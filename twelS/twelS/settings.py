@@ -29,7 +29,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    '*.twels.jp',
+    '.twels.jp',
     '15.152.18.70',  # Elastic IP
 ]
 
