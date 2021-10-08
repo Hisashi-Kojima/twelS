@@ -1,0 +1,21 @@
+{
+    "python.defaultInterpreterPath": "/Users/hisashi/.pyenv/shims/python",
+    // for Pylance
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src/twelS",  // project root directory
+        "${workspaceFolder}/src/twelS/wiki_crawler"  // Scrapy root directory
+    ],
+
+    // for flake8 and autopep8
+    "python.linting.flake8Enabled": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "python.linting.lintOnSave": true,
+    "python.linting.flake8Args": [
+        "--max-complexity=20"
+    ],
+
+    "python.formatting.provider": "autopep8",
+
+    "workbench.editor.enablePreview": false,
+}

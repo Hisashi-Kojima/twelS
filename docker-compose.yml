@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  nginx: 
+    build:
+      context: .
+      dockerfile: ./webserver/Dockerfile
+    ports:
+      # ホスト側:コンテナ側
+      - 80:80
+      - 8000:8000
+    volumes:
+      - ./webserver/conf.d:/etc/nginx/conf.d
+      - ./uwsgi/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./socket:/run  # unix domain socket でpythonコンテナと通信するために必要
+      - ./twelS/static:/twelS/static
+    depends_on:
+      - python
+
+  python:
+    build:
+      context: .
+      dockerfile: ./python/Dockerfile
+    command: >
+      sh -c '
+        ./entrypoint.sh
+        uwsgi /code/uwsgi/uwsgi.ini
+      '
+    volumes: 
+      - ./twelS:/code/twelS
+      - ./uwsgi:/code/uwsgi
+      - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
+    networks:
+      - app_net
+
+  db:
+    container_name: mysql_container
+    image: mysql:8.0.26
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
+      MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
+      MYSQL_USER: hisashi
+      MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
+    volumes:
+      - ./db/mysql:/var/lib/mysql  # 永続化
+      - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
+      - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge

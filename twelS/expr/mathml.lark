@@ -1,0 +1,114 @@
+// Dynamic Earley parserのルール
+
+// ruleの先頭の文字が'_'だったら，そのノードを作らない．'?'だったら，childが1つのとき，そのノードを作らない．
+// see here: https://github.com/lark-parser/lark/blob/master/docs/tree_construction.md
+
+start: _open mathml _close
+
+?mathml: _open mathml _close _annotation?  // mathやsemantics, mrowなど
+       | expr
+
+_annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
+
+?expr: sum _more_sum*
+
+_more_sum: relational_operator sum
+
+?sum: (_add | subtract)? product _more_product*
+   | _open (_add | subtract)? product _more_product* _close  // for mrow
+
+_more_product: (_add | subtract) product
+
+?product: atom _more_atom*  // a*bのパターン
+       | atom+  // abのパターン
+
+_more_atom: (_mul | div) atom
+
+?atom: "<mn" _attr* ">" TOKEN "</mn>"
+     | "<mi" _attr* ">" TOKEN "</mi>"
+     | _left_paren sum _right_paren -> paren
+     | func
+     | _mo
+
+// this priority is lower than atom.
+_mo.-1: "<mo" _attr* ">" TOKEN "</mo>"
+
+// tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
+?func: "<msqrt" _attr* ">" sum "</msqrt>" -> sqrt
+     | "<mfrac" _attr* ">" sum sum "</mfrac>" -> frac
+     | "<msup" _attr* ">" sum sum "</msup>" -> sup
+     | "<msub" _attr* ">" sum sum "</msub>" -> sub
+     | "<mroot" _attr* ">" sum sum "</mroot>" -> root
+     | "<msubsup" _attr* ">" sum sum sum "</msubsup>" -> subsup
+     | "<mover" _attr* ">" mathml mathml "</mover>" -> over
+     | "<munder" _attr* ">" mathml mathml "</munder>" -> under
+     | "<munderover" _attr* ">" mathml mathml mathml "</munderover>" -> underover
+     | table
+
+// for mtable
+table: "<mtable" _attr* ">" mtr+ "</mtable>"
+mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
+mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
+
+
+_open: "<" _ELEMENTS _attr* ">"
+_close: "</" _ELEMENTS ">"
+
+_add: _open ("+" | "&#x0002B;") _close
+subtract: _open ("-" | "&#x02212;") _close
+_mul: _open ("*" | "×" | "&#x0002A;") _close
+div: _open ("/" | "÷" | "&#x0002F;") _close
+equal: _open ("=" | "&#x0003D;") _close
+less: _open "<" _close
+greater: _open ">" _close
+in: _open ("∈" | "&#x2208;") _close
+_left_paren: _open ("&#x00028;" | "(") _close
+_right_paren: _open ("&#x00029;" | ")") _close
+
+?relational_operator: equal
+                    | less
+                    | greater
+                    | in
+
+_attr: " "* _ATTRIBUTE
+
+TOKEN: /[^<> ]+/
+_CONTENT: /[^<>]+/
+_ATTRIBUTE: /[^<>= ]+=("[^"]*"|'[^']*')/  // シングルクォーテーションとダブルクォーテーションに対応．
+COMMENT: /<!--[^(-->)]*-->/
+
+_ELEMENTS: "math"
+         | "maction"
+         | "maligngroup"
+         | "malignmark"
+         | "men_close"
+         | "merror"
+         | "mfenced"
+         | "mglyph"
+         | "mlabeledtr"
+         | "mlongdiv"
+         | "mmultiscripts"
+         | "mo"
+         | "mpadded"
+         | "mphantom"
+         | "mrow"
+         | "mscarries"
+         | "mscarry"
+         | "msgroup"
+         | "msline"
+         | "mspace"
+         | "msrow"
+         | "mstack"
+         | "mstyle"
+         | "ms"  // msはmstyleなどよりも後に記述しなければ，mstyleなどが無視されてしまう．
+         | "mtable"
+         | "mtd"
+         | "mtext"
+         | "mtr"
+         | "semantics"
+         | "annotation"
+         | "annotation-xml"
+
+%import common.WS  // white space
+%ignore WS
+%ignore COMMENT

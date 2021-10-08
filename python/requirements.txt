@@ -1,0 +1,19 @@
+# for developing
+autopep8==1.5.7
+flake8==3.9.2
+
+# for system
+Django==3.2.6
+lark-parser==0.11.3
+latex2mathml==3.61.0
+mysql-connector-python==8.0.26
+Scrapy==2.5.0
+scrapy-splash==0.7.2
+
+# for test
+pytest==6.2.4
+pytest-xdist==2.3.0
+
+beautifulsoup4==4.9.3
+
+uwsgi==2.0.19.1
