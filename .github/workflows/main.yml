@@ -27,10 +27,11 @@ jobs:
           python-version: '3.9.6'
 
       # Runs a single command using the runners shell
-      - name: Print Working Directory and ls
-        run: |
-          pwd,
-          ls,
+      - name: Print Working Directory
+        run: pwd
+        
+      - name: ls
+        run: ls
         
       - name: Update pip
         run: pip install --upgrade pip
