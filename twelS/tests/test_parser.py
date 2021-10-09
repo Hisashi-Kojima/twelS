@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from latex2mathml.commands import ACUTE
 path = Path(__file__)  # test_parser.pyのpath
-sys.path.append(str(path.parent.parent))  # src/twelS
+sys.path.append(str(path.parent.parent))  # twels/twelS
 
 import latex2mathml.converter
 from lark import Tree, Token, exceptions

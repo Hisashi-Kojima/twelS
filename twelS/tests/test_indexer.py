@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 path = Path(__file__)  # test_indexer.pyのpath
-sys.path.append(str(path.parent.parent))  # src/twelS
+sys.path.append(str(path.parent.parent))  # twels/twelS
 
 
 from itemadapter import ItemAdapter
