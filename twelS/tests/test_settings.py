@@ -2,7 +2,6 @@
 import sys
 from pathlib import Path
 path = Path(__file__)  # test_indexer.pyのpath
-print('path: ', path)
 sys.path.append(str(path.parent.parent))  # twels/twelS
 
 
