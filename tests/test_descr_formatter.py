@@ -1,7 +1,5 @@
-import sys
-from pathlib import Path
-path = Path(__file__)  # test_descr_formatter.pyのpath
-sys.path.append(str(path.parent.parent))  # twels/twelS
+from add_path import add_path
+add_path()
 
 from search.searcher.descr_formatter import DescrFormatter
 

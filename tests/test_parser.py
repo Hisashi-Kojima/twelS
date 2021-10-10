@@ -5,21 +5,19 @@ made by Hisashi
 
 import unittest
 
-import sys
-from pathlib import Path
 from latex2mathml.commands import ACUTE
-path = Path(__file__)  # test_parser.pyのpath
-sys.path.append(str(path.parent.parent))  # twels/twelS
-
 import latex2mathml.converter
 from lark import Tree, Token, exceptions
+
+from add_path import add_path
+add_path()
 
 from expr.parser import Parser
 from constant.const import Const
 
 
 class TestParser(unittest.TestCase):
-    
+
     def test_get_parsed_tree_add_1(self):
         """加算のparse
         1+2
