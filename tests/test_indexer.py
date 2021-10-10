@@ -1,13 +1,10 @@
 import json
 
-# for path
-import sys
-from pathlib import Path
-path = Path(__file__)  # test_indexer.pyのpath
-sys.path.append(str(path.parent.parent))  # twels/twelS
-
-
 from itemadapter import ItemAdapter
+
+from add_path import add_path
+add_path()
+
 from wiki_crawler.wiki_crawler.items import Page
 
 from constant.const import Const
