@@ -19,5 +19,5 @@ def add_path():
 def _append_if_not_in(path: Path):
     """pathがsys.pathに含まれていなかったら追加する関数．
     """
-    if not str(path) in sys.path:
+    if str(path) not in sys.path:
         sys.path.append(str(path))
