@@ -343,6 +343,7 @@ class Cursor:
             cnx = mysql.connector.connect(**Const.config_for_test)
         else:
             cnx = mysql.connector.connect(**Const.config_for_dev)
+            # cnx = mysql.connector.connect(**Const.config_for_local)
         yield cnx
         cnx.close()  # exit method
 

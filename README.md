@@ -20,4 +20,8 @@ pytest test_cursor.py
 gibo dump Python macOS VisualStudioCode >> .gitignore
 
 # crawl
-44193秒（約12時間）かかった
+51236秒（約14時間10分）かかった
+
+
+# mysqlのバックアップ  
+mysqldump --single-transaction -u hisashi -p twels > mysql_backup.sql  

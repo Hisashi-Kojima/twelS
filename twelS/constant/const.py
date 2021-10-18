@@ -20,6 +20,7 @@ class Const:
     sum_data = 'sum'
     product_data = 'product'
     equal_data = 'equal'
+    atom_data = 'atom'
     in_data = 'in'
     neg_data = 'neg'
     paren_data = 'paren'
@@ -35,14 +36,23 @@ class Const:
     table_data = 'table'
     tr_data = 'tr'
     td_data = 'td'
+    cdots_data = 'cdots'
+    omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
 
     # TODO: connection_timeoutの適切な値を設定する
     # 開発用のデータベース
     config_for_dev = {
         'user': 'hisashi',
         'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
-        # 'host': 'localhost',
         'host': 'mysql_container',  # MySQLのコンテナの名前で接続
+        'database': 'twels',
+        'connection_timeout': 100  # second
+    }
+
+    # TODO: localでもconfig_for_devで接続できるように修正．localでもdockerを使ってクロールすれば良い．
+    config_for_local = {
+        'user': 'hisashi',
+        'password': 'lovebasketball',
         'database': 'twels',
         'connection_timeout': 100  # second
     }
