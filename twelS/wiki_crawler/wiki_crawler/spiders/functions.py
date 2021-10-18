@@ -33,7 +33,7 @@ def get_exprs(response) -> list[str]:
     result = []
     for mathml in response.xpath('//math').getall():
         tmp = _remove_indent_and_new_line(mathml)
-        
+
         # _clean_textの方と合わせるためにBeautifulSoupを使う
         soup = BeautifulSoup(tmp, 'lxml')
         # 補完されるhtmlタグとbodyタグを削除
@@ -48,7 +48,7 @@ def get_exprs(response) -> list[str]:
 def _clean_text(text: str) -> str:
     """不要なタグなどを削除する関数．
     bodyタグの削除
-    TODO: 
+    TODO:
         不要な情報を削除することで，登録するデータ量を小さくする．
         classなどが自作のものとかぶっても困るので，そのあたりの削除．
     """
@@ -100,7 +100,7 @@ def _clean_text(text: str) -> str:
     for nav in soup.find_all('nav'):
         nav.decompose()
     _remove_comments(soup)
-    
+
     result = str(soup)
     return result.replace('\n', '')
 
