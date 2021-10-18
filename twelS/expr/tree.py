@@ -3,12 +3,11 @@
 made by Hisashi
 """
 
-from typing import List
-
 from lark import Transformer, Tree, Token
 from lark.visitors import Discard
 
 from constant.const import Const
+from normalizer.normalizer import Normalizer
 
 
 class MathMLTree(Transformer):
@@ -20,7 +19,7 @@ class MathMLTree(Transformer):
 
     def sup(self, nodes: list):
         return Tree('sup', _insert_pseudo_num(nodes))
-        
+
     def sub(self, nodes: list):
         return Tree('sub', _insert_pseudo_num(nodes))
 
@@ -39,33 +38,29 @@ class MathMLTree(Transformer):
     def underover(self, nodes: list):
         return Tree('underover', _insert_pseudo_num(nodes))
 
-
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""
-        if len(nodes) == 1 and type(nodes[0]) is Tree and nodes[0].data == 'expr':
-            return Tree('start', nodes[0].children)
-        return Tree('start', nodes)
-
+        if len(nodes) == 1 and type(nodes[0]) is Tree and nodes[0].data == Const.expr_data:
+            return Tree(Const.root_data, nodes[0].children)
+        return Tree(Const.root_data, nodes)
 
     def sum(self, nodes: list):
         """sumの子ノードを整理する関数．
         subtractを見つけたら，次のノードの符号を逆にする．
         """
-        return _get_tree_of('sum', nodes, 'subtract', _get_negative)
-
+        return _get_tree_of(Const.sum_data, nodes, 'subtract', _get_negative)
 
     def product(self, nodes: list):
         """productの子ノードを整理する関数．
         divを見つけたら，次のノードの数を逆数にする．
+        cdotsを見つけたら，正規化する．
         """
-        return _get_tree_of('product', nodes, 'div', _get_reciprocal)
-
+        return _get_tree_of(Const.product_data, nodes, 'div', _get_reciprocal)
 
     def __default__(self, data, children, meta):
         """Default funciton that is called if there is no attribute matching 'data'."""
         return Tree(data, children, meta)
-
 
 
 # ************** functions ******************
@@ -87,8 +82,16 @@ def _get_tree_of(operator: str, nodes: list, sign: str, get_func) -> Tree:
     try:
         while True:
             node = next(i)
-            if type(node) is Tree and node.data == sign:
-                new_nodes.append(get_func(next(i)))
+            if type(node) is Tree:
+                if node.data == sign:
+                    new_nodes.append(get_func(next(i)))
+                elif node.data == Const.cdots_data and operator == Const.product_data:
+                    # 直前の値を取り出して正規化
+                    num_token = new_nodes.pop()
+                    result = Normalizer.normalize_num(num_token)
+                    new_nodes.append(Tree(Const.omit_data, [result]))
+                else:
+                    new_nodes.append(node)
             else:
                 new_nodes.append(node)
     except StopIteration:

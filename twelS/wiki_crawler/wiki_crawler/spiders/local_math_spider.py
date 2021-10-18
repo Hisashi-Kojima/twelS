@@ -9,8 +9,6 @@ import os
 
 base_path = os.path.abspath(__file__)  # local_math_spider.pyのpath
 
-from typing import List
-
 import scrapy
 from scrapy.http.response.html import HtmlResponse
 
@@ -25,10 +23,10 @@ class LocalMathSpider(scrapy.Spider):
         'DOWNLOAD_DELAY': 0,
         'ROBOTSTXT_OBEY': False  # because not exists in local
     }
-    
+
     path = os.path.normpath(os.path.join(base_path, '../../../wiki_pages'))
-    paths = glob.glob(f'{path}/*')
-    start_urls = [f'file://{path}' for path in paths]
+    math_paths = glob.glob(f'{path}/math/*')
+    start_urls = [f'file://{path}' for path in math_paths]
     # start_urls = [f'file://{paths[0]}', f'file://{paths[1]}']
     # start_urls = ['file:///Users/hisashi/Documents/code/research/twels/src/twelS/wiki_crawler/wiki_pages/方程式 - Wikipedia.html']
     # start_urls = ['file:///Users/hisashi/Documents/code/research/twels/src/twelS/wiki_crawler/wiki_pages/シグモイド関数 - Wikipedia.html']

@@ -28,10 +28,18 @@ _more_atom: (_mul | div) atom
      | "<mi" _attr* ">" TOKEN "</mi>"
      | _left_paren sum _right_paren -> paren
      | func
+     | cdots
      | _mo
+     | _mi_empty
+
+// this priority is higher than _mo.
+cdots.-1: "<mo" _attr* ">" ("&#x22EF;" | "&#x022EF;") "</mo>"
 
 // this priority is lower than atom.
-_mo.-1: "<mo" _attr* ">" TOKEN "</mo>"
+_mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
+
+// this priority is lower than atom.
+_mi_empty.-1: "<mi" _attr* "></mi>"
 
 // tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
 ?func: "<msqrt" _attr* ">" sum "</msqrt>" -> sqrt
@@ -55,8 +63,8 @@ _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
 
 _add: _open ("+" | "&#x0002B;") _close
-subtract: _open ("-" | "&#x02212;") _close
-_mul: _open ("*" | "×" | "&#x0002A;") _close
+subtract: _open ("-" | "&#x02212;" | "&#x2212;") _close
+_mul: _open ("*" | "×" | "&#x0002A;" | "&#x22C5;") _close  // &#x22C5; is '⋅'.
 div: _open ("/" | "÷" | "&#x0002F;") _close
 equal: _open ("=" | "&#x0003D;") _close
 less: _open "<" _close
