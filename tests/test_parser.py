@@ -5,9 +5,8 @@ made by Hisashi
 
 import unittest
 
-from latex2mathml.commands import ACUTE
 import latex2mathml.converter
-from lark import Tree, Token, exceptions
+from lark import Tree, Token
 
 from add_path import add_path
 add_path()
@@ -890,7 +889,6 @@ def test_get_parsed_tree_cdots_3():
                         <annotation encoding="application/x-tex">{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}</annotation>
                     </semantics>
                 </math>"""
-    # TODO: expectedの実装．
     expected = Tree(Const.root_data, [
             Tree(Const.table_data, [
                 Tree(Const.tr_data, [
