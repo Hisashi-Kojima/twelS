@@ -11,6 +11,7 @@ services:
       - 8000:8000
     volumes:
       - ./webserver/conf.d:/etc/nginx/conf.d
+      - ./webserver/logs:/var/log/nginx
       - ./uwsgi/uwsgi_params:/etc/nginx/uwsgi_params
       - ./socket:/run  # unix domain socket でpythonコンテナと通信するために必要
       - ./twelS/static:/twelS/static
@@ -30,6 +31,7 @@ services:
     volumes: 
       - ./twelS:/code/twelS
       - ./uwsgi:/code/uwsgi
+      - ./.env:/code/.env  # for django-environ
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     networks:
       - app_net
@@ -48,6 +50,7 @@ services:
     volumes:
       - ./db/mysql:/var/lib/mysql  # 永続化
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
+      - ./db/logs:/var/log/mysql
       - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net

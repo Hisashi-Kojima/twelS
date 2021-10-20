@@ -18,6 +18,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    env:
+      DJANGO_SECRET_KEY: foo  # incorrect value
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # This action check-out my repository under $GITHUB_WORKSPACE, 
@@ -32,7 +35,7 @@ jobs:
         run: pip install --upgrade pip
 
       - name: Install dependencies
-        run: pip install pytest
+        run: pip install -r python/requirements.txt
       
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
