@@ -16,6 +16,7 @@ services:
       - ./twelS/static:/twelS/static
     depends_on:
       - python
+    restart: always
 
   python:
     build:
@@ -32,6 +33,7 @@ services:
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     networks:
       - app_net
+    restart: always
 
   db:
     container_name: mysql_container
@@ -49,6 +51,7 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net
+    restart: always
 
 networks:
   app_net:
