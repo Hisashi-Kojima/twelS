@@ -25,3 +25,11 @@ gibo dump Python macOS VisualStudioCode >> .gitignore
 
 # mysqlのバックアップ  
 mysqldump --single-transaction -u hisashi -p twels > mysql_backup.sql  
+
+# ローカルブランチのアップデート  
+git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME  
+ex.  
+git pull origin develop:develop  
+
+# EC2内でのdocker daemonの再起動  
+sudo systemctl restart docker  
