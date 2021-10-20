@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
@@ -22,19 +20,19 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/setup-python@v2  # setup-python version is 2
-        with:
+      # This action check-out my repository under $GITHUB_WORKSPACE, 
+      # so my workflow can access it.
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2  # setup-python version is 2
+        with: 
           python-version: '3.9.6'
-
-      # Runs a single command using the runners shell
-      - name: Get Python version
-        run: python -V
-        
+          
       - name: Update pip
         run: pip install --upgrade pip
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Install dependencies
+        run: pip install pytest
+      
+      - name: check Django DEBUG = False
+        run: pytest tests/test_settings.py

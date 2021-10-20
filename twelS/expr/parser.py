@@ -25,17 +25,22 @@ from expr.collector import get_path_set
 from utils.utils import print_in_red
 
 
-class Parser:
-    """MathMLを解析するためのクラス．"""
-
-    _path = os.path.normpath(os.path.join(base_path, '../mathml.lark'))
+def get_lark_parser():
+    """Lark parserを返す関数．
+    """
+    path = os.path.normpath(os.path.join(base_path, '../mathml.lark'))
     try:
-        with open(_path, encoding='utf-8') as _grammar:
-            _lark = Lark(_grammar, parser='earley')
+        with open(path, encoding='utf-8') as _grammar:
+            return Lark(_grammar, parser='earley')
     except exceptions.GrammarError as e:
         print_in_red(e)
     except FileNotFoundError as e:
         print_in_red(e)
+
+
+class Parser:
+    """MathMLを解析するためのクラス．"""
+    _lark = get_lark_parser()
 
     @staticmethod
     def parse(mathml: str) -> set[str]:

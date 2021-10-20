@@ -5,9 +5,8 @@ made by Hisashi
 
 import unittest
 
-from latex2mathml.commands import ACUTE
 import latex2mathml.converter
-from lark import Tree, Token, exceptions
+from lark import Tree, Token
 
 from add_path import add_path
 add_path()
@@ -445,7 +444,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(expected, Parser.get_parsed_tree(mathml))
 
     def test_get_parsed_tree_summation_1(self):
-        """基本的な総和の式のparse
+        r"""基本的な総和の式のparse
         \sum_{i=1}^{n} x_{i}
         """
         mathml = """<math displaystyle="true">
@@ -487,7 +486,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(expected, Parser.get_parsed_tree(mathml))
 
     def test_get_parsed_tree_summation_2(self):
-        """上と下がない総和の式のparse
+        r"""上と下がない総和の式のparse
         \sum R
         """
         mathml = """<math displaystyle="true">
@@ -503,7 +502,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(expected, Parser.get_parsed_tree(mathml))
 
     def test_get_parsed_tree_summation_3(self):
-        """上がない総和の式のparse
+        r"""上がない総和の式のparse
         \sum_{x\in R} x
         """
         mathml = """<math displaystyle="true">
@@ -692,6 +691,277 @@ class TestParser(unittest.TestCase):
         # TODO: expectedの実装．
         expected = False
         self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+
+
+def test_get_parsed_tree_table_3():
+    """mtableのparse．<mi>タグの中が空．
+    https://ja.wikipedia.org/wiki/0.999...
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mrow class="MJX-TeXAtom-ORD">
+                            <mtable columnalign="right left right left right left right left right left right left" rowspacing="3pt" columnspacing="0em 2em 0em 2em 0em 2em 0em 2em 0em 2em 0em" displaystyle="true">
+                                <mtr>
+                                <mtd>
+                                    <mi>c</mi>
+                                </mtd>
+                                <mtd>
+                                    <mi></mi>
+                                    <mo>=</mo>
+                                    <mn>0.999</mn>
+                                    <mo>&#x22EF;<!-- ⋯ --></mo>
+                                </mtd>
+                                </mtr>
+                            </mtable>
+                            </mrow>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+            Tree(Const.table_data, [
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+                        ])
+                    ])
+                ])
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_cdots_1():
+    """0.999...のparse
+    https://ja.wikipedia.org/wiki/%E7%B4%9A%E6%95%B0
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mn>0.999</mn>
+                            <mo>&#x22EF;<!-- ⋯ --></mo>
+                        </mstyle>
+                        </mrow>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+            Tree(Const.omit_data, [Token(Const.token_type, '0.9')]),
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_cdots_2():
+    """0.999...のparse
+    https://ja.wikipedia.org/wiki/%E7%B4%9A%E6%95%B0
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 0.999\cdots =0.9+0.09+\cdots +9\cdot 10^{-n}+\cdots }">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mn>0.999</mn>
+                            <mo>&#x22EF;<!-- ⋯ --></mo>
+                            <mo>=</mo>
+                            <mn>0.9</mn>
+                            <mo>+</mo>
+                            <mn>0.09</mn>
+                            <mo>+</mo>
+                            <mo>&#x22EF;<!-- ⋯ --></mo>
+                            <mo>+</mo>
+                            <mn>9</mn>
+                            <mo>&#x22C5;<!-- ⋅ --></mo>
+                            <msup>
+                            <mn>10</mn>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mo>&#x2212;<!-- − --></mo>
+                                <mi>n</mi>
+                            </mrow>
+                            </msup>
+                            <mo>+</mo>
+                            <mo>&#x22EF;<!-- ⋯ --></mo>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle 0.999\cdots =0.9+0.09+\cdots +9\cdot 10^{-n}+\cdots }</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+            Tree(Const.omit_data, [Token(Const.token_type, '0.9')]),
+            Tree(Const.equal_data, []),
+            Tree(Const.sum_data, [
+                Token(Const.token_type, '0.9'),
+                Token(Const.token_type, '0.09'),
+                Tree(Const.cdots_data, []),
+                Tree(Const.product_data, [
+                    Token(Const.token_type, '9'),
+                    Tree(Const.sup_data, [
+                        Tree('#0', [Token(Const.token_type, '10')]),
+                        Tree('#1', [Tree(Const.neg_data, [Token(Const.token_type, 'n')])])
+                    ])
+                ]),
+                Tree(Const.cdots_data, []),
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_cdots_3():
+    """0.999...のparse
+    https://ja.wikipedia.org/wiki/0.999...
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mrow class="MJX-TeXAtom-ORD">
+                            <mtable columnalign="right left right left right left right left right left right left" rowspacing="3pt" columnspacing="0em 2em 0em 2em 0em 2em 0em 2em 0em 2em 0em" displaystyle="true">
+                                <mtr>
+                                    <mtd>
+                                        <mi>c</mi>
+                                    </mtd>
+                                    <mtd>
+                                        <mi></mi>
+                                        <mo>=</mo>
+                                        <mn>0.999</mn>
+                                        <mo>&#x22EF;<!-- ⋯ --></mo>
+                                    </mtd>
+                                </mtr>
+                                <mtr>
+                                    <mtd>
+                                        <mn>10</mn>
+                                        <mi>c</mi>
+                                    </mtd>
+                                    <mtd>
+                                        <mi></mi>
+                                        <mo>=</mo>
+                                        <mn>9.999</mn>
+                                        <mo>&#x22EF;<!-- ⋯ --></mo>
+                                    </mtd>
+                                </mtr>
+                                <mtr>
+                                    <mtd>
+                                        <mn>10</mn>
+                                        <mi>c</mi>
+                                        <mo>&#x2212;<!-- − --></mo>
+                                        <mi>c</mi>
+                                    </mtd>
+                                    <mtd>
+                                        <mi></mi>
+                                        <mo>=</mo>
+                                        <mn>9.999</mn>
+                                        <mo>&#x22EF;<!-- ⋯ --></mo>
+                                        <mo>&#x2212;<!-- − --></mo>
+                                        <mn>0.999</mn>
+                                        <mo>&#x22EF;<!-- ⋯ --></mo>
+                                    </mtd>
+                                </mtr>
+                                <mtr>
+                                    <mtd>
+                                        <mn>9</mn>
+                                        <mi>c</mi>
+                                    </mtd>
+                                    <mtd>
+                                        <mi></mi>
+                                        <mo>=</mo>
+                                        <mn>9</mn>
+                                    </mtd>
+                                </mtr>
+                                <mtr>
+                                    <mtd>
+                                        <mi>c</mi>
+                                    </mtd>
+                                    <mtd>
+                                        <mi></mi>
+                                        <mo>=</mo>
+                                        <mn>1</mn>
+                                    </mtd>
+                                </mtr>
+                            </mtable>
+                            </mrow>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+            Tree(Const.table_data, [
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+                        ])
+                    ])
+                ]),
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [Tree(Const.product_data, [
+                        Token(Const.token_type, '10'),
+                        Token(Const.token_type, 'c')
+                    ])]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Tree(Const.omit_data, [Token(Const.token_type, '9.9')])
+                        ])
+                    ])
+                ]),
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [Tree(Const.sum_data, [
+                        Tree(Const.product_data, [
+                            Token(Const.token_type, '10'),
+                            Token(Const.token_type, 'c')
+                        ]),
+                        Tree(Const.neg_data, [Token(Const.token_type, 'c')])
+                    ])]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Tree(Const.sum_data, [
+                                Tree(Const.omit_data, [Token(Const.token_type, '9.9')]),
+                                Tree(Const.neg_data, [
+                                    Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+                                ])
+                            ])
+                        ])
+                    ])
+                ]),
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [
+                        Tree(Const.product_data, [
+                            Token(Const.token_type, '9'),
+                            Token(Const.token_type, 'c')
+                        ])]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Token(Const.token_type, '9')
+                        ])
+                    ])
+                ]),
+                Tree(Const.tr_data, [
+                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
+                    Tree(Const.td_data, [
+                        Tree(Const.expr_data, [
+                            Tree(Const.atom_data, []),
+                            Tree(Const.equal_data, []),
+                            Token(Const.token_type, '1')
+                        ])
+                    ])
+                ])
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
 
 def test_parse_num_1():

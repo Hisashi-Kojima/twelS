@@ -59,7 +59,7 @@ class Indexer:
 
         # 削除する数式のexpr_idとuri_idをもとにinverted_indexのinfoの該当箇所を削除．
         info = Cursor.remove_info_from_inverted_index(cursor, expr_id, uri_id)
-        
+
         if not info['uri_id']:
             # infoが空になった場合，そのexpr_idのレコードをinverted_index tableとexpression tableから削除．
             Cursor.delete_from_inverted_index_where_expr_id_1(cursor, expr_id)

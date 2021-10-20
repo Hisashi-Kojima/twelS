@@ -20,4 +20,16 @@ pytest test_cursor.py
 gibo dump Python macOS VisualStudioCode >> .gitignore
 
 # crawl
-44193秒（約12時間）かかった
+51236秒（約14時間10分）かかった
+
+
+# mysqlのバックアップ  
+mysqldump --single-transaction -u hisashi -p twels > mysql_backup.sql  
+
+# ローカルブランチのアップデート  
+git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME  
+ex.  
+git pull origin develop:develop  
+
+# EC2内でのdocker daemonの再起動  
+sudo systemctl restart docker  
