@@ -1,20 +1,20 @@
 # for developing
 autopep8==1.5.7
-flake8==3.9.2
+flake8==4.0.1
 
 # for system
-Django==3.2.6
-django-environ==0.8.0
-lark-parser==0.11.3
+Django==3.2.8
+django-environ==0.8.1
+lark-parser==0.12.0
 latex2mathml==3.61.0
-mysql-connector-python==8.0.26
-Scrapy==2.5.0
-scrapy-splash==0.7.2
+mysql-connector-python==8.0.27
+Scrapy==2.5.1
+scrapy-splash==0.8.0
 
 # for test
-pytest==6.2.4
-pytest-xdist==2.3.0
+pytest==6.2.5
+pytest-xdist==2.4.0
 
-beautifulsoup4==4.9.3
+beautifulsoup4==4.10.0
 
-uwsgi==2.0.19.1
+uwsgi==2.0.20

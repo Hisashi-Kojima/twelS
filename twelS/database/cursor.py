@@ -4,7 +4,7 @@ made by Hisashi
 """
 
 import json
-from typing import Union, Tuple
+from typing import Tuple
 from contextlib import contextmanager
 
 import mysql.connector
@@ -158,13 +158,13 @@ class Cursor:
 
 
     @staticmethod
-    def select_all_from_index_where_expr_id_1(cursor, expr_id: int) -> Union[tuple, None]:
+    def select_all_from_index_where_expr_id_1(cursor, expr_id: int) -> tuple | None:
         cursor.execute('SELECT * FROM inverted_index WHERE expr_id = %s', (expr_id,))
         return cursor.fetchone()
 
 
     @staticmethod
-    def select_all_from_page_where_uri_id_1(cursor, uri_id: int) -> Union[tuple, None]:
+    def select_all_from_page_where_uri_id_1(cursor, uri_id: int) -> tuple | None:
         cursor.execute('SELECT * FROM page WHERE uri_id = %s', (uri_id,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -174,13 +174,13 @@ class Cursor:
 
 
     @staticmethod
-    def select_all_from_path_dict_where_expr_path_1(cursor, expr_path: str) -> Union[tuple, None]:
+    def select_all_from_path_dict_where_expr_path_1(cursor, expr_path: str) -> tuple | None:
         cursor.execute('SELECT * FROM path_dictionary WHERE expr_path = %s', (expr_path,))
         return cursor.fetchone()
 
 
     @staticmethod
-    def select_expr_from_expression_where_expr_id_1(cursor, expr_id: int) -> Union[str, None]:
+    def select_expr_from_expression_where_expr_id_1(cursor, expr_id: int) -> str | None:
         cursor.execute('SELECT expr FROM expression WHERE expr_id = %s', (expr_id,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -190,7 +190,7 @@ class Cursor:
 
 
     @staticmethod
-    def select_expr_id_from_expression_where_expr_1(cursor, expr: str) -> Union[int, None]:
+    def select_expr_id_from_expression_where_expr_1(cursor, expr: str) -> int | None:
         cursor.execute('SELECT expr_id FROM expression WHERE expr = %s', (expr,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -200,7 +200,7 @@ class Cursor:
 
 
     @staticmethod
-    def select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path: str) -> Union[list[str], None]:
+    def select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path: str) -> list[str] | None:
         cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -210,7 +210,7 @@ class Cursor:
 
 
     @staticmethod
-    def select_info_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> Union[dict[str, list[str]], None]:
+    def select_info_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> dict[str, list[str]] | None:
         cursor.execute('SELECT info FROM inverted_index WHERE expr_id = %s', (expr_id,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -228,7 +228,7 @@ class Cursor:
 
 
     @staticmethod
-    def select_uri_id_from_page_where_uri_1(cursor, uri: str) -> Union[int, None]:
+    def select_uri_id_from_page_where_uri_1(cursor, uri: str) -> int | None:
         cursor.execute('SELECT uri_id FROM page WHERE uri = %s', (uri,))
         tpl = cursor.fetchone()
         if tpl is None:
@@ -283,7 +283,7 @@ class Cursor:
         return json.loads(info_json)
 
     @staticmethod
-    def select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id: int, expr_path: str) -> Union[str, None]:
+    def select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id: int, expr_path: str) -> str | None:
         """path_dictionaryのexpr_ids内の指定されたexpr_idへのパスを返す"""
         cursor.execute('SELECT JSON_SEARCH(expr_ids, "one", %s) FROM path_dictionary WHERE expr_path = %s', (str(expr_id), expr_path))
         json_path = cursor.fetchone()[0]
@@ -295,7 +295,7 @@ class Cursor:
 
 
     @staticmethod
-    def select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, uri_id: int, expr_id: int) -> Union[str, None]:
+    def select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, uri_id: int, expr_id: int) -> str | None:
         """inverted_indexのinfo内の指定されたuri_idへのパスを返す"""
         cursor.execute(
                 'SELECT JSON_SEARCH(info, "one", %s) FROM inverted_index WHERE expr_id = %s', 
