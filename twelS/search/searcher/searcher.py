@@ -8,6 +8,7 @@ import itertools
 from concurrent import futures
 
 import latex2mathml.converter
+from lark import exceptions
 
 from expr.parser import Parser
 from database.cursor import Cursor
@@ -27,14 +28,20 @@ class Searcher:
             {'search_result': search_result, 'result_num': result_num}
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
-        path_set: set[str] = Parser.parse(latex2mathml.converter.convert(expr))
-        sorted_expr_ids = __class__._get_expr_ids(path_set)
-        extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids)
-        info = __class__._get_info(extracted_ids)
-        search_result = __class__._get_search_result(info, extracted_ids)
-        result = {
-            'search_result': search_result,
-            'result_num': len(info['uri_id'])
+        try:
+            path_set: set[str] = Parser.parse(latex2mathml.converter.convert(expr))
+            sorted_expr_ids = __class__._get_expr_ids(path_set)
+            extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids)
+            info = __class__._get_info(extracted_ids)
+            search_result = __class__._get_search_result(info, extracted_ids)
+            result = {
+                'search_result': search_result,
+                'result_num': len(info['uri_id'])
+                }
+        except exceptions.LarkError:
+            result = {
+                'search_result': [],
+                'result_num': 0
             }
         return result
 
