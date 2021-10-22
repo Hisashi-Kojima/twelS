@@ -150,10 +150,10 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-            'filename': './logs/debug.log',
+            'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'),
             'encoding': 'utf-8',
         },
         'console': {

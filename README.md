@@ -33,3 +33,6 @@ git pull origin develop:develop
 
 # EC2内でのdocker daemonの再起動  
 sudo systemctl restart docker  
+
+# 開発用サーバの起動
+docker-compose -f docker-compose.dev.yml up

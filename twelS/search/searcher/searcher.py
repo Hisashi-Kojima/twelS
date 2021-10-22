@@ -6,6 +6,7 @@ made by Hisashi
 import collections
 import itertools
 from concurrent import futures
+import time
 
 import latex2mathml.converter
 from lark import exceptions
@@ -29,11 +30,17 @@ class Searcher:
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
         try:
+            start_time = time.time()
             path_set: set[str] = Parser.parse(latex2mathml.converter.convert(expr))
+            print('after parse:', time.time() - start_time)
             sorted_expr_ids = __class__._get_expr_ids(path_set)
+            print('after _get_expr_ids:', time.time() - start_time)
             extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids)
+            print('after _extract:', time.time() - start_time)
             info = __class__._get_info(extracted_ids)
+            print('after _get_info:', time.time() - start_time)
             search_result = __class__._get_search_result(info, extracted_ids)
+            print('after _get_search_result:', time.time() - start_time)
             result = {
                 'search_result': search_result,
                 'result_num': len(info['uri_id'])
@@ -72,9 +79,8 @@ class Searcher:
         """
         expr_ids: list[str] = []
         for path in path_set:
-            with Cursor.connect() as cnx:
-                with Cursor.cursor(cnx) as cursor:
-                    expr_ids_json = Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, path)
+            with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
+                expr_ids_json = Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, path)
             if expr_ids_json is None:
                 continue
             expr_ids.extend(expr_ids_json)
@@ -98,6 +104,7 @@ class Searcher:
         uri_id_list = [[] for i in range(loop_times)]
         lang_list = [[] for i in range(loop_times)]
 
+        # for multi process
         with futures.ProcessPoolExecutor() as executor:
             f = [executor.submit(__class__._get_info_from_db, i, expr_id) for i, expr_id in enumerate(extracted_ids)]
             for future in futures.as_completed(f):
@@ -108,16 +115,16 @@ class Searcher:
                 uri_id_list[index] = info['uri_id']
                 lang_list[index] = info['lang']
 
+        # expr_idの出現回数の降順にuri_idとlangを並べる
         result_uri_id = list(itertools.chain.from_iterable(uri_id_list))
         result_lang = list(itertools.chain.from_iterable(lang_list))
         return {'uri_id': result_uri_id, 'lang': result_lang}
 
     @staticmethod
     def _get_info_from_db(index: int, expr_id: str):
-        with Cursor.connect() as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
-                return index, info
+        with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
+            info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
+            return index, info
 
     @staticmethod
     def _get_search_result(info: dict[str, list[str]], extracted_ids: list[str]) -> list[dict]:
@@ -140,9 +147,8 @@ class Searcher:
                 # 指定した言語ではなかったらskip
                 # if lang != 'ja'
                 #   continue
-                with Cursor.connect() as cnx:
-                    with Cursor.cursor(cnx) as cursor:
-                        page_info = Cursor.select_all_from_page_where_uri_id_1(cursor, uri_id)
+                with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
+                    page_info = Cursor.select_all_from_page_where_uri_id_1(cursor, uri_id)
                 if page_info is None:
                     continue
                 search_result.append({

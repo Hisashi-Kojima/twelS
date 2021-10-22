@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  python:
+    build:
+      context: .
+      dockerfile: ./python/Dockerfile
+    command: >
+      sh -c '
+        ./entrypoint.sh
+        python twelS/manage.py runserver 0.0.0.0:8000
+      '
+    volumes: 
+      - ./twelS:/code/twelS
+      - ./uwsgi:/code/uwsgi
+      - ./.env:/code/.env  # for django-environ
+      - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
+    ports:
+      # ホスト側:コンテナ側
+      - 8000:8000
+    networks:
+      - app_net
+
+  db:
+    container_name: mysql_container
+    image: mysql:8.0.27
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
+      MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
+      MYSQL_USER: hisashi
+      MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
+    volumes:
+      - ./db/mysql:/var/lib/mysql  # 永続化
+      - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
+      - ./db/logs:/var/log/mysql
+      - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
