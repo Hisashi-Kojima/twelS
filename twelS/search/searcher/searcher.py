@@ -4,9 +4,6 @@ made by Hisashi
 """
 
 import collections
-import itertools
-from concurrent import futures
-import time
 
 import latex2mathml.converter
 from lark import exceptions
@@ -20,27 +17,25 @@ from .descr_formatter import DescrFormatter
 class Searcher:
     """データベースに接続し，検索結果を取得するためのクラス．
     """
+    # 検索結果として表示する数
+    search_num = 10
+
     @staticmethod
-    def search(expr: str) -> dict:
+    def search(expr: str, start: int) -> dict:
         """
         Args:
             expr: 検索する式．
+            start: 検索開始位置．
         Returns:
             {'search_result': search_result, 'result_num': result_num}
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
         try:
-            start_time = time.time()
             path_set: set[str] = Parser.parse(latex2mathml.converter.convert(expr))
-            print('after parse:', time.time() - start_time)
             sorted_expr_ids = __class__._get_expr_ids(path_set)
-            print('after _get_expr_ids:', time.time() - start_time)
-            extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids)
-            print('after _extract:', time.time() - start_time)
-            info = __class__._get_info(extracted_ids)
-            print('after _get_info:', time.time() - start_time)
+            extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids, start)
+            info = __class__._get_info(extracted_ids, start)
             search_result = __class__._get_search_result(info, extracted_ids)
-            print('after _get_search_result:', time.time() - start_time)
             result = {
                 'search_result': search_result,
                 'result_num': len(info['uri_id'])
@@ -53,22 +48,27 @@ class Searcher:
         return result
 
     @staticmethod
-    def _extract_ids_from_sorted_expr_ids(sorted_expr_ids: list[tuple[str, int]]) -> list[str]:
+    def _extract_ids_from_sorted_expr_ids(sorted_expr_ids: list[tuple[str, int]], start: int) -> list[str]:
         """sorted_expr_idsからいくつかのidだけを取得する関数．
         Args:
             sorted_expr_ids: ("expr_id", 出現回数)を出現回数に並べたlist．
             ex. [('1', 7), ('2', 3), ('3', 1)]
+            start: 検索開始位置．
         Returns:
             expr_idを出現回数の降順に並べたlist.
             ex. ['1', '2']
         """
         result: list[str] = []
-        for id, num in sorted_expr_ids:
-            # 検索結果の数を絞るためにnumを2以上にしている．
-            if num == 1:
-                break
-            result.append(id)
-        return result
+        try:
+            # 検索結果として表示する数と同じ数だけexpr_idがあれば十分だと仮定し，
+            # rangeのstopをstart+search_numに設定
+            for i in range(start+__class__.search_num):
+                # append expr_id
+                result.append(sorted_expr_ids[i][0])
+        except IndexError:
+            pass
+        finally:
+            return result
 
     @staticmethod
     def _get_expr_ids(path_set: set[str]) -> list[tuple[str, int]]:
@@ -91,34 +91,30 @@ class Searcher:
         return sorted_expr_ids
 
     @staticmethod
-    def _get_info(extracted_ids: list[str]) -> dict[str, list[str]]:
+    def _get_info(extracted_ids: list[str], start) -> dict[str, list[str]]:
         """ヒットした数式のinfoを取得する関数．
         expr_idが多い順に，expr_idをクエリにinverted_index tableからinfo(uri_id, lang)を取得する．
         Args:
             extracted_ids: expr_idを出現回数の降順に並べたlist.
             ex. ['1', '2']
+            start: 検索開始位置．
         Returns:
             info: {'uri_id': ['1', '2'], 'lang': ['ja', 'en']}のような形式．
         """
-        loop_times = len(extracted_ids)
-        uri_id_list = [[] for i in range(loop_times)]
-        lang_list = [[] for i in range(loop_times)]
+        info: dict[str, list[str]] = {'uri_id': [], 'lang': []}
+        ids = iter(extracted_ids)
+        end = start+__class__.search_num
+        while len(info['uri_id']) < end:
+            expr_id: str = next(ids)
+            with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
+                tmp_info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
+                info['uri_id'].extend(tmp_info['uri_id'])
+                info['lang'].extend(tmp_info['lang'])
 
-        # for multi process
-        with futures.ProcessPoolExecutor() as executor:
-            f = [executor.submit(__class__._get_info_from_db, i, expr_id) for i, expr_id in enumerate(extracted_ids)]
-            for future in futures.as_completed(f):
-                index, info = future.result()
-                if info is None:
-                    continue
-                # []を実際のリストに置き換える
-                uri_id_list[index] = info['uri_id']
-                lang_list[index] = info['lang']
-
-        # expr_idの出現回数の降順にuri_idとlangを並べる
-        result_uri_id = list(itertools.chain.from_iterable(uri_id_list))
-        result_lang = list(itertools.chain.from_iterable(lang_list))
-        return {'uri_id': result_uri_id, 'lang': result_lang}
+        return {
+            'uri_id': info['uri_id'][start:end],
+            'lang': info['lang'][start:end]
+            }
 
     @staticmethod
     def _get_info_from_db(index: int, expr_id: str):
@@ -137,8 +133,6 @@ class Searcher:
         # 現在の_get_infoのアルゴリズムだと，特定のページが複数回出てくる可能性がある
         uri_ids = []  # 表示するuri_idのリスト
         search_result: list[dict] = []
-        display_num = 10  # 表示する検索結果の数
-        count = 0
         for i, uri_id in enumerate(info['uri_id']):
             # 重複しているページをスキップ
             if uri_id not in uri_ids:
@@ -157,7 +151,4 @@ class Searcher:
                     'description': DescrFormatter.format(page_info[4], extracted_ids)  # TODO: formatに時間がかかっているので，分散処理等を検討
                 })
 
-                count += 1
-                if count == display_num:
-                    break
         return search_result
