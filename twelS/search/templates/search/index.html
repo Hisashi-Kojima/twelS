@@ -24,7 +24,7 @@
 
     <!-- queryが有効なもののときのみ表示 -->
     {% if query %}
-　　     <p>{{ query }}  の検索結果：{{ result_num }}件</p><br>
+　　     <p>{{ query }}  の検索結果</p><br>
     {% endif %}
 
     {% for page in page_list %}
@@ -37,6 +37,12 @@
             </p><br>
         </div>
     {% endfor %}
+
+    <!-- queryが有効なもののときのみ表示 -->
+    {% if query %}
+        <!-- <a href="." onclick="search_next('{{query}}');return false">更に表示</a> -->
+        <a href="./?q={{query}}&start={{start}}">更に表示</a>
+    {% endif %}
 
     <script>
     var mathFieldSpan = document.getElementById('math-field');
@@ -63,12 +69,13 @@
         q.value = expr;
         q.name = 'q';
         q.type = 'hidden';
-
         form.appendChild(q);
+
         document.body.appendChild(form);
 
         form.submit();
     }
+
     </script>
     <script src="{% static 'search/load-mathjax.js' %}" id="MathJax-script" async></script>
 {% endblock body %}

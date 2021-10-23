@@ -4,7 +4,6 @@ made by Hisashi
 """
 
 import time
-from typing import Union
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -20,19 +19,27 @@ def index(request):
         page_list: list[dict] = []
         result_num = 0
 
-        expr: Union[str, None] = request.GET.get('q')
+        expr: str | None = request.GET.get('q')
+        start: str | None = request.GET.get('start')
+        # 検索時
         if expr is not None and expr != '':
             start_time = time.time()
-            result = Searcher.search(expr)
+            if start is None:
+                start = '0'
+            result = Searcher.search(expr, int(start))
             page_list: list[dict] = result['search_result']
             result_num: int = result['result_num']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
+        # first access
+        else:
+            if start is None:
+                start = '0'
 
         context = {
             'page_list': page_list,
-            'result_num': result_num,
             'query': expr,
+            'start': str(int(start)+10),
         }
     else:
         print('GET以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
