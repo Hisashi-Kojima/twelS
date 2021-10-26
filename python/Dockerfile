@@ -17,7 +17,7 @@ COPY ./webserver/conf.d /etc/nginx/conf.d
 
 # パッケージのインストール
 COPY ./python/requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # entrypoint.shをコンテナにコピー
 COPY ./entrypoint.sh /code/
