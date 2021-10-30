@@ -3,46 +3,48 @@
 {% load static %}
 
 {% block head %}
-<!-- 公開まで検索に引っかからないようにする -->
-<meta name="robots" content="noindex">
+    <!-- 公開まで検索に引っかからないようにする -->
+    <meta name="robots" content="noindex">
 
-<title>twelS</title>
-<link rel="stylesheet" href="{% static 'search/style.css' %}">
-<link rel="shortcut icon" href="{% static 'search/images/favicon.png' %}">
-<!-- for MathQuill -->
-<link rel="stylesheet" href="{% static 'mathquill-0.10.1/mathquill.css' %}">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="{% static 'mathquill-0.10.1/mathquill.js' %}"></script>
+    <title>twelS</title>
+    <link rel="stylesheet" href="{% static 'search/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'search/images/favicon.png' %}">
+    <!-- for MathQuill -->
+    <link rel="stylesheet" href="{% static 'mathquill-0.10.1/mathquill.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{% static 'mathquill-0.10.1/mathquill.js' %}"></script>
 {% endblock head %}
 
 {% block body %}
-    <p id="main_form">
-        Type math here: <span id="math-field"></span>
-        <button onclick="submit()">検索</button>
-    </p>
-    <p>LaTeX of what you typed: <span id="latex"></span></p>
+    <div id="main_content">
+        <p id="main_form">
+            Type math here: <span id="math-field"></span>
+            <button onclick="submit()">検索</button>
+        </p>
+        <p>LaTeX of what you typed: <span id="latex"></span></p>
 
-    <!-- queryが有効なもののときのみ表示 -->
-    {% if query %}
-　　     <p>{{ query }}  の検索結果</p><br>
-    {% endif %}
+        <!-- queryが有効なもののときのみ表示 -->
+        {% if query %}
+    　　     <p>{{ query }}  の検索結果</p><br>
+        {% endif %}
 
-    {% for page in page_list %}
-        <div class="page">
-            <a href="{{ page.uri }}"><h3>{{ page.title }}</h3></a>
-            <p>
-                {% autoescape off %}
-                    {{ page.description }}
-                {% endautoescape %}
-            </p><br>
-        </div>
-    {% endfor %}
+        {% for page in page_list %}
+            <div class="page">
+                <a href="{{ page.uri }}"><h3>{{ page.title }}</h3></a>
+                <p>
+                    {% autoescape off %}
+                        {{ page.description }}
+                    {% endautoescape %}
+                </p><br>
+            </div>
+        {% endfor %}
 
-    <!-- queryが有効なもののときのみ表示 -->
-    {% if query %}
-        <!-- <a href="." onclick="search_next('{{query}}');return false">更に表示</a> -->
-        <a href="./?q={{query}}&start={{start}}">更に表示</a>
-    {% endif %}
+        <!-- queryが有効なもののときのみ表示 -->
+        {% if query %}
+            <!-- <a href="." onclick="search_next('{{query}}');return false">更に表示</a> -->
+            <a href="./?q={{query}}&start={{start}}">更に表示</a>
+        {% endif %}
+    </div>
 
     <script>
     var mathFieldSpan = document.getElementById('math-field');

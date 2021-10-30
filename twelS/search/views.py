@@ -47,6 +47,12 @@ def index(request):
     return render(request, 'search/index.html', context)
 
 
+def privacy_policy(request):
+    """プライバシーポリシーのページ．
+    """
+    return render(request, 'search/privacy_policy.html', {})
+
+
 def robots_txt(request):
     """robots.txtを表示するための関数．
     """
