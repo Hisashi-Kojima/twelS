@@ -8,6 +8,14 @@ body{
     text-align: center;
 }
 
+footer{
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    background-color: aqua;
+    bottom: 0;
+}
+
 #math-field{
     font-size: 170%;
     width: 50%;
@@ -15,6 +23,10 @@ body{
 
 #main_form > button{
     font-size: 120%;
+}
+
+#main_content{
+    margin-bottom: 100px;  /* footerとかぶらないように */
 }
 
 .page{

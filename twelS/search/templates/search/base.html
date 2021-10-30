@@ -5,10 +5,25 @@
     {% block head %}
     <title>Title</title>
     {% endblock head %}
+
+    {% block analytics %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FBF3VF32MV"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-FBF3VF32MV');
+    </script>
+    {% endblock analytics %}
 </head>
 <body>
     {% block body %}
         replace me.
     {% endblock body %}
+    <footer>
+        <p><a href="{% url 'privacy_policy' %}">プライバシーポリシー</a></p>
+    </footer>
 </body>
 </html>
