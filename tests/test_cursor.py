@@ -1,4 +1,5 @@
 import json
+import traceback
 
 import pytest
 import mysql.connector
@@ -8,28 +9,47 @@ add_path()
 
 from constant.const import Const
 from database.cursor import Cursor
+from utils.utils import print_in_red
 
 
 @pytest.fixture
 def cnx():
-    cnx = mysql.connector.connect(**Const.config_for_test)
-    yield cnx
-    # テスト後（成功時も失敗時も）にyield以降の処理が実行される
-    cnx.rollback()  # テスト完了後にロールバックする．
-    cnx.close()
+    """データベースに接続する関数．接続できたらちゃんとcloseしてくれる．
+    """
+    try:
+        cnx = mysql.connector.connect(**Const.config_for_test)
+        yield cnx
+        # テスト後（成功時も失敗時も）にyield以降の処理が実行される
+        cnx.rollback()  # テスト完了後にロールバックする．
+        cnx.close()
+    except mysql.connector.errors.InterfaceError:
+        print(Const.config_for_test)
+        print_in_red(traceback.format_exc())
+        yield None
 
 
 @pytest.fixture
 def cursor(cnx):
-    # TODO: 可能であればPrepared Statementにする．
-    cursor = cnx.cursor()
-    yield cursor
-    cursor.close()
+    if cnx is not None:
+        # TODO: 可能であればPrepared Statementにする．
+        cursor = cnx.cursor()
+        yield cursor
+        cursor.close()
+    else:
+        yield None
 
 
 # TODO: testをmulti processで実行したときにdeadlockになるので，それについて調べる．
 # testでなくてもmulti processで実行すればdeadlockになると予想できる．
 # multi process前提の処理にする必要があるだろう．
+
+
+def test_connection_1(cursor):
+    """データベースのテーブルにレコードがないことを確認．
+    """
+    query = "SELECT COUNT(*) FROM page"
+    cursor.execute(query)
+    assert cursor.fetchone()[0] == 0
 
 
 def test_append_expr_id_if_not_registered_1(cursor):
@@ -194,7 +214,6 @@ def test_delete_from_path_dictionary_where_expr_path_1(cursor):
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
-
 def test_insert_into_index_values_expr_id_and_info_1(cursor):
     """Cursor.insert_into_index_values_expr_id_and_info()のテスト．
     expr_idがない場合．
@@ -280,7 +299,6 @@ def test_insert_into_index_values_expr_id_and_info_3(cursor):
         }
 
     assert result_info == expected_info
-
 
 
 def test_insert_into_index_values_1(cursor):
@@ -384,7 +402,7 @@ def test_remove_info_from_inverted_index_1(cursor):
         'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))', 
         (expr_id, "1", str(remove_uri_id), "3", "ja", "ja", "ja")
         )
-    
+
     Cursor.remove_info_from_inverted_index(cursor, expr_id, remove_uri_id)
 
     cursor.execute('SELECT info FROM inverted_index WHERE expr_id = %s', (expr_id,))
@@ -479,7 +497,7 @@ def test_select_expr_ids_from_path_dictionary_where_expr_path_1(cursor):
     expr_path = 'path1'
     expr_ids = ['1', '2', '3', '5']
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', 
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
         (expr_path, json.dumps(expr_ids))
         )
     result_expr_ids = Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
@@ -626,13 +644,13 @@ def test_uri_is_already_registered_1(cursor):
     descr = 'descr'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
+        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)',
         (uri, json.dumps(exprs), title, descr)
         )
 
     # Trueの場合
     assert Cursor.uri_is_already_registered(cursor, uri) is True
-    
+
     not_registered_uri = 'foo'
     # Falseの場合
     assert Cursor.uri_is_already_registered(cursor, not_registered_uri) is False

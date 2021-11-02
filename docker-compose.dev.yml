@@ -23,7 +23,7 @@ services:
 
   db:
     container_name: mysql_container
-    image: mysql:8.0.27
+    image: mysql:$MYSQL_VERSION
     ports:
       - 3306:3306
     environment:
@@ -36,6 +36,24 @@ services:
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./db/logs:/var/log/mysql
       - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+    networks:
+      - app_net
+
+  db-test:
+    image: mysql:$MYSQL_VERSION
+    ports:
+      # ホスト側のport番号がdbコンテナのホスト側のport番号と同じにならないようにする
+      - 3000:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
+      MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
+      MYSQL_USER: hisashi
+      MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
+    volumes:
+      # 永続化したい場合は./db/mysql-testをvolumeする
+      - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
+      - ./tests/db/logs:/var/log/mysql
+      - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net
 
