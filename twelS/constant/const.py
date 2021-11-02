@@ -57,11 +57,11 @@ class Const:
         'connection_timeout': 100  # second
     }
 
-    # テスト用のデータベース
-    # TODO: 修正
+    # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': 'lovebasketball',
-        'host': 'localhost',
-        'database': 'test_twels'
+        'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
+        'database': 'twels',
+        'port': 3000,
+        'connection_timeout': 100  # second
     }

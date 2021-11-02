@@ -144,7 +144,7 @@ class Cursor:
         uri_id_path = __class__.select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, uri_id, expr_id)
         cursor.execute('SELECT JSON_REMOVE(info, %s) FROM inverted_index', (uri_id_path,))
         remove_uri_id_info = json.loads(cursor.fetchone()[0])
-        
+
         lang_path = uri_id_path.replace('uri_id', 'lang')
         cursor.execute('SELECT JSON_REMOVE(info, %s) FROM inverted_index', (lang_path,))
         remove_lang_info = json.loads(cursor.fetchone()[0])
