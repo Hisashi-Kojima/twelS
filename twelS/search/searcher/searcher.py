@@ -105,11 +105,15 @@ class Searcher:
         ids = iter(extracted_ids)
         end = start+__class__.search_num
         while len(info['uri_id']) < end:
-            expr_id: str = next(ids)
-            with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
-                tmp_info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
-                info['uri_id'].extend(tmp_info['uri_id'])
-                info['lang'].extend(tmp_info['lang'])
+            try:
+                expr_id: str = next(ids)
+                with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
+                    tmp_info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
+                    info['uri_id'].extend(tmp_info['uri_id'])
+                    info['lang'].extend(tmp_info['lang'])
+            except StopIteration:
+                # 検索結果がsearch_num未満のとき
+                break
 
         return {
             'uri_id': info['uri_id'][start:end],
