@@ -56,11 +56,11 @@ def test_get_expr_id_1():
 
         assert result_expr == mathml
         assert result_expr_id == expr_id
-    
+
     finally:
         reset_tables()
-    
-    
+
+
 def test_update_db_1():
     """Indexer.update_db()のテスト．
     inverted_index tableについて，あるexpr_idで複数のuri_idが登録されるか確認するテスト．
@@ -132,7 +132,7 @@ def test_insert_expr_into_database_1():
                         </mrow>
                     </math>"""
         expr_path_set = Parser.parse(expr)
-        
+
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
                 Indexer._insert_expr_into_database(cursor, expr_path_set, expr_id, uri_id_1, lang)
