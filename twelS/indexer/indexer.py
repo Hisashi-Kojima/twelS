@@ -3,7 +3,6 @@
 made by Hisashi
 """
 
-from typing import Tuple
 import traceback
 
 from itemadapter import ItemAdapter
@@ -105,7 +104,7 @@ class Indexer:
                 return expr_id
 
     @staticmethod
-    def _get_insert_and_delete_set(new_exprs: set, registered_exprs: set) -> Tuple[set[str], set[str]]:
+    def _get_insert_and_delete_set(new_exprs: set, registered_exprs: set) -> tuple[set[str], set[str]]:
         """登録する数式と削除する数式それぞれの集合を返す関数．
         そのページに登録されていたexpressionsと今回取得したexpressionsを比較することで，
         新たに登録するexprと削除するexprがわかる．
@@ -159,7 +158,7 @@ class Indexer:
         __class__._delete_expr_from_database_with_delete_set(uri_id, delete_set, test=test)
 
     @staticmethod
-    def _update_page_table(page_info: ItemAdapter, test: bool = False) -> Tuple[int, set]:
+    def _update_page_table(page_info: ItemAdapter, test: bool = False) -> tuple[int, set]:
         """page tableを更新する関数．
         そのページのuri_idと登録されているexpressionsを返す．
         Returns:

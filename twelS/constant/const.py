@@ -8,10 +8,8 @@ class Const:
     """定数をまとめたクラス．"""
 
     # 引数を2つ以上取る関数のリスト．
-    # 引数の順番の情報を持つ．
-    # TODO: この２つの変数の見直し
-    need_args = ['elements', 'frac', 'sup', 'sub', 'root', 'subsup', 'over', 'under', 'underover']
-    need_args_m = ['mfrac', 'msup', 'msub', 'mroot', 'msubsup', 'mover', 'munder', 'munderover']
+    # 引数の順番（pseudo num: #1など）の情報を持つ．
+    need_args = ['elements', 'neg', 'frac', 'sup', 'sub', 'root', 'subsup', 'over', 'under', 'underover']
 
     # rule names
     root_data = 'start'
