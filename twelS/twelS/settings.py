@@ -34,8 +34,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '.twels.jp',
-    '15.152.18.70',  # Elastic IP
-    'twels-load-balancer-1828837030.ap-northeast-3.elb.amazonaws.com',  # Load Balancer DNS name
+    env('ELASTIC_IP_ADDRESS'),
+    env('LB_DNS_NAME'),
 ]
 
 # add Amazon EC2 private IP address to ALLOWED_HOSTS dynamically,

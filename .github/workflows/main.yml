@@ -19,7 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DJANGO_SECRET_KEY: foo  # incorrect value
+      # incorrect values
+      DJANGO_SECRET_KEY: foo
+      ELASTIC_IP_ADDRESS: 127.0.0.2
+      LB_DNS_NAME: foo.com
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
