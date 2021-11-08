@@ -2,6 +2,16 @@
 """module description
 made by Hisashi
 """
+from pathlib import Path
+import os
+
+import environ
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
+env = environ.Env()
 
 
 class Const:
@@ -41,7 +51,7 @@ class Const:
     # 開発用のデータベース
     config_for_dev = {
         'user': 'hisashi',
-        'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
+        'password': env('MY_HISASHI_PASSWORD'),
         'host': 'mysql_container',  # MySQLのコンテナの名前で接続
         'database': 'twels',
         'connection_timeout': 100  # second
@@ -58,7 +68,7 @@ class Const:
     # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
+        'password': env('MY_HISASHI_PASSWORD'),
         'database': 'twels',
         'port': 3000,
         'connection_timeout': 100  # second
