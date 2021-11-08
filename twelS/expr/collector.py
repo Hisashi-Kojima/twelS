@@ -3,17 +3,9 @@
 made by Hisashi
 """
 
-from typing import Tuple
-
 from lark import Token, Tree
 
 from constant.const import Const
-
-
-# 2/negのとき，2で止まったら困る．
-# 1/#1/fracのとき，1/#1で止まったら困る．
-skip_list = ['neg']
-skip_list.extend(Const.need_args)
 
 
 def get_path_set(tree: Tree) -> set:
@@ -26,7 +18,7 @@ def get_path_set(tree: Tree) -> set:
     return set(fix)
 
 
-def _collect_path_set(node) -> Tuple[list[str], list[str]]:
+def _collect_path_set(node) -> tuple[list[str], list[str]]:
     """子ノードを調べてPath Setを集める関数．
     Args:
         node: 木のノード．Tree型，Token型，list型のどれかをとる．
@@ -49,7 +41,7 @@ def _collect_path_set(node) -> Tuple[list[str], list[str]]:
         return tmp, fix
 
 
-def _collect_path_set_from_tree(node: Tree) -> Tuple[list[str], list[str]]:
+def _collect_path_set_from_tree(node: Tree) -> tuple[list[str], list[str]]:
     """引数のノードの子ノードそれぞれで_collect_path_set()を実行し，
     それぞれのfixとtmpをまとめる関数．
     Returns:
@@ -77,5 +69,7 @@ def _skip_some_paths(node_data: str, fix: list[str], child_tmp: list[str]):
         fix: 確定したPath Set．
         child_tmp: 子ノードから得られたPath Set．登録したければfixに追加する．
     """
-    if node_data not in skip_list:
+    # 2/negのとき，2で止まったら困る．
+    # 1/#1/fracのとき，1/#1で止まったら困る．
+    if node_data not in Const.need_args:
         fix.extend(child_tmp)
