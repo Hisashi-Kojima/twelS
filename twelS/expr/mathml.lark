@@ -1,6 +1,8 @@
 // Dynamic Earley parserのルール
 
-// ruleの先頭の文字が'_'だったら，そのノードを作らない．'?'だったら，childが1つのとき，そのノードを作らない．
+// ruleの先頭の文字が
+//   '_'だったら，そのノードを作らない．
+//   '?'だったら，childが1つのとき，そのノードを作らない．
 // see here: https://github.com/lark-parser/lark/blob/master/docs/tree_construction.md
 
 start: _open mathml _close
@@ -10,22 +12,25 @@ start: _open mathml _close
 
 _annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
 
-?expr: sum _more_sum*
+// deal with relational operators
+?expr: _open expr _close  // for mrow
+     | sum _more_sum*
 
 _more_sum: relational_operator sum
 
 ?sum: (_add | subtract)? product _more_product*
-   | _open (_add | subtract)? product _more_product* _close  // for mrow
+    | _open (_add | subtract)? product _more_product* _close  // for mrow
 
 _more_product: (_add | subtract) product
 
 ?product: atom _more_atom*  // a*bのパターン
-       | atom+  // abのパターン
+        | atom+  // abのパターン
 
 _more_atom: (_mul | div) atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
      | "<mi" _attr* ">" TOKEN "</mi>"
+     | "<mrow" _attr* ">" product "</mrow>"
      | _left_paren sum _right_paren -> paren
      | func
      | cdots
@@ -48,9 +53,10 @@ _mi_empty.-1: "<mi" _attr* "></mi>"
      | "<msub" _attr* ">" sum sum "</msub>" -> sub
      | "<mroot" _attr* ">" sum sum "</mroot>" -> root
      | "<msubsup" _attr* ">" sum sum sum "</msubsup>" -> subsup
-     | "<mover" _attr* ">" mathml mathml "</mover>" -> over
-     | "<munder" _attr* ">" mathml mathml "</munder>" -> under
-     | "<munderover" _attr* ">" mathml mathml mathml "</munderover>" -> underover
+     // use expr for dealing with relational operators
+     | "<mover" _attr* ">" expr expr "</mover>" -> over
+     | "<munder" _attr* ">" expr expr "</munder>" -> under
+     | "<munderover" _attr* ">" expr expr expr "</munderover>" -> underover
      | table
 
 // for mtable

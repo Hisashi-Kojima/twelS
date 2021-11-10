@@ -3,8 +3,6 @@
 made by Hisashi
 """
 
-import unittest
-
 import latex2mathml.converter
 from lark import Tree, Token
 
@@ -15,682 +13,813 @@ from expr.parser import Parser
 from constant.const import Const
 
 
-class TestParser(unittest.TestCase):
-
-    def test_get_parsed_tree_add_1(self):
-        """加算のparse
-        1+2
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.sum_data, [
-                Token(Const.token_type, '1'), Token(Const.token_type, '2')
-                ])
+def test_get_parsed_tree_add_1():
+    """加算のparse
+    1+2
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>1</mn>
+                        <mo>&#x0002B;</mo>
+                        <mn>2</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sum_data, [
+            Token(Const.token_type, '1'), Token(Const.token_type, '2')
             ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_add_2(self):
-        """加算のparse
-        1+2+a
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>2</mn>
-                            <mo>&#x0002B;</mo>
-                            <mi>a</mi>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.sum_data, [
-                Token(Const.token_type, '1'), Token(Const.token_type, '2'), Token(Const.token_type, 'a')
-                ])
-            ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_add_3(self):
-        """加算のparse
-        +7
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mo>&#x0002B;</mo>
-                            <mn>7</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Token(Const.token_type, '7')
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_subtract_1(self):
-        """減算のparse
-        3-2
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>3</mn>
-                            <mo>&#x02212;</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.sum_data, [
-                Token(Const.token_type, '3'), Tree(Const.neg_data, [Token(Const.token_type, '2')])
-                ])
+
+def test_get_parsed_tree_add_2():
+    """加算のparse
+    1+2+a
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>1</mn>
+                        <mo>&#x0002B;</mo>
+                        <mn>2</mn>
+                        <mo>&#x0002B;</mo>
+                        <mi>a</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sum_data, [
+            Token(Const.token_type, '1'), Token(Const.token_type, '2'), Token(Const.token_type, 'a')
             ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_subtract_2(self):
-        """減算のparse
-        -5
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mo>&#x02212;</mo>
-                            <mn>5</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.neg_data, [Token(Const.token_type, '5')])
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_mul_1(self):
-        """乗算のparse
-        2*5
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>2</mn>
-                            <mo>&#x0002A;</mo>
-                            <mn>5</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, '2'), Token(Const.token_type, '5')
-                ])
+
+def test_get_parsed_tree_add_3():
+    """加算のparse
+    +7
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mo>&#x0002B;</mo>
+                        <mn>7</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Token(Const.token_type, '7')
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_subtract_1():
+    """減算のparse
+    3-2
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>3</mn>
+                        <mo>&#x02212;</mo>
+                        <mn>2</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sum_data, [
+            Token(Const.token_type, '3'), Tree(Const.neg_data, [Token(Const.token_type, '2')])
             ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_mul_2(self):
-        """乗算のparse
-        abc
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mi>a</mi>
-                            <mi>b</mi>
-                            <mi>c</mi>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, 'a'), Token(Const.token_type, 'b'), Token(Const.token_type, 'c')
-                ])
+
+def test_get_parsed_tree_subtract_2():
+    """減算のparse
+    -5
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mo>&#x02212;</mo>
+                        <mn>5</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.neg_data, [Token(Const.token_type, '5')])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_mul_1():
+    """乗算のparse
+    2*5
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>2</mn>
+                        <mo>&#x0002A;</mo>
+                        <mn>5</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Token(Const.token_type, '2'), Token(Const.token_type, '5')
             ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_frac_1(self):
-        """分数のparse
-        frac{2}{3}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
+
+def test_get_parsed_tree_mul_2():
+    """乗算のparse
+    abc
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mi>a</mi>
+                        <mi>b</mi>
+                        <mi>c</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Token(Const.token_type, 'a'), Token(Const.token_type, 'b'), Token(Const.token_type, 'c')
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_frac_1():
+    """分数のparse
+    frac{2}{3}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mfrac>
+                            <mrow>
+                                <mn>2</mn>
+                            </mrow>
+                            <mrow>
+                                <mn>3</mn>
+                            </mrow>
+                        </mfrac>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.frac_data, [
+            Tree('#0', [Token(Const.token_type, '2')]),
+            Tree('#1', [Token(Const.token_type, '3')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_frac_2():
+    """分数のparse
+    frac{d}{dx}e^{x}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mrow class="MJX-TeXAtom-ORD">
                             <mfrac>
+                                <mi>d</mi>
                                 <mrow>
-                                    <mn>2</mn>
-                                </mrow>
-                                <mrow>
-                                    <mn>3</mn>
+                                    <mi>d</mi>
+                                    <mi>x</mi>
                                 </mrow>
                             </mfrac>
                         </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
+                        <msup>
+                            <mi>e</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>x</mi>
+                            </mrow>
+                        </msup>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
             Tree(Const.frac_data, [
-                Tree('#0', [Token(Const.token_type, '2')]),
-                Tree('#1', [Token(Const.token_type, '3')])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_div_1(self):
-        """除算のparse
-        3/4
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>3</mn>
-                            <mo>&#x0002F;</mo>
-                            <mn>4</mn>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, '3'), Tree(Const.frac_data, [
-                    Tree('#0', [Token(Const.token_type, '1')]),
-                    Tree('#1', [Token(Const.token_type, '4')])
-                ])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_eq_1(self):
-        """等号を含む式のparse
-        y=ax
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mi>y</mi>
-                            <mo>&#x0003D;</mo>
-                            <mi>a</mi>
-                            <mi>x</mi>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Token(Const.token_type, 'y'),
-            Tree(Const.equal_data, []),
-            Tree(Const.product_data, [
-                Token(Const.token_type, 'a'), Token(Const.token_type, 'x')
-                ])
-            ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_eq_2(self):
-        """等号を2つ含む式のparse
-        a=b=c
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mi>a</mi>
-                            <mo>&#x0003D;</mo>
-                            <mi>b</mi>
-                            <mo>&#x0003D;</mo>
-                            <mi>c</mi>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Token(Const.token_type, 'a'),
-            Tree(Const.equal_data, []),
-            Token(Const.token_type, 'b'),
-            Tree(Const.equal_data, []),
-            Token(Const.token_type, 'c')
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_paren_1(self):
-        """かっこを含む式のparse
-        3*(4+5)
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>3</mn>
-                            <mo>&#x0002A;</mo>
-                            <mo stretchy="false">&#x00028;</mo>
-                            <mn>4</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>5</mn>
-                            <mo stretchy="false">&#x00029;</mo>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, '3'), Tree(Const.paren_data, [
-                    Tree(Const.sum_data, [
-                        Token(Const.token_type, '4'), Token(Const.token_type, '5')
+                Tree('#0', [Token(Const.token_type, 'd')]),
+                Tree('#1', [
+                    Tree(Const.product_data, [
+                        Token(Const.token_type, 'd'),
+                        Token(Const.token_type, 'x')
                     ])
                 ])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_sup_1(self):
-        """上付き文字のparse
-        e^{x}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <msup>
-                                <mi>e</mi>
-                                <mrow>
-                                    <mi>x</mi>
-                                </mrow>
-                            </msup>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
+            ]),
             Tree(Const.sup_data, [
                 Tree('#0', [Token(Const.token_type, 'e')]),
                 Tree('#1', [Token(Const.token_type, 'x')])
             ])
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_sub_1(self):
-        """下付き文字のparse
-        x_{i}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <msub>
-                                <mi>x</mi>
-                                <mrow>
-                                    <mi>i</mi>
+
+def test_get_parsed_tree_frac_3():
+    """分数のparse
+    frac{d}{dx}e^{x}=e^{x}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mfrac>
+                                    <mi>d</mi>
+                                    <mrow>
+                                        <mi>d</mi>
+                                        <mi>x</mi>
+                                    </mrow>
+                                </mfrac>
+                            </mrow>
+                            <msup>
+                                <mi>e</mi>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mi>x</mi>
                                 </mrow>
-                            </msub>
+                            </msup>
+                            <mo>=</mo>
+                            <msup>
+                                <mi>e</mi>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mi>x</mi>
+                                </mrow>
+                            </msup>
+                            <mo>,</mo>
+                        </mstyle>
                         </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
+                        <annotation encoding="application/x-tex">{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Tree(Const.frac_data, [
+                Tree('#0', [Token(Const.token_type, 'd')]),
+                Tree('#1', [
+                    Tree(Const.product_data, [
+                        Token(Const.token_type, 'd'),
+                        Token(Const.token_type, 'x')
+                    ])
+                ])
+            ]),
+            Tree(Const.sup_data, [
+                Tree('#0', [Token(Const.token_type, 'e')]),
+                Tree('#1', [Token(Const.token_type, 'x')])
+            ])
+        ]),
+        Tree(Const.equal_data, []),
+        Tree(Const.product_data, [
+            Tree(Const.sup_data, [
+                Tree('#0', [Token(Const.token_type, 'e')]),
+                Tree('#1', [Token(Const.token_type, 'x')])
+            ]),
+            # TODO: 式の最後にある','は無視するように修正
+            Token(Const.token_type, ',')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_div_1():
+    """除算のparse
+    3/4
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>3</mn>
+                        <mo>&#x0002F;</mo>
+                        <mn>4</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Token(Const.token_type, '3'), Tree(Const.frac_data, [
+                Tree('#0', [Token(Const.token_type, '1')]),
+                Tree('#1', [Token(Const.token_type, '4')])
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_eq_1():
+    """等号を含む式のparse
+    y=ax
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mi>y</mi>
+                        <mo>&#x0003D;</mo>
+                        <mi>a</mi>
+                        <mi>x</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Token(Const.token_type, 'y'),
+        Tree(Const.equal_data, []),
+        Tree(Const.product_data, [
+            Token(Const.token_type, 'a'), Token(Const.token_type, 'x')
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_eq_2():
+    """等号を2つ含む式のparse
+    a=b=c
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mi>a</mi>
+                        <mo>&#x0003D;</mo>
+                        <mi>b</mi>
+                        <mo>&#x0003D;</mo>
+                        <mi>c</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Token(Const.token_type, 'a'),
+        Tree(Const.equal_data, []),
+        Token(Const.token_type, 'b'),
+        Tree(Const.equal_data, []),
+        Token(Const.token_type, 'c')
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_paren_1():
+    """かっこを含む式のparse
+    3*(4+5)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mn>3</mn>
+                        <mo>&#x0002A;</mo>
+                        <mo stretchy="false">&#x00028;</mo>
+                        <mn>4</mn>
+                        <mo>&#x0002B;</mo>
+                        <mn>5</mn>
+                        <mo stretchy="false">&#x00029;</mo>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Token(Const.token_type, '3'), Tree(Const.paren_data, [
+                Tree(Const.sum_data, [
+                    Token(Const.token_type, '4'), Token(Const.token_type, '5')
+                ])
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_sup_1():
+    """上付き文字のparse
+    e^{x}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <msup>
+                            <mi>e</mi>
+                            <mrow>
+                                <mi>x</mi>
+                            </mrow>
+                        </msup>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sup_data, [
+            Tree('#0', [Token(Const.token_type, 'e')]),
+            Tree('#1', [Token(Const.token_type, 'x')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_sub_1():
+    """下付き文字のparse
+    x_{i}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <msub>
+                            <mi>x</mi>
+                            <mrow>
+                                <mi>i</mi>
+                            </mrow>
+                        </msub>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sub_data, [
+            Tree('#0', [Token(Const.token_type, 'x')]),
+            Tree('#1', [Token(Const.token_type, 'i')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_subsup_1():
+    """下付き上付き文字のparse
+    x_{i}^{2}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <msubsup>
+                            <mi>x</mi>
+                            <mrow>
+                                <mi>i</mi>
+                            </mrow>
+                            <mrow>
+                                <mn>2</mn>
+                            </mrow>
+                        </msubsup>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.subsup_data, [
+            Tree('#0', [Token(Const.token_type, 'x')]),
+            Tree('#1', [Token(Const.token_type, 'i')]),
+            Tree('#2', [Token(Const.token_type, '2')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_sqrt_1():
+    """平方根のparse
+    sqrt{3}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <msqrt>
+                            <mrow>
+                                <mn>3</mn>
+                            </mrow>
+                        </msqrt>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sqrt_data, [
+            Token(Const.token_type, '3')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_root_1():
+    """n乗根のparse
+    sqrt[3]{5}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mroot>
+                            <mrow>
+                                <mn>5</mn>
+                            </mrow>
+                            <mrow>
+                                <mn>3</mn>
+                            </mrow>
+                        </mroot>
+                    </mrow>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.func_root_data, [
+            Tree('#0', [Token(Const.token_type, '5')]),
+            Tree('#1', [Token(Const.token_type, '3')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_over_1():
+    """上にアクセントがある式のparse
+    bar{x+y+z}
+    """
+    mathml = """<math>
+                    <mover accent="true">
+                        <mrow>
+                            <mi> x </mi>
+                            <mo> + </mo>
+                            <mi> y </mi>
+                            <mo> + </mo>
+                            <mi> z </mi>
+                        </mrow>
+                        <mo> &#x23DE; <!--TOP CURLY BRACKET--> </mo>
+                    </mover>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.over_data, [
+            Tree('#0', [
+                Tree(Const.sum_data, [
+                    Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
+                ])
+            ]),
+            Tree('#1', [Token(Const.token_type, '&#x23DE;')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_under_1():
+    """下にアクセントがある式のparse
+    https://developer.mozilla.org/ja/docs/Web/MathML/Element/munder
+    """
+    mathml = """<math>
+                    <munder accentunder="true">
+                        <mrow>
+                            <mi> x </mi>
+                            <mo> + </mo>
+                            <mi> y </mi>
+                            <mo> + </mo>
+                            <mi> z </mi>
+                        </mrow>
+                        <mo> &#x23DF; <!--BOTTOM CURLY BRACKET--> </mo>
+                    </munder>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.under_data, [
+            Tree('#0', [
+                Tree(Const.sum_data, [
+                    Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
+                ])
+            ]),
+            Tree('#1', [Token(Const.token_type, '&#x23DF;')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_underover_1():
+    """上下にアクセントがある式のparse
+    https://developer.mozilla.org/en-US/docs/Web/MathML/Element/munderover
+    """
+    mathml = """<math displaystyle="true">
+                    <munderover>
+                        <mo> &#x222B; <!--INTEGRAL--> </mo>
+                        <mn> 0 </mn>
+                        <mi> &#x221E; <!--INFINITY--> </mi>
+                    </munderover>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.underover_data, [
+            Tree('#0', [Token(Const.token_type, '&#x222B;')]),
+            Tree('#1', [Token(Const.token_type, '0')]),
+            Tree('#2', [Token(Const.token_type, '&#x221E;')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_summation_1():
+    r"""基本的な総和の式のparse
+    \sum_{i=1}^{n} x_{i}
+    """
+    mathml = """<math displaystyle="true">
+                    <munderover>
+                        <mo>&#x2211;<!-- ∑ --></mo>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                            <mo>=</mo>
+                            <mn>1</mn>
+                        </mrow>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>n</mi>
+                        </mrow>
+                    </munderover>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                        </mrow>
+                    </msub>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Tree(Const.underover_data, [
+                Tree('#0', [Token(Const.token_type, '&#x2211;')]),
+                Tree('#1', [Tree(Const.expr_data, [
+                    Token(Const.token_type, 'i'),
+                    Tree(Const.equal_data, []),
+                    Token(Const.token_type, '1')
+                ])]),
+                Tree('#2', [Token(Const.token_type, 'n')])
+            ]),
             Tree(Const.sub_data, [
                 Tree('#0', [Token(Const.token_type, 'x')]),
                 Tree('#1', [Token(Const.token_type, 'i')])
             ])
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_subsup_1(self):
-        """下付き上付き文字のparse
-        x_{i}^{2}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <msubsup>
-                                <mi>x</mi>
-                                <mrow>
-                                    <mi>i</mi>
-                                </mrow>
-                                <mrow>
-                                    <mn>2</mn>
-                                </mrow>
-                            </msubsup>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.subsup_data, [
-                Tree('#0', [Token(Const.token_type, 'x')]),
-                Tree('#1', [Token(Const.token_type, 'i')]),
-                Tree('#2', [Token(Const.token_type, '2')])
-            ])
+
+def test_get_parsed_tree_summation_2():
+    r"""上と下がない総和の式のparse
+    \sum R
+    """
+    mathml = """<math displaystyle="true">
+                    <mo>&#x2211;<!-- ∑ --></mo>
+                    <mi>R</mi>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Token(Const.token_type, '&#x2211;'),
+            Token(Const.token_type, 'R')
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_sqrt_1(self):
-        """平方根のparse
-        sqrt{3}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <msqrt>
-                                <mrow>
-                                    <mn>3</mn>
-                                </mrow>
-                            </msqrt>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.sqrt_data, [
-                Token(Const.token_type, '3')
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
 
-    def test_get_parsed_tree_root_1(self):
-        """n乗根のparse
-        sqrt[3]{5}
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mroot>
-                                <mrow>
-                                    <mn>5</mn>
-                                </mrow>
-                                <mrow>
-                                    <mn>3</mn>
-                                </mrow>
-                            </mroot>
-                        </mrow>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.func_root_data, [
-                Tree('#0', [Token(Const.token_type, '5')]),
-                Tree('#1', [Token(Const.token_type, '3')])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_over_1(self):
-        """上にアクセントがある式のparse
-        bar{x+y+z}
-        """
-        mathml = """<math>
-                        <mover accent="true">
-                            <mrow>
-                                <mi> x </mi>
-                                <mo> + </mo>
-                                <mi> y </mi>
-                                <mo> + </mo>
-                                <mi> z </mi>
-                            </mrow>
-                            <mo> &#x23DE; <!--TOP CURLY BRACKET--> </mo>
-                        </mover>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.over_data, [
-                Tree('#0', [
-                    Tree(Const.sum_data, [
-                        Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
-                    ])
-                ]),
-                Tree('#1', [Token(Const.token_type, '&#x23DE;')])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_under_1(self):
-        """下にアクセントがある式のparse
-        https://developer.mozilla.org/ja/docs/Web/MathML/Element/munder
-        """
-        mathml = """<math>
-                        <munder accentunder="true">
-                            <mrow>
-                                <mi> x </mi>
-                                <mo> + </mo>
-                                <mi> y </mi>
-                                <mo> + </mo>
-                                <mi> z </mi>
-                            </mrow>
-                            <mo> &#x23DF; <!--BOTTOM CURLY BRACKET--> </mo>
-                        </munder>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.under_data, [
-                Tree('#0', [
-                    Tree(Const.sum_data, [
-                        Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
-                    ])
-                ]),
-                Tree('#1', [Token(Const.token_type, '&#x23DF;')])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_underover_1(self):
-        """上下にアクセントがある式のparse
-        https://developer.mozilla.org/en-US/docs/Web/MathML/Element/munderover
-        """
-        mathml = """<math displaystyle="true">
-                        <munderover>
-                            <mo> &#x222B; <!--INTEGRAL--> </mo>
-                            <mn> 0 </mn>
-                            <mi> &#x221E; <!--INFINITY--> </mi>
-                        </munderover>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.underover_data, [
-                Tree('#0', [Token(Const.token_type, '&#x222B;')]),
-                Tree('#1', [Token(Const.token_type, '0')]),
-                Tree('#2', [Token(Const.token_type, '&#x221E;')])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_summation_1(self):
-        r"""基本的な総和の式のparse
-        \sum_{i=1}^{n} x_{i}
-        """
-        mathml = """<math displaystyle="true">
-                        <munderover>
-                            <mo>&#x2211;<!-- ∑ --></mo>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mi>i</mi>
-                                <mo>=</mo>
-                                <mn>1</mn>
-                            </mrow>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mi>n</mi>
-                            </mrow>
-                        </munderover>
-                        <msub>
-                            <mi>x</mi>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mi>i</mi>
-                            </mrow>
-                        </msub>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Tree(Const.underover_data, [
-                    Tree('#0', [Token(Const.token_type, '&#x2211;')]),
-                    Tree('#1', [Tree(Const.expr_data, [
-                        Token(Const.token_type, 'i'),
-                        Tree(Const.equal_data, []),
-                        Token(Const.token_type, '1')
-                    ])]),
-                    Tree('#2', [Token(Const.token_type, 'n')])
-                ]),
-                Tree(Const.sub_data, [
-                    Tree('#0', [Token(Const.token_type, 'x')]),
-                    Tree('#1', [Token(Const.token_type, 'i')])
-                ])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_summation_2(self):
-        r"""上と下がない総和の式のparse
-        \sum R
-        """
-        mathml = """<math displaystyle="true">
+def test_get_parsed_tree_summation_3():
+    r"""上がない総和の式のparse
+    \sum_{x\in R} x
+    """
+    mathml = """<math displaystyle="true">
+                    <munder>
                         <mo>&#x2211;<!-- ∑ --></mo>
-                        <mi>R</mi>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, '&#x2211;'),
-                Token(Const.token_type, 'R')
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
-
-    def test_get_parsed_tree_summation_3(self):
-        r"""上がない総和の式のparse
-        \sum_{x\in R} x
-        """
-        mathml = """<math displaystyle="true">
-                        <munder>
-                            <mo>&#x2211;<!-- ∑ --></mo>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mi>x</mi>
-                                <mo>&#x2208;<!-- ∈ --></mo>
-                                <mi>R</mi>
-                            </mrow>
-                        </munder>
-                        <mi>x</mi>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Tree(Const.under_data, [
-                    Tree('#0', [Token(Const.token_type, '&#x2211;')]),
-                    Tree('#1', [
-                        Tree(Const.expr_data, [
-                            Token(Const.token_type, 'x'),
-                            Tree(Const.in_data, []),
-                            Token(Const.token_type, 'R')
-                        ])
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>x</mi>
+                            <mo>&#x2208;<!-- ∈ --></mo>
+                            <mi>R</mi>
+                        </mrow>
+                    </munder>
+                    <mi>x</mi>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.product_data, [
+            Tree(Const.under_data, [
+                Tree('#0', [Token(Const.token_type, '&#x2211;')]),
+                Tree('#1', [
+                    Tree(Const.expr_data, [
+                        Token(Const.token_type, 'x'),
+                        Tree(Const.in_data, []),
+                        Token(Const.token_type, 'R')
                     ])
-                ]),
-                Token(Const.token_type, 'x')
-            ])
+                ])
+            ]),
+            Token(Const.token_type, 'x')
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_annotation_1(self):
-        """annotationを含むMathMLのparse
-        出典: 方程式 - Wikipedia
-        https://ja.wikipedia.org/wiki/%E6%96%B9%E7%A8%8B%E5%BC%8F
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \left(x+1\right)^{2}=x^{2}+2x+1}">
-                        <semantics>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mstyle displaystyle="true" scriptlevel="0">
-                                    <msup>
+
+def test_get_parsed_tree_annotation_1():
+    """annotationを含むMathMLのparse
+    出典: 方程式 - Wikipedia
+    https://ja.wikipedia.org/wiki/%E6%96%B9%E7%A8%8B%E5%BC%8F
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \left(x+1\right)^{2}=x^{2}+2x+1}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <msup>
+                                <mrow>
+                                    <mo>(</mo>
                                     <mrow>
-                                        <mo>(</mo>
-                                        <mrow>
-                                        <mi>x</mi>
-                                        <mo>+</mo>
-                                        <mn>1</mn>
-                                        </mrow>
-                                        <mo>)</mo>
-                                    </mrow>
-                                    <mrow class="MJX-TeXAtom-ORD">
-                                        <mn>2</mn>
-                                    </mrow>
-                                    </msup>
-                                    <mo>=</mo>
-                                    <msup>
-                                    <mi>x</mi>
-                                    <mrow class="MJX-TeXAtom-ORD">
-                                        <mn>2</mn>
-                                    </mrow>
-                                    </msup>
-                                    <mo>+</mo>
-                                    <mn>2</mn>
                                     <mi>x</mi>
                                     <mo>+</mo>
                                     <mn>1</mn>
-                                </mstyle>
-                            </mrow>
-                            <annotation encoding="application/x-tex">{\displaystyle \left(x+1\right)^{2}=x^{2}+2x+1}</annotation>
-                        </semantics>
-                    </math>"""
-        expected = Tree(Const.root_data, [
-            Tree(Const.sup_data, [
-                Tree('#0', [
-                    Tree(Const.paren_data, [
-                        Tree(Const.sum_data, [
-                            Token(Const.token_type, 'x'), Token(Const.token_type, '1')
-                        ])
+                                    </mrow>
+                                    <mo>)</mo>
+                                </mrow>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mn>2</mn>
+                                </mrow>
+                                </msup>
+                                <mo>=</mo>
+                                <msup>
+                                <mi>x</mi>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mn>2</mn>
+                                </mrow>
+                                </msup>
+                                <mo>+</mo>
+                                <mn>2</mn>
+                                <mi>x</mi>
+                                <mo>+</mo>
+                                <mn>1</mn>
+                            </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle \left(x+1\right)^{2}=x^{2}+2x+1}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(Const.root_data, [
+        Tree(Const.sup_data, [
+            Tree('#0', [
+                Tree(Const.paren_data, [
+                    Tree(Const.sum_data, [
+                        Token(Const.token_type, 'x'), Token(Const.token_type, '1')
                     ])
-                ]),
+                ])
+            ]),
+            Tree('#1', [Token(Const.token_type, '2')])
+        ]),
+        Tree(Const.equal_data, []),
+        Tree(Const.sum_data, [
+            Tree(Const.sup_data, [
+                Tree('#0', [Token(Const.token_type, 'x')]),
                 Tree('#1', [Token(Const.token_type, '2')])
             ]),
-            Tree(Const.equal_data, []),
-            Tree(Const.sum_data, [
-                Tree(Const.sup_data, [
-                    Tree('#0', [Token(Const.token_type, 'x')]),
-                    Tree('#1', [Token(Const.token_type, '2')])
-                ]),
-                Tree(Const.product_data, [
-                    Token(Const.token_type, '2'),
-                    Token(Const.token_type, 'x')
-                ]),
-                Token(Const.token_type, '1')
+            Tree(Const.product_data, [
+                Token(Const.token_type, '2'),
+                Token(Const.token_type, 'x')
+            ]),
+            Token(Const.token_type, '1')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_table_1():
+    """mtableのparse
+    https://developer.mozilla.org/ja/docs/Web/MathML/Element/mtable
+    """
+    mathml = """<math>
+                    <mi>X</mi>
+                    <mo>=</mo>
+                    <mtable frame="solid" rowlines="solid" align="axis 3">
+                        <mtr>
+                            <mtd><mi>A</mi></mtd>
+                            <mtd><mi>B</mi></mtd>
+                        </mtr>
+                        <mtr>
+                            <mtd><mi>C</mi></mtd>
+                            <mtd><mi>D</mi></mtd>
+                        </mtr>
+                        <mtr>
+                            <mtd><mi>E</mi></mtd>
+                            <mtd><mi>F</mi></mtd>
+                        </mtr>
+                    </mtable>
+                </math>"""
+    # TODO: trやtdに引数の番号を割り当てるか検討．
+    expected = Tree(Const.root_data, [
+        Token(Const.token_type, 'X'),
+        Tree(Const.equal_data, []),
+        Tree(Const.table_data, [
+            Tree(Const.tr_data, [
+                Tree(Const.td_data, [Token(Const.token_type, 'A')]),
+                Tree(Const.td_data, [Token(Const.token_type, 'B')])
+            ]),
+            Tree(Const.tr_data, [
+                Tree(Const.td_data, [Token(Const.token_type, 'C')]),
+                Tree(Const.td_data, [Token(Const.token_type, 'D')])
+            ]),
+            Tree(Const.tr_data, [
+                Tree(Const.td_data, [Token(Const.token_type, 'E')]),
+                Tree(Const.td_data, [Token(Const.token_type, 'F')])
             ])
         ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
-    def test_get_parsed_tree_table_1(self):
-        """mtableのparse
-        https://developer.mozilla.org/ja/docs/Web/MathML/Element/mtable
-        """
-        mathml = """<math>
-                        <mi>X</mi>
-                        <mo>=</mo>
-                        <mtable frame="solid" rowlines="solid" align="axis 3">
-                            <mtr>
-                                <mtd><mi>A</mi></mtd>
-                                <mtd><mi>B</mi></mtd>
-                            </mtr>
-                            <mtr>
-                                <mtd><mi>C</mi></mtd>
-                                <mtd><mi>D</mi></mtd>
-                            </mtr>
-                            <mtr>
-                                <mtd><mi>E</mi></mtd>
-                                <mtd><mi>F</mi></mtd>
-                            </mtr>
-                        </mtable>
-                    </math>"""
-        # TODO: trやtdに引数の番号を割り当てるか検討．
-        expected = Tree(Const.root_data, [
-            Token(Const.token_type, 'X'),
-            Tree(Const.equal_data, []),
-            Tree(Const.table_data, [
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'A')]),
-                    Tree(Const.td_data, [Token(Const.token_type, 'B')])
-                ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'C')]),
-                    Tree(Const.td_data, [Token(Const.token_type, 'D')])
-                ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'E')]),
-                    Tree(Const.td_data, [Token(Const.token_type, 'F')])
-                ])
-            ])
-        ])
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
 
-    def test_get_parsed_tree_table_2(self):
-        """行列のparse
-        [  1 9 -13]
-        [ 20 5  -6]
-        """
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}">
-                        <semantics>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mstyle displaystyle="true" scriptlevel="0">
-                                    <mrow class="MJX-TeXAtom-ORD">
-                                    <mrow>
-                                        <mo>[</mo>
-                                        <mtable rowspacing="4pt" columnspacing="1em">
-                                        <mtr>
-                                            <mtd>
-                                            <mn>1</mn>
-                                            </mtd>
-                                            <mtd>
-                                            <mn>9</mn>
-                                            </mtd>
-                                            <mtd>
-                                            <mo>&#x2212;<!-- − --></mo>
-                                            <mn>13</mn>
-                                            </mtd>
-                                        </mtr>
-                                        <mtr>
-                                            <mtd>
-                                            <mn>20</mn>
-                                            </mtd>
-                                            <mtd>
-                                            <mn>5</mn>
-                                            </mtd>
-                                            <mtd>
-                                            <mo>&#x2212;<!-- − --></mo>
-                                            <mn>6</mn>
-                                            </mtd>
-                                        </mtr>
-                                        </mtable>
-                                        <mo>]</mo>
-                                    </mrow>
-                                    </mrow>
-                                </mstyle>
-                            </mrow>
-                            <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
-                        </semantics>
-                    </math>"""
-        # TODO: expectedの実装．
-        expected = False
-        self.assertEqual(expected, Parser.get_parsed_tree(mathml))
+def test_get_parsed_tree_table_2():
+    """行列のparse
+    [  1 9 -13]
+    [ 20 5  -6]
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mrow>
+                                    <mo>[</mo>
+                                    <mtable rowspacing="4pt" columnspacing="1em">
+                                    <mtr>
+                                        <mtd>
+                                        <mn>1</mn>
+                                        </mtd>
+                                        <mtd>
+                                        <mn>9</mn>
+                                        </mtd>
+                                        <mtd>
+                                        <mo>&#x2212;<!-- − --></mo>
+                                        <mn>13</mn>
+                                        </mtd>
+                                    </mtr>
+                                    <mtr>
+                                        <mtd>
+                                        <mn>20</mn>
+                                        </mtd>
+                                        <mtd>
+                                        <mn>5</mn>
+                                        </mtd>
+                                        <mtd>
+                                        <mo>&#x2212;<!-- − --></mo>
+                                        <mn>6</mn>
+                                        </mtd>
+                                    </mtr>
+                                    </mtable>
+                                    <mo>]</mo>
+                                </mrow>
+                                </mrow>
+                            </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
+                    </semantics>
+                </math>"""
+    # TODO: expectedの実装．
+    expected = False
+    assert expected == Parser.get_parsed_tree(mathml)
 
 
 def test_get_parsed_tree_table_3():
@@ -1056,11 +1185,11 @@ def test_parse_eq_2():
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle y=0}">
                     <semantics>
                         <mrow class="MJX-TeXAtom-ORD">
-                        <mstyle displaystyle="true" scriptlevel="0">
-                            <mi>y</mi>
-                            <mo>=</mo>
-                            <mn>0</mn>
-                        </mstyle>
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mi>y</mi>
+                                <mo>=</mo>
+                                <mn>0</mn>
+                            </mstyle>
                         </mrow>
                         <annotation encoding="application/x-tex">{\displaystyle y=0}</annotation>
                     </semantics>
