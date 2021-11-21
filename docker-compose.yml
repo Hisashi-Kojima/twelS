@@ -38,7 +38,7 @@ services:
     restart: always
 
   db:
-    container_name: mysql_container
+    container_name: $DB_CONTAINER_NAME
     image: mysql:$MYSQL_VERSION
     ports:
       - 3306:3306
