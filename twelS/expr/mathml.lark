@@ -36,6 +36,7 @@ _more_atom: (_mul | div) atom
      | cdots
      | _mo
      | _mi_empty
+     | mtext
 
 // this priority is higher than _mo.
 cdots.-1: "<mo" _attr* ">" ("&#x22EF;" | "&#x022EF;") "</mo>"
@@ -45,6 +46,8 @@ _mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
 
 // this priority is lower than atom.
 _mi_empty.-1: "<mi" _attr* "></mi>"
+
+?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
 
 // tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
 ?func: "<msqrt" _attr* ">" sum "</msqrt>" -> sqrt
@@ -117,7 +120,6 @@ _ELEMENTS: "math"
          | "ms"  // msはmstyleなどよりも後に記述しなければ，mstyleなどが無視されてしまう．
          | "mtable"
          | "mtd"
-         | "mtext"
          | "mtr"
          | "semantics"
          | "annotation"
