@@ -20,11 +20,16 @@ pytest test_cursor.py
 gibo dump Python macOS VisualStudioCode >> .gitignore
 
 # crawl
-51236秒（約14時間10分）かかった
-追加の物理学は7883秒（約2時間11分）かかった
+CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)，メモリ16GBのWindows PCで  
+日本語のWikipediaの数学と物理学のページ合わせて7859ページを  
+シングルプロセスのスクレイピングをしたとき，  
+488526秒（5日15時間42分6秒）かかった．  
+request_bytes: 2505717 (約2.4MB)  
+response_bytes: 712761985 (約680MB)  
 
 # mysqlのバックアップ  
-mysqldump --single-transaction -u hisashi -p twels > mysql_backup.sql  
+MySQLのコンテナ内で  
+mysqldump --single-transaction -u root -p twels > mysql_backup.sql  
 
 # ローカルブランチのアップデート  
 git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME  
@@ -36,3 +41,13 @@ sudo systemctl restart docker
 
 # 開発用サーバの起動
 docker-compose -f docker-compose.dev.yml up
+
+# crawl
+docker-compose -f docker-compose.scrape.yml up  
+他のターミナルで  
+docker exec -it twels_python_1 /bin/bash  
+cd twelS/wiki_crawler  
+scrapy crawl local_math  
+
+
+mysqldump --single-transaction -u root -p twels > mysql_backup.sql  
