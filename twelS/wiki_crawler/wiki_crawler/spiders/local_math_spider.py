@@ -24,9 +24,10 @@ class LocalMathSpider(scrapy.Spider):
 
     base_path = os.path.abspath(__file__)  # local_math_spider.pyのpath
     path = os.path.normpath(os.path.join(base_path, '../../../wiki_pages'))
-    math_paths = glob.glob(f'{path}/math/*')
-    # physics_paths = glob.glob(f'{path}/physics/*')
-    start_urls = [f'file://{path}' for path in math_paths]
+    # 数学と物理学のページを登録
+    target_paths = glob.glob(f'{path}/math/*')
+    target_paths.extend(glob.glob(f'{path}/physics/*'))
+    start_urls = [f'file://{path}' for path in target_paths]
 
     count = 0
 
