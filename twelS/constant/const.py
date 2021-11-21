@@ -52,8 +52,8 @@ class Const:
     config_for_dev = {
         'user': 'hisashi',
         'password': env('MY_HISASHI_PASSWORD'),
-        'host': 'mysql_container',  # MySQLのコンテナの名前で接続
-        'database': 'twels',
+        'host': env('DB_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_DB_NAME'),
         'connection_timeout': 100  # second
     }
 
@@ -61,7 +61,7 @@ class Const:
     config_for_local = {
         'user': 'hisashi',
         'password': 'lovebasketball',
-        'database': 'twels',
+        'database': env('MY_DB_NAME'),
         'connection_timeout': 100  # second
     }
 
@@ -69,7 +69,7 @@ class Const:
     config_for_test = {
         'user': 'hisashi',
         'password': env('MY_HISASHI_PASSWORD'),
-        'database': 'twels',
+        'database': env('MY_DB_NAME'),
         'port': 3000,
         'connection_timeout': 100  # second
     }
