@@ -38,11 +38,13 @@ def test_get_description_1(response):
         # extract body data
         body_list = text_list[34:811]
     expected = ''.join(body_list)
-    assert actual == False 
+    # TODO: 修正
+    assert actual == False
 
 
 def test_get_exprs_1(response):
     """何を確かめるテストにするのかまだ決めていない．
     """
     actual = functions.get_exprs(response)
+    # TODO: 修正
     assert actual == False
