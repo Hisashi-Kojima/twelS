@@ -509,7 +509,7 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
     """
     expr_id: int = 1
     info = {
-        "uri_id": ["1", "2"], 
+        "uri_id": ["1", "2"],
         "lang": ["ja", "ja"]
         }
     cursor.execute(

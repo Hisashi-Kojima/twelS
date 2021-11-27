@@ -14,6 +14,7 @@ services:
       - ./twelS:/code/twelS
       - ./uwsgi:/code/uwsgi
       - ./.env:/code/.env  # for django-environ
+      - ./tests:/code/tests  # for test
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     ports:
       # ホスト側:コンテナ側
@@ -22,7 +23,7 @@ services:
       - app_net
 
   db:
-    container_name: mysql_container
+    container_name: $DB_CONTAINER_NAME
     image: mysql:$MYSQL_VERSION
     ports:
       - 3306:3306

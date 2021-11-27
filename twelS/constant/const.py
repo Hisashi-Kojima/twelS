@@ -2,16 +2,24 @@
 """module description
 made by Hisashi
 """
+from pathlib import Path
+import os
+
+import environ
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
+env = environ.Env()
 
 
 class Const:
     """定数をまとめたクラス．"""
 
     # 引数を2つ以上取る関数のリスト．
-    # 引数の順番の情報を持つ．
-    # TODO: この２つの変数の見直し
-    need_args = ['elements', 'frac', 'sup', 'sub', 'root', 'subsup', 'over', 'under', 'underover']
-    need_args_m = ['mfrac', 'msup', 'msub', 'mroot', 'msubsup', 'mover', 'munder', 'munderover']
+    # 引数の順番（pseudo num: #1など）の情報を持つ．
+    need_args = ['elements', 'neg', 'frac', 'sup', 'sub', 'root', 'subsup', 'over', 'under', 'underover']
 
     # rule names
     root_data = 'start'
@@ -43,9 +51,9 @@ class Const:
     # 開発用のデータベース
     config_for_dev = {
         'user': 'hisashi',
-        'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
-        'host': 'mysql_container',  # MySQLのコンテナの名前で接続
-        'database': 'twels',
+        'password': env('MY_HISASHI_PASSWORD'),
+        'host': env('DB_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_DB_NAME'),
         'connection_timeout': 100  # second
     }
 
@@ -53,15 +61,15 @@ class Const:
     config_for_local = {
         'user': 'hisashi',
         'password': 'lovebasketball',
-        'database': 'twels',
+        'database': env('MY_DB_NAME'),
         'connection_timeout': 100  # second
     }
 
     # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': 'i6auwm!LJT57GPwAzmUB@dKyZ%Hjq^',
-        'database': 'twels',
+        'password': env('MY_HISASHI_PASSWORD'),
+        'database': env('MY_DB_NAME'),
         'port': 3000,
         'connection_timeout': 100  # second
     }
