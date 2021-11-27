@@ -18,14 +18,16 @@
 {% block body %}
     <div id="main_content">
         <p id="main_form">
-            Type math here: <span id="math-field"></span>
+            <span id="math-field"></span>
             <button onclick="submit()">検索</button>
         </p>
-        <p>LaTeX of what you typed: <span id="latex"></span></p>
+        <p>LaTeX: <span id="latex"></span></p>
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
     　　     <p>{{ query }}  の検索結果</p><br>
+        {% else %}
+            入力例：E=mc^2
         {% endif %}
 
         {% for page in page_list %}
@@ -41,7 +43,6 @@
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
-            <!-- <a href="." onclick="search_next('{{query}}');return false">更に表示</a> -->
             <a href="./?q={{query}}&start={{start}}">更に表示</a>
         {% endif %}
     </div>
