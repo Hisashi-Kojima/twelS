@@ -40,12 +40,12 @@ git pull origin develop:develop
 sudo systemctl restart docker  
 
 # 開発用サーバの起動
-docker-compose -f docker-compose.dev.yml up
+docker-compose -f docker-compose.dev.yml up  
 
 # crawl
 docker-compose -f docker-compose.scrape.yml up  
 他のターミナルで  
-docker exec -it twels_python_1 /bin/bash  
+docker exec -it twels-python-1 /bin/bash  
 cd twelS/wiki_crawler  
 scrapy crawl local_math  
 
