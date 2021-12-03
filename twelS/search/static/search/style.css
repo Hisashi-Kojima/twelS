@@ -6,15 +6,73 @@ body{
     font-size: 100%; /* to work in all browsers, set a default font-size in percent for the <body> element */
     margin: 0;
     text-align: center;
+    background-color: white;
+}
+
+h3{
+    text-align: left;
+}
+
+footer{
+    float: right;
+    bottom: 0;
+    padding-right: 15px;
+    font-size: 80%;
+}
+
+footer a{
+    color: gray;
+    text-decoration: none;
+}
+footer a:hover{
+    color: black;
+    text-decoration: underline;
 }
 
 #math-field{
     font-size: 170%;
     width: 50%;
+    position: relative;
+    top: 0px;
+    padding: 4.5px;
+    border: 0px;
+    border-radius: 5px;
+    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
 }
 
 #main_form > button{
     font-size: 120%;
+    border-radius: 5px;
+    background-color: rgb(38, 132, 255);
+    color: white;
+    border: 1px solid rgb(207, 207, 207);
+    padding: 6px;
+    position: relative;
+    left: -5px;
+}
+#main_form > button:hover{
+    background-color: rgb(59, 144, 255);
+    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
+}
+#main_form > button:active{
+    background-color: rgb(53, 124, 218);
+}
+
+#main_content{
+    margin-bottom: 100px;  /* footerとかぶらないように */
+}
+
+.next_page{
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.next_page a{
+    text-decoration: none;
+    color: rgb(54, 54, 54);
+    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 .page{
@@ -22,6 +80,35 @@ body{
     margin-left: 10%;
     margin-right: 10%;
     text-align: center;
+    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
+    padding: 0px 20px 20px 20px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    max-height: 200px;
+    overflow: hidden;
+}
+
+/* 下の方を薄くしたいからこれを使う */
+/* 
+TODO: 疑似要素のheightは200pxと固定されているが，
+.pageのheightはコンテンツの量によって動的に変わる．これに関する修正．
+*/
+.page::before{
+    user-select: none;
+    pointer-events: none;
+    z-index: 100;
+    content: ' ';
+    left:12%;
+    position: absolute;
+    width:  77%;
+    height: 200px;
+    background-color: rgba(0, 128, 0, 0.555);
+    background:linear-gradient(to bottom, transparent 120px, white);
+}
+
+.page a{
+    text-decoration: none;
+    color: rgb(25, 103, 210);
 }
 
 .hl{

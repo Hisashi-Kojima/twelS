@@ -43,7 +43,9 @@
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
-            <a href="./?q={{query}}&start={{start}}">更に表示</a>
+            <div class="next_page">
+                <a href="./?q={{query}}&start={{start}}">更に表示</a>
+            </div>
         {% endif %}
     </div>
 
