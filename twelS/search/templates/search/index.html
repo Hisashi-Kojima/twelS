@@ -32,6 +32,7 @@
 
         {% for page in page_list %}
             <div class="page">
+                <div class="fade"></div>
                 <a href="{{ page.uri }}"><h3>{{ page.title }}</h3></a>
                 <p>
                     {% autoescape off %}
