@@ -93,17 +93,15 @@ footer a:hover{
 TODO: 疑似要素のheightは200pxと固定されているが，
 .pageのheightはコンテンツの量によって動的に変わる．これに関する修正．
 */
-.page::before{
+.page > .fade{
+    width: 77%;
+    height: 200px;
     user-select: none;
     pointer-events: none;
     z-index: 100;
     content: ' ';
-    left:12%;
     position: absolute;
-    width:  77%;
-    height: 200px;
-    background-color: rgba(0, 128, 0, 0.555);
-    background:linear-gradient(to bottom, transparent 120px, white);
+    background:linear-gradient(to bottom, transparent 70%, #f5f5f5);
 }
 
 .page a{
