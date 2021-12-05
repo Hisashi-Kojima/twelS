@@ -2,6 +2,8 @@
 autopep8==1.5.7
 flake8==4.0.1
 
+wheel==0.37.0
+
 # for system
 Django==3.2.8
 django-environ==0.8.1
