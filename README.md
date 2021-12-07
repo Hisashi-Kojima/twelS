@@ -1,7 +1,6 @@
-# nginxの起動
+# システムの起動
 twelsディレクトリ(rootディレクトリにて)にて  
 docker-compose up  
-"""これでdockerが起動して，nginxも起動する．"""
 
 # test
 testsディレクトリにて  
