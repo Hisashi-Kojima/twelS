@@ -1,6 +1,6 @@
 # システムの起動
 twelsディレクトリ(rootディレクトリにて)にて  
-docker-compose up  
+`docker-compose up`  
 
 # test
 testsディレクトリにて  
