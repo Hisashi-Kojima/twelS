@@ -6,8 +6,8 @@ made by Hisashi
 from lark import Transformer, Tree, Token
 from lark.visitors import Discard
 
-from constant.const import Const
-from normalizer.normalizer import Normalizer
+from twelS.constant.const import Const
+from twelS.normalizer.normalizer import Normalizer
 
 
 class MathMLTree(Transformer):

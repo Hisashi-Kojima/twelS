@@ -8,9 +8,9 @@ import traceback
 from itemadapter import ItemAdapter
 from lark import exceptions
 
-from database.cursor import Cursor
-from expr.parser import Parser
-from utils.utils import print_in_red
+from twelS.database.cursor import Cursor
+from twelS.expr.parser import Parser
+from twelS.utils.utils import print_in_red
 
 
 class Indexer:

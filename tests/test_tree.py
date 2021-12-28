@@ -3,16 +3,13 @@
 made by Hisashi
 """
 
-from add_path import add_path
-add_path()
-
 from lark import Tree, Token
 import latex2mathml.converter
 
-from constant.const import Const
+from twelS.constant.const import Const
 
-from expr.tree import MathMLTree
-from expr.parser import get_lark_parser
+from twelS.expr.tree import MathMLTree
+from twelS.expr.parser import get_lark_parser
 
 
 def test_mathmlTree_1():

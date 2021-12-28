@@ -3,10 +3,7 @@
 made by Hisashi
 """
 
-from add_path import add_path
-add_path()
-
-from search.searcher.searcher import Searcher
+from twelS.search.searcher.searcher import Searcher
 
 
 def test_search_1():

@@ -12,6 +12,7 @@ services:
       '
     volumes: 
       - ./twelS:/code/twelS
+      - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
       - ./.env:/code/.env  # for django-environ
       - ./tests:/code/tests  # for test
@@ -19,6 +20,8 @@ services:
     ports:
       # ホスト側:コンテナ側
       - 8000:8000
+    environment:
+      - PYTHONPATH=$PYTHONPATH
     networks:
       - app_net
 
