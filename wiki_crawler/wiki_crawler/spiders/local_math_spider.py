@@ -9,6 +9,7 @@ import os
 
 import scrapy
 from scrapy.http.response.html import HtmlResponse
+from scrapy.utils.httpobj import urlparse
 
 from wiki_crawler.wiki_crawler.items import Page
 from wiki_crawler.wiki_crawler.spiders import functions
@@ -41,6 +42,12 @@ class LocalMathSpider(scrapy.Spider):
             lang=functions.get_lang(response),
             exprs=functions.get_exprs(response)
         )
+
+    @staticmethod
+    def _get_domain_from_uri(uri: str) -> str:
+        """URIからドメインを抽出して返す関数．"""
+        parseResult = urlparse(uri)
+        return f'{parseResult.scheme}://{parseResult.netloc}'
 
     def _get_wiki_uri(self, response) -> str:
         """WikipediaのページからそのページのURI(URL)を取得する関数．"""
