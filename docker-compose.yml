@@ -30,9 +30,12 @@ services:
       '
     volumes: 
       - ./twelS:/code/twelS
+      - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
       - ./.env:/code/.env  # for django-environ
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
+    environment:
+      - PYTHONPATH=$PYTHONPATH
     networks:
       - app_net
     restart: always
