@@ -6,8 +6,8 @@ made by Hisashi
 import latex2mathml.converter
 from lark import Tree, Token
 
-from twelS.expr.parser import Parser
-from twelS.constant.const import Const
+from twels.expr.parser import Parser
+from twels.constant.const import Const
 
 
 def test_get_parsed_tree_add_1():

@@ -8,8 +8,8 @@ import time
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from twelS.twelS.settings import BASE_DIR
-from twelS.search.searcher.searcher import Searcher
+from twels.twelS.settings import BASE_DIR
+from twels.search.searcher.searcher import Searcher
 
 
 def index(request):

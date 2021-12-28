@@ -5,8 +5,8 @@ made by Hisashi
 
 from lark import Token
 
-from twelS.normalizer.normalizer import Normalizer
-from twelS.constant.const import Const
+from twels.normalizer.normalizer import Normalizer
+from twels.constant.const import Const
 
 
 def test_normalize_1():

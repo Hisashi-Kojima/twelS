@@ -5,8 +5,8 @@ made by Hisashi
 
 from lark import Lark
 
-from twelS.expr.collector import get_path_set
-from twelS.expr.tree import ChangeOperator, CheckEachNode
+from twels.expr.collector import get_path_set
+from twels.expr.tree import ChangeOperator, CheckEachNode
 
 
 def parse(expr: str):

@@ -9,11 +9,6 @@ from scrapy_splash import SplashRequest
 from wiki_crawler.items import Page
 from wiki_crawler.spiders import functions
 
-import sys
-from pathlib import Path
-path = Path(__file__)  # math_spider.pyのpath
-sys.path.append(str(path.parent.parent.parent.parent))  # src/twelS
-
 
 def _load_script(path: str) -> str:
     script = 'scriptが読み込まれていません．'
@@ -43,9 +38,9 @@ class MathSpider(scrapy.Spider):
     def _parse_response(self, response):
         """要素を取得してItemに追加する関数．"""
         yield Page(
-            uri = response.url,
-            title = functions.get_description(response),
-            descr = functions.get_description(response),
-            lang = functions.get_lang(response),
-            exprs = functions.get_exprs(response)
+            uri=response.url,
+            title=functions.get_description(response),
+            descr=functions.get_description(response),
+            lang=functions.get_lang(response),
+            exprs=functions.get_exprs(response)
         )

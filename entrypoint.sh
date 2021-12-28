@@ -1,5 +1,5 @@
 # migrate django
-python /code/twelS/manage.py makemigrations search
-python /code/twelS/manage.py migrate
+python /code/twels/manage.py makemigrations search
+python /code/twels/manage.py migrate
 
-python /code/twelS/manage.py collectstatic --noinput
+python /code/twels/manage.py collectstatic --noinput

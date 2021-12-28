@@ -14,7 +14,7 @@ from scrapy import signals
 from itemadapter import is_item, ItemAdapter
 import twisted
 
-from utils.utils import print_in_red
+from twels.utils.utils import print_in_red
 
 
 class WikiCrawlerSpiderMiddleware:

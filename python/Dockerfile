@@ -6,8 +6,8 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /code/
 WORKDIR /code/
 
-# DjangoProjectディレクトリを /code/twelS/ へコピーする．
-COPY ./twelS/ /code/twelS/
+# DjangoProjectディレクトリを /code/twels/ へコピーする．
+COPY ./twels/ /code/twels/
 
 # uWSGIの設定ファイルをコピー
 COPY ./uwsgi/ /code/uwsgi/

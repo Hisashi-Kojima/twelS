@@ -19,7 +19,7 @@ made by Hisashi
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
-from indexer.indexer import Indexer
+from twels.indexer.indexer import Indexer
 
 
 class WikiCrawlerPipeline:

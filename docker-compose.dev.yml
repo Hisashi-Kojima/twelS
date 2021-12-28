@@ -8,10 +8,10 @@ services:
     command: >
       sh -c '
         ./entrypoint.sh
-        python twelS/manage.py runserver 0.0.0.0:8000
+        python twels/manage.py runserver 0.0.0.0:8000
       '
     volumes: 
-      - ./twelS:/code/twelS
+      - ./twels:/code/twels
       - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
       - ./.env:/code/.env  # for django-environ
@@ -21,7 +21,7 @@ services:
       # ホスト側:コンテナ側
       - 8000:8000
     environment:
-      - PYTHONPATH=$PYTHONPATH
+      - PYTHONPATH=/code
     networks:
       - app_net
 

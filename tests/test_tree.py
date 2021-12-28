@@ -6,10 +6,9 @@ made by Hisashi
 from lark import Tree, Token
 import latex2mathml.converter
 
-from twelS.constant.const import Const
-
-from twelS.expr.tree import MathMLTree
-from twelS.expr.parser import get_lark_parser
+from twels.constant.const import Const
+from twels.expr.tree import MathMLTree
+from twels.expr.parser import get_lark_parser
 
 
 def test_mathmlTree_1():

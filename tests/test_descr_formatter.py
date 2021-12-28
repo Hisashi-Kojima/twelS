@@ -3,7 +3,7 @@
 made by Hisashi
 """
 
-from twelS.search.searcher.descr_formatter import DescrFormatter
+from twels.search.searcher.descr_formatter import DescrFormatter
 
 
 def test_excerpt_1():
