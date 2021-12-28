@@ -10,8 +10,8 @@ import os
 import scrapy
 from scrapy.http.response.html import HtmlResponse
 
-from wiki_crawler.items import Page
-from wiki_crawler.spiders import functions
+from wiki_crawler.wiki_crawler.items import Page
+from wiki_crawler.wiki_crawler.spiders import functions
 
 
 class LocalMathSpider(scrapy.Spider):
