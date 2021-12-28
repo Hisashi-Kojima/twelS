@@ -1,9 +1,6 @@
 import pytest
 from scrapy.http.response.html import HtmlResponse
 
-from add_path import add_path
-add_path()
-
 from wiki_crawler.wiki_crawler.spiders import functions
 
 

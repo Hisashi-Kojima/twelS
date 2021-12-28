@@ -3,8 +3,8 @@
 made by Hisashi
 """
 
-from database.cursor import Cursor
-from utils.utils import print_in_red
+from twelS.database.cursor import Cursor
+from twelS.utils.utils import print_in_red
 
 
 class DescrFormatter:

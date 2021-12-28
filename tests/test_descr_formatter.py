@@ -1,7 +1,9 @@
-from add_path import add_path
-add_path()
+# -*- coding: utf-8 -*-
+"""module description
+made by Hisashi
+"""
 
-from search.searcher.descr_formatter import DescrFormatter
+from twelS.search.searcher.descr_formatter import DescrFormatter
 
 
 def test_excerpt_1():

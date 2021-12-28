@@ -6,11 +6,8 @@ made by Hisashi
 import latex2mathml.converter
 from lark import Tree, Token
 
-from add_path import add_path
-add_path()
-
-from expr.parser import Parser
-from constant.const import Const
+from twelS.expr.parser import Parser
+from twelS.constant.const import Const
 
 
 def test_get_parsed_tree_add_1():

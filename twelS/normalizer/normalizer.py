@@ -5,7 +5,7 @@ made by Hisashi
 
 from lark import Token
 
-from constant.const import Const
+from twelS.constant.const import Const
 
 
 class Normalizer:

@@ -8,9 +8,9 @@ import collections
 import latex2mathml.converter
 from lark import exceptions
 
-from expr.parser import Parser
-from database.cursor import Cursor
-from utils.utils import print_in_red
+from twelS.expr.parser import Parser
+from twelS.database.cursor import Cursor
+from twelS.utils.utils import print_in_red
 from .descr_formatter import DescrFormatter
 
 

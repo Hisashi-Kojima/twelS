@@ -1,16 +1,17 @@
+# -*- coding: utf-8 -*-
+"""module description
+made by Hisashi
+"""
+
 import json
 
 from itemadapter import ItemAdapter
 
-from add_path import add_path
-add_path()
-
 from wiki_crawler.wiki_crawler.items import Page
-
-from constant.const import Const
-from database.cursor import Cursor
-from indexer.indexer import Indexer
-from expr.parser import Parser
+from twelS.constant.const import Const
+from twelS.database.cursor import Cursor
+from twelS.indexer.indexer import Indexer
+from twelS.expr.parser import Parser
 
 # Indexerのメソッド内のCursor.connect()と競合しないように，
 # ここでは@pytest.fixtureではなくCursor.connect()を用いることで，

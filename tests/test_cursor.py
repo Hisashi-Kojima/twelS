@@ -4,12 +4,9 @@ import traceback
 import pytest
 import mysql.connector
 
-from add_path import add_path
-add_path()
-
-from constant.const import Const
-from database.cursor import Cursor
-from utils.utils import print_in_red
+from twelS.constant.const import Const
+from twelS.database.cursor import Cursor
+from twelS.utils.utils import print_in_red
 
 
 @pytest.fixture

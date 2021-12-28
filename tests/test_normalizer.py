@@ -1,10 +1,12 @@
-from add_path import add_path
-add_path()
+# -*- coding: utf-8 -*-
+"""module description
+made by Hisashi
+"""
 
 from lark import Token
 
-from normalizer.normalizer import Normalizer
-from constant.const import Const
+from twelS.normalizer.normalizer import Normalizer
+from twelS.constant.const import Const
 
 
 def test_normalize_1():
