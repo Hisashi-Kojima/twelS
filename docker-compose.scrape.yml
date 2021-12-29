@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./python/Dockerfile
     volumes: 
-      - ./twelS:/code/twelS
+      - ./twels:/code/twels
       - ./wiki_crawler:/code/wiki_crawler
       - ./.env:/code/.env  # for django-environ
     networks:
@@ -23,7 +23,7 @@ services:
       MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
       MYSQL_USER: hisashi
       MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
-      PYTHONPATH: $PYTHONPATH
+      PYTHONPATH: /code
     volumes:
       - ./db/mysql:/var/lib/mysql  # 永続化
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント

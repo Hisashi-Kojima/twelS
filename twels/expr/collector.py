@@ -5,7 +5,7 @@ made by Hisashi
 
 from lark import Token, Tree
 
-from twelS.constant.const import Const
+from twels.constant.const import Const
 
 
 def get_path_set(tree: Tree) -> set:

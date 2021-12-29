@@ -7,7 +7,7 @@ import json
 from contextlib import contextmanager
 
 import mysql.connector
-from twelS.constant.const import Const
+from twels.constant.const import Const
 
 
 class Cursor:

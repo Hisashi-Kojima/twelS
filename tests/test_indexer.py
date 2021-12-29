@@ -8,10 +8,10 @@ import json
 from itemadapter import ItemAdapter
 
 from wiki_crawler.wiki_crawler.items import Page
-from twelS.constant.const import Const
-from twelS.database.cursor import Cursor
-from twelS.indexer.indexer import Indexer
-from twelS.expr.parser import Parser
+from twels.constant.const import Const
+from twels.database.cursor import Cursor
+from twels.indexer.indexer import Indexer
+from twels.expr.parser import Parser
 
 # Indexerのメソッド内のCursor.connect()と競合しないように，
 # ここでは@pytest.fixtureではなくCursor.connect()を用いることで，

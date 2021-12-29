@@ -4,9 +4,9 @@ import traceback
 import pytest
 import mysql.connector
 
-from twelS.constant.const import Const
-from twelS.database.cursor import Cursor
-from twelS.utils.utils import print_in_red
+from twels.constant.const import Const
+from twels.database.cursor import Cursor
+from twels.utils.utils import print_in_red
 
 
 @pytest.fixture

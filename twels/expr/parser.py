@@ -6,7 +6,7 @@ made by Hisashi
 import json
 import os
 
-from twelS.constant.const import Const
+from twels.constant.const import Const
 
 base_path = os.path.abspath(__file__)  # parser.pyのpath
 
@@ -20,9 +20,9 @@ from logging import getLogger, config
 
 from lark import Lark, exceptions, Tree
 
-from twelS.expr.tree import MathMLTree
-from twelS.expr.collector import get_path_set
-from twelS.utils.utils import print_in_red
+from twels.expr.tree import MathMLTree
+from twels.expr.collector import get_path_set
+from twels.utils.utils import print_in_red
 
 
 def get_lark_parser():

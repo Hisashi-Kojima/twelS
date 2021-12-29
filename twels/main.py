@@ -6,8 +6,8 @@ made by Hisashi
 from xml.etree.ElementTree import parse
 import latex2mathml.converter
 
-from twelS.expr.parser import Parser
-from twelS.search.searcher.searcher import Searcher
+from twels.expr.parser import Parser
+from twels.search.searcher.searcher import Searcher
 
 
 if __name__ == '__main__':
