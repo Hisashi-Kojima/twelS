@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS
+      # PYTHONPATH: /home/runner/work/twelS
       # incorrect values
       DJANGO_SECRET_KEY: foo
       ELASTIC_IP_ADDRESS: 127.0.0.2
