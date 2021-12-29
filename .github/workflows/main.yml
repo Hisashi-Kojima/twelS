@@ -41,6 +41,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r python/requirements.txt
       
+      - name: List Files
+        run: |
+          pwd
+          ls
+
       - name: spider test
         run: pytest tests/test_spider.py
 
