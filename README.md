@@ -11,7 +11,7 @@ testsディレクトリにて
 `pytest -s`  
 """print関数の出力が標準出力に書き出される．ただし，pytest-xdistとは共存しない．"""
 
-pytest test_cursor.py  
+`pytest test_cursor.py`  
 """test_cursor.pyのみをテストする．"""
 
 # make gitignore
