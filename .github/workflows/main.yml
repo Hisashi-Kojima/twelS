@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS
+      PYTHONPATH: /home/runner/work
       # incorrect values
       DJANGO_SECRET_KEY: foo
       ELASTIC_IP_ADDRESS: 127.0.0.2
@@ -43,7 +43,6 @@ jobs:
       
       - name: spider test
         run: pytest tests/test_spider.py
-        working-directory: ./twels
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
