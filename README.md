@@ -15,7 +15,7 @@ pytest test_cursor.py
 """test_cursor.pyのみをテストする．"""
 
 # make gitignore
-.gitignoreを作成したいディレクトリにて
+.gitignoreを作成したいディレクトリにて  
 `gibo dump Python macOS VisualStudioCode >> .gitignore`
 
 # crawl
