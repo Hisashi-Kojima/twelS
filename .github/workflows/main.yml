@@ -45,6 +45,9 @@ jobs:
         run: |
           pwd
           ls
+          echo '################'
+          cd ../
+          ls
 
       - name: spider test
         run: pytest tests/test_spider.py
