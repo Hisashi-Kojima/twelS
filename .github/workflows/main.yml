@@ -43,6 +43,7 @@ jobs:
       
       - name: spider test
         run: pytest tests/test_spider.py
+        working-directory: ./twels
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
