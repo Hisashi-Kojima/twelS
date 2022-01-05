@@ -62,8 +62,5 @@ jobs:
       - name: parser test
         run: pytest tests/test_parser.py
 
-      - name: functions.py test
-        run: pytest tests/test_functions.py
-
       - name: tree test
         run: pytest tests/test_tree.py
