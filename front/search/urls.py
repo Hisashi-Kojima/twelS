@@ -5,7 +5,7 @@ made by Hisashi
 
 from django.urls import path
 
-from .views import index, robots_txt, coming_soon, privacy_policy
+from front.search.views import index, robots_txt, coming_soon, privacy_policy
 
 urlpatterns = [
     path('', coming_soon),

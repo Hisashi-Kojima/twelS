@@ -2,15 +2,17 @@ version: '3'
 
 services:
   python:
+    container_name: $PYTHON_CONTAINER_NAME
     build:
       context: .
       dockerfile: ./python/Dockerfile
     command: >
       sh -c '
         ./entrypoint.sh
-        python twels/manage.py runserver 0.0.0.0:8000
+        python front/manage.py runserver 0.0.0.0:8000
       '
     volumes: 
+      - ./front:/code/front
       - ./twels:/code/twels
       - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi

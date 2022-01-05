@@ -7,7 +7,7 @@ RUN mkdir /code/
 WORKDIR /code/
 
 # DjangoProjectディレクトリを /code/twels/ へコピーする．
-COPY ./twels/ /code/twels/
+COPY ./front/ /code/front/
 
 # uWSGIの設定ファイルをコピー
 COPY ./uwsgi/ /code/uwsgi/

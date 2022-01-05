@@ -20,6 +20,7 @@ services:
     restart: always
 
   python:
+    container_name: $PYTHON_CONTAINER_NAME
     build:
       context: .
       dockerfile: ./python/Dockerfile
@@ -29,6 +30,7 @@ services:
         uwsgi /code/uwsgi/uwsgi.ini
       '
     volumes: 
+      - ./front:/code/front
       - ./twels:/code/twels
       - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
