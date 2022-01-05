@@ -3,7 +3,7 @@
 made by Hisashi
 """
 
-from twels.twelS.settings import DEBUG
+from front.twelS.settings import DEBUG
 
 
 def test_debug_false():
