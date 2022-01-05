@@ -28,25 +28,3 @@ def test_get_title_1(response):
     actual = functions.get_title(response)
     expected = '方程式 - Wikipedia'
     assert actual == expected
-
-
-def test_get_description_1(response):
-    """何を確かめるテストにするのかまだ決めていない．
-    """
-    actual = functions.get_description(response)
-
-    with open('test_data/方程式 - Wikipedia.html') as f:
-        text_list = f.readlines()
-        # extract body data
-        body_list = text_list[34:811]
-    expected = ''.join(body_list)
-    # TODO: 修正
-    assert actual == False
-
-
-def test_get_exprs_1(response):
-    """何を確かめるテストにするのかまだ決めていない．
-    """
-    actual = functions.get_exprs(response)
-    # TODO: 修正
-    assert actual == False
