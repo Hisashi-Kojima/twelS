@@ -3,7 +3,7 @@
 made by Hisashi
 """
 
-from twels.search.searcher.searcher import Searcher
+from twels.searcher.searcher import Searcher
 
 
 def test_search_1():
