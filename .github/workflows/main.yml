@@ -54,3 +54,12 @@ jobs:
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
+
+      - name: parser test
+        run: pytest tests/test_parser.py
+
+      - name: functions.py test
+        run: pytest tests/test_functions.py
+
+      - name: tree test
+        run: pytest tests/test_tree.py
