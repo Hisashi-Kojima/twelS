@@ -22,6 +22,8 @@ class DescrFormatter:
             descr: description.
             extracted_ids: expr_idを出現回数の降順に並べたlist.
             ex. ['1', '2']
+        Returns:
+            excerpted_descr: 抜粋された文章．
         """
         _descr = descr
         for i, expr_id in enumerate(extracted_ids):
