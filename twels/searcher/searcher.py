@@ -10,6 +10,7 @@ from lark import exceptions
 
 from twels.expr.parser import Parser
 from twels.database.cursor import Cursor
+from twels.normalizer.normalizer import Normalizer
 from twels.utils.utils import print_in_red
 from .descr_formatter import DescrFormatter
 
@@ -31,7 +32,8 @@ class Searcher:
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
         try:
-            path_set: set[str] = Parser.parse(latex2mathml.converter.convert(expr))
+            mathml = latex2mathml.converter.convert(expr)
+            path_set: set[str] = Parser.parse(Normalizer.normalize_subsup(mathml))
             sorted_expr_ids = __class__._get_expr_ids(path_set)
             extracted_ids = __class__._extract_ids_from_sorted_expr_ids(sorted_expr_ids, start)
             info = __class__._get_info(extracted_ids, start)
