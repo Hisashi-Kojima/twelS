@@ -36,3 +36,10 @@ class Normalizer:
         else:
             # 正規化できないときにはそのまま返す．
             return number
+
+    def normalize_subsup(mathml: str):
+        """<msubsup>タグを含んでいたら<munderover>タグに置き換える関数．
+        Args:
+            mathml: MathMLの文字列．
+        """
+        return mathml.replace('msubsup', 'munderover')
