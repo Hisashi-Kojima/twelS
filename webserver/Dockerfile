@@ -1,5 +1,5 @@
-FROM nginx:1.21.3
+FROM nginx:1.21.5
 
 # staticファイルはNginxのコンテナに置く必要がある．
-RUN mkdir -p /twels/static/
-COPY ./twels/static/ /twels/static
+RUN mkdir -p /front/static/
+COPY ./front/static/ /front/static
