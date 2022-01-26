@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-"""デバッグのためのモジュール
+"""module for debugging
 made by Hisashi
 """
 
-from xml.etree.ElementTree import parse
-import latex2mathml.converter
-
-from twels.expr.parser import Parser
-from twels.search.searcher.searcher import Searcher
+import os
+import subprocess
 
 
 if __name__ == '__main__':
-    result = Searcher.search('a')
-    print(result)
+    os.chdir('../wiki_crawler')
+    command = ['scrapy', 'list']
+    subprocess.run(command, check=True)
