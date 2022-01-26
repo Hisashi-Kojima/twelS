@@ -9,6 +9,8 @@ import scrapy
 
 
 class WikiSpider(scrapy.Spider):
+    """Wikipediaの数学に関するページをダウンロードするためのクラス．
+    """
     # type 'scrapy crawl wiki' to crawl.
     name = 'wiki'
 
