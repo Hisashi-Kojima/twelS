@@ -38,11 +38,19 @@ ex.
 # EC2内でのdocker daemonの再起動  
 `sudo systemctl restart docker`  
 
+# docker composeの設定の確認
+`docker compose config`  
+または  
+`docker compose -f docker-compose.yml -f docker-compose.prod.yml config`
+
+# 本番環境の起動
+`docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
+
 # 開発用サーバの起動
-`docker compose -f docker-compose.dev.yml up`  
+`docker compose -f docker-compose.yml -f docker-compose.dev.yml up`  
 
 # crawl
-`docker compose -f docker-compose.scrape.yml up`  
+`docker compose -f docker-compose.yml -f docker-compose.scrape.yml up`  
 他のターミナルで  
 `docker exec -it python_container /bin/bash`  
 `cd wiki_crawler`  
