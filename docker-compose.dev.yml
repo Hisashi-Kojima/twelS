@@ -1,44 +1,22 @@
 version: '3'
 
 services:
+  # dbはdocker-compose.ymlのものをそのまま使うため，ここには書かれていない．
   python:
-    build:
-      context: .
-      dockerfile: ./python/Dockerfile
     command: >
       sh -c '
         ./entrypoint.sh
-        python twelS/manage.py runserver 0.0.0.0:8000
+        python front/manage.py runserver 0.0.0.0:8000
       '
     volumes: 
-      - ./twelS:/code/twelS
+      - ./front:/code/front
+      - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
-      - ./.env:/code/.env  # for django-environ
       - ./tests:/code/tests  # for test
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     ports:
-      # ホスト側:コンテナ側
+      # host port : container port
       - 8000:8000
-    networks:
-      - app_net
-
-  db:
-    container_name: $DB_CONTAINER_NAME
-    image: mysql:$MYSQL_VERSION
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
-      MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
-      MYSQL_USER: hisashi
-      MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
-    volumes:
-      - ./db/mysql:/var/lib/mysql  # 永続化
-      - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
-      - ./db/logs:/var/log/mysql
-      - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
-    networks:
-      - app_net
 
   db-test:
     image: mysql:$MYSQL_VERSION
@@ -55,9 +33,3 @@ services:
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./tests/db/logs:/var/log/mysql
       - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
-    networks:
-      - app_net
-
-networks:
-  app_net:
-    driver: bridge

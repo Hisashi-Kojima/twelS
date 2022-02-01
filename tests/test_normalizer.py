@@ -1,10 +1,12 @@
-from add_path import add_path
-add_path()
+# -*- coding: utf-8 -*-
+"""module description
+made by Hisashi
+"""
 
 from lark import Token
 
-from normalizer.normalizer import Normalizer
-from constant.const import Const
+from twels.normalizer.normalizer import Normalizer
+from twels.constant.const import Const
 
 
 def test_normalize_1():
@@ -40,3 +42,43 @@ def test_normalize_5():
     num_token = Token('TOKEN', '5555')
     expected = Token(Const.token_type, '5')
     assert expected == Normalizer.normalize_num(num_token)
+
+
+def test_normalize_subsup_1():
+    """<msubsup>を<munderover>に置き換える．"""
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <msubsup>
+                            <mo>&#x02211;</mo>
+                            <mrow>
+                                <mi>i</mi>
+                                <mo>&#x0003D;</mo>
+                                <mn>1</mn>
+                            </mrow>
+                            <mi>n</mi>
+                        </msubsup>
+                        <msub>
+                            <mi>x</mi>
+                            <mi>i</mi>
+                        </msub>
+                    </mrow>
+                </math>"""
+    actual = Normalizer.normalize_subsup(mathml)
+    expected = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <munderover>
+                            <mo>&#x02211;</mo>
+                            <mrow>
+                                <mi>i</mi>
+                                <mo>&#x0003D;</mo>
+                                <mn>1</mn>
+                            </mrow>
+                            <mi>n</mi>
+                        </munderover>
+                        <msub>
+                            <mi>x</mi>
+                            <mi>i</mi>
+                        </msub>
+                    </mrow>
+                </math>"""
+    assert actual == expected

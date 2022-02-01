@@ -1,10 +1,5 @@
 {
     "python.defaultInterpreterPath": "/Users/hisashi/.pyenv/shims/python",
-    // for Pylance
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/twelS",  // project root directory
-        "${workspaceFolder}/twelS/wiki_crawler"  // Scrapy root directory
-    ],
 
     // for flake8 and autopep8
     "python.linting.flake8Enabled": true,

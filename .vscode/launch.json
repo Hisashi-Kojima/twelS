@@ -8,7 +8,7 @@
             "name": "Python: main.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/twelS/main.py",  // workspaceFolderはVSCodeで開かれたフォルダのパス．
+            "program": "${workspaceFolder}/front/main.py",  // workspaceFolderはVSCodeで開かれたフォルダのパス．
             "console": "integratedTerminal",
             "justMyCode": false  // 外部モジュールにステップインするため
         }

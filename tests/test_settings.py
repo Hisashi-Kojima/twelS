@@ -1,7 +1,9 @@
-from add_path import add_path
-add_path()
+# -*- coding: utf-8 -*-
+"""module description
+made by Hisashi
+"""
 
-from twelS.settings import DEBUG
+from front.twelS.settings import DEBUG
 
 
 def test_debug_false():

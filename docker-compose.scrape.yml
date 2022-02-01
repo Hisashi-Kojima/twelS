@@ -2,34 +2,13 @@ version: '3'
 
 services:
   python:
-    build:
-      context: .
-      dockerfile: ./python/Dockerfile
     volumes: 
-      - ./twelS:/code/twelS
-      - ./.env:/code/.env  # for django-environ
-    networks:
-      - app_net
+      - ./front:/code/front  # TODO: frontをvolumeする必要があるか確認．
+      - ./wiki_crawler:/code/wiki_crawler
     tty: true
 
   db:
-    container_name: $DB_CONTAINER_NAME
-    image: mysql:$MYSQL_VERSION
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
-      MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
-      MYSQL_USER: hisashi
-      MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
     volumes:
-      - ./db/mysql:/var/lib/mysql  # 永続化
-      - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
-      - ./db/logs:/var/log/mysql
-      - ./sqls/initdb:/docker-entrypoint-initdb.d  # mysqlディレクトリが空の場合，テーブルを作成して，データは空のままにしていたい
-    networks:
-      - app_net
-
-networks:
-  app_net:
-    driver: bridge
+      # ここだけdocker-compose.ymlを上書きする．
+      # mysqlディレクトリが空の場合，テーブルを作成して，データは空のままにしていたい．
+      - ./sqls/initdb:/docker-entrypoint-initdb.d

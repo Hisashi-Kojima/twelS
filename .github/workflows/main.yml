@@ -19,10 +19,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PYTHONPATH: /home/runner/work/twelS/twelS
+      
       # incorrect values
       DJANGO_SECRET_KEY: foo
       ELASTIC_IP_ADDRESS: 127.0.0.2
       LB_DNS_NAME: foo.com
+      MY_HISASHI_PASSWORD: foo
+      MY_DB_NAME: foo
+      DB_CONTAINER_NAME: foo
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -40,5 +45,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r python/requirements.txt
       
+      - name: List Files
+        run: |
+          pwd
+          ls
+          echo '################'
+          cd ../
+          ls
+
+      - name: spider test
+        run: pytest tests/test_spider.py
+
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
+
+      - name: parser test
+        run: pytest tests/test_parser.py
+
+      - name: tree test
+        run: pytest tests/test_tree.py

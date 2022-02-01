@@ -1,25 +1,9 @@
+# this file contains our base configuration.
 version: '3'
 
 services:
-  nginx: 
-    build:
-      context: .
-      dockerfile: ./webserver/Dockerfile
-    ports:
-      # ホスト側:コンテナ側
-      - 80:80
-      - 8000:8000
-    volumes:
-      - ./webserver/conf.d:/etc/nginx/conf.d
-      - ./webserver/logs:/var/log/nginx
-      - ./uwsgi/uwsgi_params:/etc/nginx/uwsgi_params
-      - ./socket:/run  # unix domain socket でpythonコンテナと通信するために必要
-      - ./twelS/static:/twelS/static
-    depends_on:
-      - python
-    restart: always
-
   python:
+    container_name: $PYTHON_CONTAINER_NAME
     build:
       context: .
       dockerfile: ./python/Dockerfile
@@ -28,14 +12,13 @@ services:
         ./entrypoint.sh
         uwsgi /code/uwsgi/uwsgi.ini
       '
-    volumes: 
-      - ./twelS:/code/twelS
-      - ./uwsgi:/code/uwsgi
+    volumes:
       - ./.env:/code/.env  # for django-environ
-      - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
+      - ./twels:/code/twels  # own packages
+    environment:
+      - PYTHONPATH=/code
     networks:
       - app_net
-    restart: always
 
   db:
     container_name: $DB_CONTAINER_NAME
@@ -54,7 +37,6 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net
-    restart: always
 
 networks:
   app_net:

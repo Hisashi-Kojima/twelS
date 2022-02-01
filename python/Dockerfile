@@ -1,4 +1,4 @@
-FROM python:3.10.0
+FROM python:3.10.2
 
 ENV PYTHONUNBUFFERED 1
 
@@ -6,8 +6,8 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /code/
 WORKDIR /code/
 
-# DjangoProjectディレクトリを /code/twelS/ へコピーする．
-COPY ./twelS/ /code/twelS/
+# DjangoProjectディレクトリを /code/twels/ へコピーする．
+COPY ./front/ /code/front/
 
 # uWSGIの設定ファイルをコピー
 COPY ./uwsgi/ /code/uwsgi/
