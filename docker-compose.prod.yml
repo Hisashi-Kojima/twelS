@@ -1,0 +1,32 @@
+# for a production environment.
+version: '3'
+
+services:
+  nginx: 
+    build:
+      context: .
+      dockerfile: ./webserver/Dockerfile
+    ports:
+      # host port : container port
+      - 80:80
+      - 8000:8000
+    volumes:
+      - ./webserver/conf.d:/etc/nginx/conf.d
+      - ./webserver/logs:/var/log/nginx
+      - ./uwsgi/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./socket:/run  # unix domain socket でpythonコンテナと通信するために必要
+      - ./front/static:/front/static
+    depends_on:
+      - python
+    restart: always
+
+  python:
+    volumes: 
+      - ./front:/code/front
+      - ./wiki_crawler:/code/wiki_crawler
+      - ./uwsgi:/code/uwsgi
+      - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
+    restart: always
+
+  db:
+    restart: always

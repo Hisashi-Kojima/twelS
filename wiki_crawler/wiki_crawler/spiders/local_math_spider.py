@@ -11,8 +11,8 @@ import scrapy
 from scrapy.http.response.html import HtmlResponse
 from scrapy.utils.httpobj import urlparse
 
-from wiki_crawler.wiki_crawler.items import Page
-from wiki_crawler.wiki_crawler.spiders import functions
+from ..items import Page
+from ..spiders import functions
 
 
 class LocalMathSpider(scrapy.Spider):
