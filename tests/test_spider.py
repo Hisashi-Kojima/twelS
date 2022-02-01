@@ -16,7 +16,9 @@ def test_crawl_1():
     クロール時にModuleNotFoundError: No module named 'crawler.settings'が
     出るときにはこのテストは失敗する．
     """
-    os.chdir('../wiki_crawler')  # move to scrapy root directory
+    # move to scrapy root directory.
+    # use os.path.join() because Windows use '\' and Linux use '/'.
+    os.chdir(os.path.join('..', 'wiki_crawler'))
 
     command = ['scrapy', 'list']
     subprocess.run(command, check=True)
