@@ -4,7 +4,6 @@ import traceback
 import pytest
 import mysql.connector
 
-from twels.constant.const import Const
 from twels.database.cursor import Cursor
 from twels.utils.utils import print_in_red
 
@@ -14,13 +13,13 @@ def cnx():
     """データベースに接続する関数．接続できたらちゃんとcloseしてくれる．
     """
     try:
-        cnx = mysql.connector.connect(**Const.config_for_test)
+        cnx = mysql.connector.connect(**Cursor.config_for_test)
         yield cnx
         # テスト後（成功時も失敗時も）にyield以降の処理が実行される
         cnx.rollback()  # テスト完了後にロールバックする．
         cnx.close()
     except mysql.connector.errors.InterfaceError:
-        print(Const.config_for_test)
+        print(Cursor.config_for_test)
         print_in_red(traceback.format_exc())
         yield None
 

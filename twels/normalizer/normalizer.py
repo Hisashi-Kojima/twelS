@@ -5,7 +5,7 @@ made by Hisashi
 
 from lark import Token
 
-from twels.constant.const import Const
+from twels.expr.parser_const import ParserConst
 
 
 class Normalizer:
@@ -30,9 +30,9 @@ class Normalizer:
             result = num[:index]
             # すべて同じ文字なら''になる．
             if result == '':
-                return Token(Const.token_type, last_char)
+                return Token(ParserConst.token_type, last_char)
             else:
-                return Token(Const.token_type, result)
+                return Token(ParserConst.token_type, result)
         else:
             # 正規化できないときにはそのまま返す．
             return number

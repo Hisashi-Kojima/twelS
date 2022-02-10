@@ -4,13 +4,41 @@ made by Hisashi
 """
 
 import json
+import os
 from contextlib import contextmanager
+from pathlib import Path
 
+import environ
 import mysql.connector
-from twels.constant.const import Const
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
+env = environ.Env()
 
 
 class Cursor:
+    """Databaseと接続するためのクラス．
+    """
+    # TODO: connection_timeoutの適切な値を設定する
+    # 開発用のデータベース
+    config_for_dev = {
+        'user': 'hisashi',
+        'password': env('MY_HISASHI_PASSWORD'),
+        'host': env('DB_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_DB_NAME'),
+        'connection_timeout': 100  # second
+    }
+
+    # テスト用
+    config_for_test = {
+        'user': 'hisashi',
+        'password': env('MY_HISASHI_PASSWORD'),
+        'database': env('MY_DB_NAME'),
+        'port': 3000,
+        'connection_timeout': 100  # second
+    }
 
     @staticmethod
     def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str):
@@ -308,10 +336,9 @@ class Cursor:
         """
         # enter method
         if test:
-            cnx = mysql.connector.connect(**Const.config_for_test)
+            cnx = mysql.connector.connect(**__class__.config_for_test)
         else:
-            cnx = mysql.connector.connect(**Const.config_for_dev)
-            # cnx = mysql.connector.connect(**Const.config_for_local)
+            cnx = mysql.connector.connect(**__class__.config_for_dev)
         yield cnx
         cnx.close()  # exit method
 
