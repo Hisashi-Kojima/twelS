@@ -6,9 +6,9 @@ made by Hisashi
 from lark import Tree, Token
 import latex2mathml.converter
 
-from twels.constant.const import Const
 from twels.expr.tree import MathMLTree
 from twels.expr.parser import get_lark_parser
+from twels.expr.parser_const import ParserConst
 
 
 def test_mathmlTree_1():
@@ -26,8 +26,8 @@ def test_mathmlTree_1():
                 </math>"""
     parsed_tree = parser.parse(mathml)
     cleaned_tree = MathMLTree().transform(parsed_tree)
-    expected = Tree(Const.root_data, [
-        Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
         ])
     assert expected == cleaned_tree
 
@@ -35,10 +35,10 @@ def test_mathmlTree_1():
 def test_mathmlTree_2():
     """cdotsのテスト"""
     parser = get_lark_parser()
-    mathml = latex2mathml.converter.convert('0.999\cdots ')
+    mathml = latex2mathml.converter.convert(r'0.999\cdots ')
     parsed_tree = parser.parse(mathml)
     cleaned_tree = MathMLTree().transform(parsed_tree)
-    expected = Tree(Const.root_data, [
-        Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
         ])
     assert expected == cleaned_tree

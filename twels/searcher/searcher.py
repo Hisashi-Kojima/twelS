@@ -11,7 +11,6 @@ from lark import exceptions
 from twels.expr.parser import Parser
 from twels.database.cursor import Cursor
 from twels.normalizer.normalizer import Normalizer
-from twels.utils.utils import print_in_red
 from .descr_formatter import DescrFormatter
 
 
