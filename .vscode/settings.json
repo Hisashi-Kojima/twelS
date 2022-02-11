@@ -15,4 +15,9 @@
     "workbench.editor.enablePreview": false,
 
     "git.autofetch": false,
+
+    // for irongeek.vscode-env
+    "files.associations": {
+        "*.env.test": "env",
+    }
 }
