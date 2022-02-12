@@ -14,7 +14,6 @@ services:
       - ./uwsgi:/code/uwsgi
       - ./tests:/code/tests  # for test
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
-      - ./.env.test:/code/.env.test  # for django-environ
     ports:
       # host port : container port
       - 8000:8000

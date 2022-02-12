@@ -14,6 +14,7 @@ services:
       '
     volumes:
       - ./.env:/code/.env  # for django-environ
+      - ./.env.test:/code/.env.test  # for django-environ
       - ./twels:/code/twels  # own packages
     environment:
       - PYTHONPATH=/code
