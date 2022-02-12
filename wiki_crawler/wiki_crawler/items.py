@@ -15,6 +15,6 @@ class Page(scrapy.Item):
     # define the fields for your item here like:
     uri = scrapy.Field()
     title = scrapy.Field()
-    descr = scrapy.Field()
+    snippet = scrapy.Field()
     lang = scrapy.Field()
     exprs = scrapy.Field()  # そのページにあるMathMLすべて

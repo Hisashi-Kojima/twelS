@@ -18,10 +18,10 @@ def response():
 
 # tests
 
-def test_get_description_1(response):
+def test_get_snippet_1(response):
     """何を確かめるテストにするのかまだ決めていない．
     """
-    actual = functions.get_description(response)
+    actual = functions.get_snippet(response)
 
     with open('test_data/方程式 - Wikipedia.html') as f:
         text_list = f.readlines()

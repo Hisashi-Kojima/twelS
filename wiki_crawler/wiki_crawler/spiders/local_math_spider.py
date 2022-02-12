@@ -38,7 +38,7 @@ class LocalMathSpider(scrapy.Spider):
         yield Page(
             uri=self._get_wiki_uri(response),
             title=functions.get_title(response),
-            descr=functions.get_description(response),
+            snippet=functions.get_snippet(response),
             lang=functions.get_lang(response),
             exprs=functions.get_exprs(response)
         )
