@@ -108,8 +108,8 @@ class Cursor:
             )
 
     @staticmethod
-    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, descr: str):
-        cursor.execute('INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, descr))
+    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, snippet: str):
+        cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, snippet))
 
     @staticmethod
     def insert_into_path_dictionary_values_1_2(cursor, expr_path: str, expr_id: int):
@@ -316,8 +316,8 @@ class Cursor:
         cursor.execute('UPDATE inverted_index SET info = %s WHERE expr_id = %s', (info_json, expr_id))
 
     @staticmethod
-    def update_page_set_exprs_1_title_2_descr_3_where_uri_id_4(cursor, exprs: list, title: str, descr: str, uri_id):
-        cursor.execute('UPDATE page SET exprs = %s, title = %s, descr = %s WHERE uri_id = %s', (json.dumps(exprs), title, descr, uri_id))
+    def update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, exprs: list, title: str, snippet: str, uri_id):
+        cursor.execute('UPDATE page SET exprs = %s, title = %s, snippet = %s WHERE uri_id = %s', (json.dumps(exprs), title, snippet, uri_id))
 
     @staticmethod
     def update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, expr_ids_json: str, expr_path: str):

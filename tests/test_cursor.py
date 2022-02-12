@@ -170,11 +170,11 @@ def test_delete_from_page_where_uri_id_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     select_query = 'SELECT * FROM page WHERE uri = %s'
@@ -244,14 +244,14 @@ def test_insert_into_uri_values_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     select_query = 'SELECT * FROM page WHERE uri = %s'
 
     # insert前
     cursor.execute(select_query, (uri,))
     assert cursor.fetchone() is None
-    Cursor.insert_into_page_values_1_2_3_4(cursor, uri, exprs, title, descr)
+    Cursor.insert_into_page_values_1_2_3_4(cursor, uri, exprs, title, snippet)
     # insert後
     cursor.execute(select_query, (uri,))
     result = cursor.fetchone()
@@ -259,12 +259,12 @@ def test_insert_into_uri_values_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_uri == uri
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == exprs
     assert result_title == title
-    assert result_descr == descr
+    assert result_snippet == snippet
 
 
 def test_remove_expr_id_from_path_dictionary_1(cursor):
@@ -347,11 +347,11 @@ def test_select_all_from_page_where_uri_id_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
     cursor.execute('SELECT uri_id FROM page WHERE title = %s', (title,))
     uri_id = cursor.fetchone()[0]
@@ -362,12 +362,12 @@ def test_select_all_from_page_where_uri_id_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_uri == uri
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == exprs
     assert result_title == title
-    assert result_descr == descr
+    assert result_snippet == snippet
 
 
 def test_select_all_from_path_dict_where_expr_path_1(cursor):
@@ -376,7 +376,7 @@ def test_select_all_from_path_dict_where_expr_path_1(cursor):
     expr_path = 'expr_path_1'
     expr_ids = ['1', '3']
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', 
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
         (expr_path, json.dumps(expr_ids))
         )
 
@@ -421,7 +421,7 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
         "lang": ["ja", "ja"]
         }
     cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
+        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
         (expr_id, "1", "2", "ja", "ja")
         )
     result_info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, expr_id)
@@ -434,11 +434,11 @@ def test_select_uri_id_and_exprs_from_page_where_uri_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     result = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
@@ -454,11 +454,11 @@ def test_select_uri_id_from_page_where_uri_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     result_uri_id = Cursor.select_uri_id_from_page_where_uri_1(cursor, uri)
@@ -471,11 +471,11 @@ def test_select_uri_id_from_page_where_uri_2(cursor):
     uri_1 = 'uri1'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri_1, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri_1, json.dumps(exprs), title, snippet)
         )
 
     uri_2 = 'uri2'
@@ -707,18 +707,18 @@ def test_update_inverted_index_set_info_1_where_expr_id_2(cursor):
     assert actual_info == expected_info
 
 
-def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
-    """Cursor.update_page_set_exprs_1_title_2_descr_3_where_uri_id_4()のテスト．
+def test_update_page_set_exprs_title_snippet_where_uri_id_1(cursor):
+    """Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4()のテスト．
     """
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     # insert
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     # get uri_id
@@ -729,8 +729,8 @@ def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
     # update
     new_exprs = ['new_expr1', 'new_expr2']
     new_title = 'new title'
-    new_descr = 'new description'
-    Cursor.update_page_set_exprs_1_title_2_descr_3_where_uri_id_4(cursor, new_exprs, new_title, new_descr, uri_id)
+    new_snippet = 'new snippet'
+    Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, new_exprs, new_title, new_snippet, uri_id)
 
     # check updated record
     cursor.execute('SELECT * FROM page WHERE uri_id = %s', (uri_id,))
@@ -739,10 +739,10 @@ def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_exprs == new_exprs
     assert result_title == new_title
-    assert result_descr == new_descr
+    assert result_snippet == new_snippet
 
 
 def test_update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor):
@@ -769,11 +769,11 @@ def test_uri_is_already_registered_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)',
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     # Trueの場合

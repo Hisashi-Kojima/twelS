@@ -11,7 +11,7 @@ from lark import exceptions
 from twels.expr.parser import Parser
 from twels.database.cursor import Cursor
 from twels.normalizer.normalizer import Normalizer
-from .descr_formatter import DescrFormatter
+from .snippet_formatter import SnippetFormatter
 
 
 class Searcher:
@@ -153,7 +153,7 @@ class Searcher:
                 search_result.append({
                     'uri': page_info[0],
                     'title': page_info[3],
-                    'description': DescrFormatter.format(page_info[4], extracted_ids)  # TODO: formatに時間がかかっているので，分散処理等を検討
+                    'snippet': SnippetFormatter.format(page_info[4], extracted_ids)  # TODO: formatに時間がかかっているので，分散処理等を検討
                 })
 
         return search_result

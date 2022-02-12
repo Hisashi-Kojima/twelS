@@ -157,7 +157,7 @@ def test_update_page_table_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        descr = 'descr'
+        snippet = 'snippet'
         lang = 'ja'
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
@@ -168,7 +168,7 @@ def test_update_page_table_1():
                     </math>"""
         exprs = [expr]
 
-        page_item_1 = Page(uri=uri_1, title=title, descr=descr, lang=lang, exprs=exprs)
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
 
         actual_uri_id, actual_registered_exprs = Indexer._update_page_table(page_info_1, test=True)
@@ -193,7 +193,7 @@ def test_update_page_table_2():
         # register old page info
         uri = 'uri'
         old_title = 'title'
-        old_descr = 'descr'
+        old_snippet = 'snippet'
         old_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
@@ -205,12 +205,12 @@ def test_update_page_table_2():
 
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
-                Cursor.insert_into_page_values_1_2_3_4(cursor, uri, old_exprs, old_title, old_descr)
+                Cursor.insert_into_page_values_1_2_3_4(cursor, uri, old_exprs, old_title, old_snippet)
             cnx.commit()
 
         # new page info
         new_title = 'new title'
-        new_descr = 'new descr'
+        new_snippet = 'new snippet'
         new_lang = 'en'  # lang is unnecessary for page table.
         new_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
@@ -221,7 +221,7 @@ def test_update_page_table_2():
                     </math>"""
         new_exprs = [new_expr]
 
-        page_new_item = Page(uri=uri, title=new_title, descr=new_descr, lang=new_lang, exprs=new_exprs)
+        page_new_item = Page(uri=uri, title=new_title, snippet=new_snippet, lang=new_lang, exprs=new_exprs)
         page_new_info = ItemAdapter(page_new_item)
 
         uri_id, registered_exprs = Indexer._update_page_table(page_new_info, test=True)
@@ -230,10 +230,10 @@ def test_update_page_table_2():
                 actual = Cursor.select_all_from_page_where_uri_id_1(cursor, uri_id)
 
         actual_title = actual[3]
-        actual_descr = actual[4]
+        actual_snippet = actual[4]
         assert registered_exprs == set(old_exprs)
         assert actual_title == new_title
-        assert actual_descr == new_descr
+        assert actual_snippet == new_snippet
 
     finally:
         reset_tables()
@@ -245,7 +245,7 @@ def test_update_index_and_path_table_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        descr = 'descr'
+        snippet = 'snippet'
         lang = 'ja'
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
@@ -256,7 +256,7 @@ def test_update_index_and_path_table_1():
                     </math>"""
         exprs = [expr]
 
-        page_item_1 = Page(uri=uri_1, title=title, descr=descr, lang=lang, exprs=exprs)
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
 
         # page tableへの登録
@@ -293,7 +293,7 @@ def test_update_db_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        descr = 'descr'
+        snippet = 'snippet'
         lang = 'ja'
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
@@ -304,12 +304,12 @@ def test_update_db_1():
                     </math>"""
         exprs = [expr]
 
-        page_item_1 = Page(uri=uri_1, title=title, descr=descr, lang=lang, exprs=exprs)
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
         assert Indexer.update_db(page_info_1, test=True) == True
 
         uri_2 = 'uri_2'
-        page_item_2 = Page(uri=uri_2, title=title, descr=descr, lang=lang, exprs=exprs)
+        page_item_2 = Page(uri=uri_2, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_2 = ItemAdapter(page_item_2)
         assert Indexer.update_db(page_info_2, test=True) == True
 

@@ -178,12 +178,12 @@ class Indexer:
                     # DBに登録されているuri_idとexpressionsを取得して，そのレコードの情報を新しい情報に更新する．
                     # 取得した登録されているexprsは，今回スクレイプしたexprsと比較するために使う．
                     uri_id, registered_exprs = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, page_info['uri'])
-                    Cursor.update_page_set_exprs_1_title_2_descr_3_where_uri_id_4(cursor, page_info['exprs'], page_info['title'], page_info['descr'], uri_id)
+                    Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, page_info['exprs'], page_info['title'], page_info['snippet'], uri_id)
                     cnx.commit()
                     return uri_id, registered_exprs
                 else:
                     # レコードが存在しなかったら，新しい情報を登録して，uri_idを取得する．
-                    Cursor.insert_into_page_values_1_2_3_4(cursor, page_info['uri'], page_info['exprs'], page_info['title'], page_info['descr'])
+                    Cursor.insert_into_page_values_1_2_3_4(cursor, page_info['uri'], page_info['exprs'], page_info['title'], page_info['snippet'])
                     uri_id = Cursor.select_uri_id_from_page_where_uri_1(cursor, page_info['uri'])
                     cnx.commit()
                     return uri_id, set()
