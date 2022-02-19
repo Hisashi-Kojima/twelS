@@ -4,7 +4,6 @@ made by Hisashi
 """
 
 from twels.database.cursor import Cursor
-from twels.utils.utils import print_in_red
 
 
 class SnippetFormatter:
@@ -36,7 +35,7 @@ class SnippetFormatter:
             # expr_idをもとに，数式を取得
             with Cursor.connect() as cnx:
                 with Cursor.cursor(cnx) as cursor:
-                    expr = Cursor.select_expr_from_expression_where_expr_id_1(cursor, int(expr_id))
+                    expr = Cursor.select_expr_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
             # 数式がsnippetに含まれているか確認．
             head = snippet.find(expr)
             tail = head + len(expr)

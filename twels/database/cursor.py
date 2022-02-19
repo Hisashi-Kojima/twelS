@@ -165,6 +165,15 @@ class Cursor:
         return cursor.fetchone()
 
     @staticmethod
+    def select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> str | None:
+        cursor.execute('SELECT expr FROM inverted_index WHERE expr_id = %s', (expr_id,))
+        tpl = cursor.fetchone()
+        if tpl is None:
+            return None
+        else:
+            return tpl[0]
+
+    @staticmethod
     def select_expr_id_from_inverted_index_where_expr_1(cursor, expr: str) -> int | None:
         cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
         tpl = cursor.fetchone()
