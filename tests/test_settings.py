@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 from front.twelS.settings import DEBUG

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 # Define here the models for your scraped items

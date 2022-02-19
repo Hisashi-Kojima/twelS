@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """DjangoのSECRET_KEYを再生成するモジュール．
-made by Hisashi
 """
 
 from django.core.management.utils import get_random_secret_key
