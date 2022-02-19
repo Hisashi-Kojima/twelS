@@ -37,7 +37,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2  # setup-python version is 2
         with: 
-          python-version: '3.10.0'
+          python-version: '3.10.2'
           
       - name: Update pip
         run: pip install --upgrade pip
