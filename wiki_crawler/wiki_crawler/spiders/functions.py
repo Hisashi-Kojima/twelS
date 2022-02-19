@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 import re
 
@@ -17,7 +16,7 @@ def get_title(response) -> str:
     return response.css('title::text').get()
 
 
-def get_description(response) -> str:
+def get_snippet(response) -> str:
     """ページの説明を取得する関数．
     TODO:
         登録できる文字のmax lengthを設定して，それに収まっているかを確認する．

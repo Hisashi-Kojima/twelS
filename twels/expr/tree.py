@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 from lark import Transformer, Tree, Token
-from lark.visitors import Discard
 
-from twels.constant.const import Const
+from twels.expr.parser_const import ParserConst
 from twels.normalizer.normalizer import Normalizer
 
 
@@ -41,22 +39,22 @@ class MathMLTree(Transformer):
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""
-        if len(nodes) == 1 and type(nodes[0]) is Tree and nodes[0].data == Const.expr_data:
-            return Tree(Const.root_data, nodes[0].children)
-        return Tree(Const.root_data, nodes)
+        if len(nodes) == 1 and type(nodes[0]) is Tree and nodes[0].data == ParserConst.expr_data:
+            return Tree(ParserConst.root_data, nodes[0].children)
+        return Tree(ParserConst.root_data, nodes)
 
     def sum(self, nodes: list):
         """sumの子ノードを整理する関数．
         subtractを見つけたら，次のノードの符号を逆にする．
         """
-        return _get_tree_of(Const.sum_data, nodes, 'subtract', _get_negative)
+        return _get_tree_of(ParserConst.sum_data, nodes, 'subtract', _get_negative)
 
     def product(self, nodes: list):
         """productの子ノードを整理する関数．
         divを見つけたら，次のノードの数を逆数にする．
         cdotsを見つけたら，正規化する．
         """
-        return _get_tree_of(Const.product_data, nodes, 'div', _get_reciprocal)
+        return _get_tree_of(ParserConst.product_data, nodes, 'div', _get_reciprocal)
 
     def __default__(self, data, children, meta):
         """Default funciton that is called if there is no attribute matching 'data'."""
@@ -85,11 +83,11 @@ def _get_tree_of(operator: str, nodes: list, sign: str, get_func) -> Tree:
             if type(node) is Tree:
                 if node.data == sign:
                     new_nodes.append(get_func(next(i)))
-                elif node.data == Const.cdots_data and operator == Const.product_data:
+                elif node.data == ParserConst.cdots_data and operator == ParserConst.product_data:
                     # 直前の値を取り出して正規化
                     num_token = new_nodes.pop()
                     result = Normalizer.normalize_num(num_token)
-                    new_nodes.append(Tree(Const.omit_data, [result]))
+                    new_nodes.append(Tree(ParserConst.omit_data, [result]))
                 else:
                     new_nodes.append(node)
             else:
@@ -111,11 +109,11 @@ def _get_negative(node):
             or Tree('foo', [foo])
             or Token('foo', 'foo')
     """
-    if type(node) is Tree and node.data == Const.neg_data:
+    if type(node) is Tree and node.data == ParserConst.neg_data:
         # negを外して返す．
         return node.children[0]
     else:
-        return Tree(Const.neg_data, [node])
+        return Tree(ParserConst.neg_data, [node])
 
 
 def _get_reciprocal(node) -> Tree:
@@ -123,7 +121,7 @@ def _get_reciprocal(node) -> Tree:
     Args:
         node: Tree or Token.
     """
-    if type(node) is Tree and node.data == Const.frac_data:
+    if type(node) is Tree and node.data == ParserConst.frac_data:
         # 入れ替える．
         tmp: list = node.children[0].children
         node.children[0].children = node.children[1].children
@@ -142,7 +140,7 @@ def _get_pseudo_tree(pseudo_num: int, node) -> Tree:
 def _get_pseudo_tree_wrapper(pseudo_num: int, arg) -> Tree:
     """引数がintのときにはToken()でwrapして_get_pseudo_tree()を呼ぶ関数．"""
     if type(arg) is int:
-        return _get_pseudo_tree(pseudo_num, Token(Const.token_type, str(arg)))
+        return _get_pseudo_tree(pseudo_num, Token(ParserConst.token_type, str(arg)))
     elif type(arg) is Tree or type(arg) is Token:
         return _get_pseudo_tree(pseudo_num, arg)
     else:
@@ -158,7 +156,7 @@ def _get_fraction(numerator, denominator) -> Tree:
     nodes = []
     nodes.append(_get_pseudo_tree_wrapper(0, numerator))
     nodes.append(_get_pseudo_tree_wrapper(1, denominator))
-    return Tree(Const.frac_data, nodes)
+    return Tree(ParserConst.frac_data, nodes)
 
 
 def _skip_this_node(nodes: list):

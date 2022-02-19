@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 import scrapy
@@ -39,8 +38,8 @@ class MathSpider(scrapy.Spider):
         """要素を取得してItemに追加する関数．"""
         yield Page(
             uri=response.url,
-            title=functions.get_description(response),
-            descr=functions.get_description(response),
+            title=functions.get_title(response),
+            snippet=functions.get_snippet(response),
             lang=functions.get_lang(response),
             exprs=functions.get_exprs(response)
         )

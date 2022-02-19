@@ -4,7 +4,6 @@ import traceback
 import pytest
 import mysql.connector
 
-from twels.constant.const import Const
 from twels.database.cursor import Cursor
 from twels.utils.utils import print_in_red
 
@@ -14,13 +13,13 @@ def cnx():
     """データベースに接続する関数．接続できたらちゃんとcloseしてくれる．
     """
     try:
-        cnx = mysql.connector.connect(**Const.config_for_test)
+        cnx = mysql.connector.connect(**Cursor.config_for_test)
         yield cnx
         # テスト後（成功時も失敗時も）にyield以降の処理が実行される
         cnx.rollback()  # テスト完了後にロールバックする．
         cnx.close()
     except mysql.connector.errors.InterfaceError:
-        print(Const.config_for_test)
+        print(Cursor.config_for_test)
         print_in_red(traceback.format_exc())
         yield None
 
@@ -122,43 +121,46 @@ def test_append_expr_id_if_not_registered_3(cursor):
     assert result_expr_ids == [str(expr_id)]
 
 
-def test_delete_from_expression_where_expr_id_1(cursor):
-    """Cursor.delete_from_expression_where_expr_id_1()のテスト．
+def test_delete_from_inverted_index_where_expr_1(cursor):
+    """Cursor.delete_from_inverted_index_where_expr_1()のテスト．
     """
-    expr = 'expr1'
-    cursor.execute('INSERT INTO expression (expr) VALUES (%s)', (expr,))
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
+        (expr, "1", "2", "ja", "ja")
+        )
 
-    select_query = 'SELECT * FROM expression WHERE expr = %s'
-
-    # データが登録されていることを確認．
-    cursor.execute(select_query, (expr,))
-    inserted_expr, expr_id = cursor.fetchone()
-    assert inserted_expr == expr
-    assert type(expr_id) == int
-
-    Cursor.delete_from_expression_where_expr_id_1(cursor, expr_id)
+    select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
 
     cursor.execute(select_query, (expr,))
-    assert cursor.fetchone() is None  # 削除されていることを確認．
+    assert cursor.fetchone() is not None  # データが登録されていることを確認．
+
+    Cursor.delete_from_inverted_index_where_expr_1(cursor, expr)
+
+    cursor.execute(select_query, (expr,))
+    assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
 def test_delete_from_inverted_index_where_expr_id_1(cursor):
     """Cursor.delete_from_inverted_index_where_expr_id_1()のテスト．
     """
-    expr_id = 1
+    expr = '<math>a</math>'
     cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
-        (expr_id, "1", "2", "ja", "ja")
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
+        (expr, "1", "2", "ja", "ja")
         )
 
-    select_query = 'SELECT * FROM inverted_index WHERE expr_id = %s'
+    select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
 
-    cursor.execute(select_query, (expr_id,))
-    assert cursor.fetchone() is not None  # データが登録されていることを確認．
+    cursor.execute(select_query, (expr,))
+    tpl = cursor.fetchone()
+    # データが登録されていることを確認．
+    expr_id: int = tpl[0]
+    assert tpl[1] == expr
 
     Cursor.delete_from_inverted_index_where_expr_id_1(cursor, expr_id)
 
-    cursor.execute(select_query, (expr_id,))
+    cursor.execute(select_query, (expr,))
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
@@ -168,11 +170,11 @@ def test_delete_from_page_where_uri_id_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     select_query = 'SELECT * FROM page WHERE uri = %s'
@@ -211,113 +213,28 @@ def test_delete_from_path_dictionary_where_expr_path_1(cursor):
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
-def test_insert_into_index_values_expr_id_and_info_1(cursor):
-    """Cursor.insert_into_index_values_expr_id_and_info()のテスト．
-    expr_idがない場合．
-    """
-    expr_id = 1
-    uri_id = 1
-    lang = 'ja'
-    select_query = 'SELECT * FROM inverted_index WHERE expr_id = %s'
-
-    cursor.execute(select_query, (expr_id,))
-    assert cursor.fetchone() is None  # insert前
-
-    Cursor.insert_into_index_values_expr_id_and_info(cursor, expr_id, uri_id, lang)
-    cursor.execute(select_query, (expr_id,))
-    result_expr_id, result_json_info = cursor.fetchone()
-    result_info = json.loads(result_json_info)
-
-    # DBに登録するときにinfoをリストに入れているので，ここでもリストに入れる
-    info = {"uri_id": [str(uri_id)], "lang": [lang]}
-
-    assert result_info == info
-
-
-def test_insert_into_index_values_expr_id_and_info_2(cursor):
-    """Cursor.insert_into_index_values_expr_id_and_info()のテスト．
-    expr_idがあって，infoにuri_idがない場合．そのexpr_idのinfoにuri_idとlangを追加．
-    """
-    expr_id = 1
-    append_uri_id = 3
-    append_lang = 'ja'
-
-    cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
-        (expr_id, "1", "2", "ja", "ja")
-        )
-
-    select_query = 'SELECT * FROM inverted_index WHERE expr_id = %s'
-
-    # expr_idが登録されていることを確認
-    cursor.execute(select_query, (expr_id,))
-    assert cursor.fetchone() is not None
-
-    Cursor.insert_into_index_values_expr_id_and_info(cursor, expr_id, append_uri_id, append_lang)
-
-    cursor.execute(select_query, (expr_id,))
-    result_expr_id, result_json_info = cursor.fetchone()
-    result_info = json.loads(result_json_info)
-
-    # DBに登録するときにinfoをリストに入れているので，ここでもリストに入れる
-    expected_info = {"uri_id": ["1", "2", str(append_uri_id)], "lang": ["ja", "ja", append_lang]}
-
-    assert result_info == expected_info
-
-
-def test_insert_into_index_values_expr_id_and_info_3(cursor):
-    """Cursor.insert_into_index_values_expr_id_and_info()のテスト．
-    expr_idがあって，infoにuri_idがある場合．langが更新されているか確認．
-    """
-    expr_id = 1
-    uri_id = 1
-    lang = 'en'
-
-    cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
-        (expr_id, str(uri_id), "2", "ja", "ja")
-        )
-
-    select_query = 'SELECT * FROM inverted_index WHERE expr_id = %s'
-
-    # expr_idが登録されていることを確認
-    cursor.execute(select_query, (expr_id,))
-    assert cursor.fetchone() is not None
-
-    Cursor.insert_into_index_values_expr_id_and_info(cursor, expr_id, uri_id, lang)
-
-    cursor.execute(select_query, (expr_id,))
-    result_expr_id, result_json_info = cursor.fetchone()
-    result_info = json.loads(result_json_info)
-
-    expected_info = {
-        "uri_id": [str(uri_id), "2"], 
-        "lang": [lang, "ja"]
-        }
-
-    assert result_info == expected_info
-
-
 def test_insert_into_index_values_1(cursor):
     """Cursor.insert_into_index_values_1_2()のテスト．
     """
-    expr_id: int = 1
+    expr = '<math>a</math>'
     uri_id = 1
     lang = 'ja'
     info = {"uri_id": [str(uri_id)], "lang": [lang]}
 
-    select_query = 'SELECT * FROM inverted_index WHERE expr_id = %s'
+    select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
 
-    cursor.execute(select_query, (expr_id,))
+    cursor.execute(select_query, (expr,))
     assert cursor.fetchone() is None  # insert前
 
-    Cursor.insert_into_index_values_1_2(cursor, expr_id, uri_id, lang)
-    cursor.execute(select_query, (expr_id,))
+    Cursor.insert_into_index_values_1_2(cursor, expr, uri_id, lang)
+    cursor.execute(select_query, (expr,))
     # insert後
     result = cursor.fetchone()
     result_expr_id = result[0]
-    result_info = json.loads(result[1])
-    assert result_expr_id == expr_id
+    result_expr = result[1]
+    result_info = json.loads(result[2])
+    assert type(result_expr_id) == int
+    assert result_expr == expr
     assert result_info == info
 
 
@@ -327,14 +244,14 @@ def test_insert_into_uri_values_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     select_query = 'SELECT * FROM page WHERE uri = %s'
 
     # insert前
     cursor.execute(select_query, (uri,))
     assert cursor.fetchone() is None
-    Cursor.insert_into_page_values_1_2_3_4(cursor, uri, exprs, title, descr)
+    Cursor.insert_into_page_values_1_2_3_4(cursor, uri, exprs, title, snippet)
     # insert後
     cursor.execute(select_query, (uri,))
     result = cursor.fetchone()
@@ -342,25 +259,12 @@ def test_insert_into_uri_values_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_uri == uri
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == exprs
     assert result_title == title
-    assert result_descr == descr
-
-
-def test_insert_into_expr_values_1(cursor):
-    """Cursor.insert_into_expr_values_1()のテスト．
-    """
-    expr = 'y=ax'
-    select_query = 'SELECT expr FROM expression WHERE expr = %s'
-
-    cursor.execute(select_query, (expr,))
-    assert cursor.fetchone() is None  # insert前
-    Cursor.insert_into_expr_values_1(cursor, expr)
-    cursor.execute(select_query, (expr,))
-    assert cursor.fetchone() is not None  # insert後
+    assert result_snippet == snippet
 
 
 def test_remove_expr_id_from_path_dictionary_1(cursor):
@@ -393,20 +297,20 @@ def test_remove_expr_id_from_path_dictionary_1(cursor):
 def test_remove_info_from_inverted_index_1(cursor):
     """Cursor.remove_info_from_inverted_index()のテスト．
     """
-    expr_id = 1
+    expr = '<math>a</math>'
     remove_uri_id = 2
     cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))', 
-        (expr_id, "1", str(remove_uri_id), "3", "ja", "ja", "ja")
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", str(remove_uri_id), "3", "ja", "ja", "ja")
         )
 
-    Cursor.remove_info_from_inverted_index(cursor, expr_id, remove_uri_id)
+    Cursor.remove_info_from_inverted_index(cursor, expr, remove_uri_id)
 
-    cursor.execute('SELECT info FROM inverted_index WHERE expr_id = %s', (expr_id,))
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
     result_info = json.loads(cursor.fetchone()[0])
 
     expected_info = {
-        "uri_id": ["1", "3"], 
+        "uri_id": ["1", "3"],
         "lang": ["ja", "ja"]
         }
     assert result_info == expected_info
@@ -415,20 +319,25 @@ def test_remove_info_from_inverted_index_1(cursor):
 def test_select_all_from_index_where_expr_id_1(cursor):
     """Cursor.select_all_from_index_where_expr_id_1()のテスト．
     """
-    expr_id = 1
+    expr = '<math>a</math>'
     info = {
-        "uri_id": ["1", "2"], 
+        "uri_id": ["1", "2"],
         "lang": ["ja", "ja"]
         }
     cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
-        (expr_id, "1", "2", "ja", "ja")
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
+        (expr, "1", "2", "ja", "ja")
         )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
 
     result = Cursor.select_all_from_index_where_expr_id_1(cursor, expr_id)
     result_expr_id = result[0]
-    result_info = json.loads(result[1])
+    result_info = json.loads(result[2])
+    result_expr = result[1]
     assert expr_id == result_expr_id
+    assert result_expr == expr
     assert result_info == info
 
 
@@ -438,11 +347,11 @@ def test_select_all_from_page_where_uri_id_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
     cursor.execute('SELECT uri_id FROM page WHERE title = %s', (title,))
     uri_id = cursor.fetchone()[0]
@@ -453,12 +362,12 @@ def test_select_all_from_page_where_uri_id_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_uri == uri
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == exprs
     assert result_title == title
-    assert result_descr == descr
+    assert result_snippet == snippet
 
 
 def test_select_all_from_path_dict_where_expr_path_1(cursor):
@@ -467,7 +376,7 @@ def test_select_all_from_path_dict_where_expr_path_1(cursor):
     expr_path = 'expr_path_1'
     expr_ids = ['1', '3']
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', 
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
         (expr_path, json.dumps(expr_ids))
         )
 
@@ -478,13 +387,31 @@ def test_select_all_from_path_dict_where_expr_path_1(cursor):
     assert result_expr_ids == expr_ids
 
 
-def test_select_expr_id_from_expression_where_expr_1(cursor):
-    """Cursor.select_expr_id_from_expression_where_expr_1()のテスト．
+def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
+    """Cursor.select_expr_from_inverted_index_where_expr_id_1()のテスト．
+    """
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+    assert type(expr_id) == int
+
+    actual = Cursor.select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id)
+    assert actual == expr
+
+
+def test_select_expr_id_from_inverted_index_where_expr_1(cursor):
+    """Cursor.select_expr_id_from_inverted_index_where_expr_1()のテスト．
     """
     expr = 'expr1'
-    cursor.execute('INSERT INTO expression (expr) VALUES (%s)', (expr,))
+    uri_id = 1
+    lang = 'ja'
+    Cursor.insert_into_index_values_1_2(cursor, expr, uri_id, lang)
 
-    result = Cursor.select_expr_id_from_expression_where_expr_1(cursor, expr)
+    result = Cursor.select_expr_id_from_inverted_index_where_expr_1(cursor, expr)
     assert type(result) == int
 
 
@@ -510,7 +437,7 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
         "lang": ["ja", "ja"]
         }
     cursor.execute(
-        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))', 
+        'INSERT INTO inverted_index (expr_id, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
         (expr_id, "1", "2", "ja", "ja")
         )
     result_info = Cursor.select_info_from_inverted_index_where_expr_id_1(cursor, expr_id)
@@ -523,11 +450,11 @@ def test_select_uri_id_and_exprs_from_page_where_uri_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     result = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
@@ -543,11 +470,11 @@ def test_select_uri_id_from_page_where_uri_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     result_uri_id = Cursor.select_uri_id_from_page_where_uri_1(cursor, uri)
@@ -560,16 +487,129 @@ def test_select_uri_id_from_page_where_uri_2(cursor):
     uri_1 = 'uri1'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri_1, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri_1, json.dumps(exprs), title, snippet)
         )
 
     uri_2 = 'uri2'
     result_uri_id = Cursor.select_uri_id_from_page_where_uri_1(cursor, uri_2)
     assert result_uri_id == None  # idの値は毎回異なるので，型の確認だけする
+
+
+def test_select_json_array_append_expr_ids_where_expr_path_2(cursor):
+    """Cursor.select_json_array_append_expr_ids_where_expr_path_2()のテスト．
+    """
+    expr_path = 'path1'
+    expr_ids = ['1', '2', '3', '5']
+    cursor.execute(
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
+        (expr_path, json.dumps(expr_ids))
+        )
+
+    expr_id = 10
+    Cursor.select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id, expr_path)
+
+    cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
+    actual = json.loads(cursor.fetchone()[0])
+    expected = ['1', '2', '3', '5', str(expr_id)]
+    assert actual == expected
+
+
+def test_select_json_array_append_lang_1(cursor):
+    """Cursor.select_json_array_append_lang()のテスト．"""
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+    Cursor.select_json_array_append_lang(cursor, 'en', expr_id)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual = json.loads(cursor.fetchone()[0])
+    expected = {
+        "uri_id": ["1", "2", "3"],
+        "lang": ["ja", "ja", "ja", "en"]
+        }
+    assert actual == expected
+
+
+def test_select_json_array_append_uri_id_1(cursor):
+    """Cursor.select_json_array_append_uri_id()のテスト．"""
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+    Cursor.select_json_array_append_uri_id(cursor, 100, expr_id)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual = json.loads(cursor.fetchone()[0])
+    expected = {
+        "uri_id": ["1", "2", "3", "100"],
+        "lang": ["ja", "ja", "ja"]
+        }
+    assert actual == expected
+
+
+def test_select_json_replace_info_1(cursor):
+    """Cursor.select_json_replace_info()のテスト．
+    replace lang.
+    """
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+
+    lang_path = '$.lang[1]'
+    lang = 'en'
+    Cursor.select_json_replace_info(cursor, lang_path, lang, expr_id)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual = json.loads(cursor.fetchone()[0])
+    expected = {
+        "uri_id": ["1", "2", "3"],
+        "lang": ["ja", lang, "ja"],
+        }
+    assert actual == expected
+
+
+def test_select_json_replace_info_2(cursor):
+    """Cursor.select_json_replace_info()のテスト．
+    replace uri_id.
+    """
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+
+    uri_id_path = '$.uri_id[2]'
+    uri_id = 5
+    Cursor.select_json_replace_info(cursor, uri_id_path, str(uri_id), expr_id)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual = json.loads(cursor.fetchone()[0])
+    expected = {
+        "uri_id": ["1", "2", str(uri_id)],
+        "lang": ["ja", "ja", "ja"],
+        }
+    assert actual == expected
 
 
 def test_select_json_search_expr_ids_from_path_dict_where_expr_path_1(cursor):
@@ -578,12 +618,12 @@ def test_select_json_search_expr_ids_from_path_dict_where_expr_path_1(cursor):
     expr_path = 'path1'
     expr_ids = ['1', '2', '3', '5']
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', 
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
         (expr_path, json.dumps(expr_ids))
         )
 
     cursor.execute(
-        'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', 
+        'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s',
         (expr_path,)
         )
     tmp = cursor.fetchone()[0]
@@ -594,18 +634,107 @@ def test_select_json_search_expr_ids_from_path_dict_where_expr_path_1(cursor):
     assert result_pos == "$[2]"
 
 
-def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
-    """Cursor.update_page_set_exprs_1_title_2_descr_3_where_uri_id_4()のテスト．
+def test_select_json_search_uri_id_1_from_inverted_index_where_expr_2_1(cursor):
+    """Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_2()のテスト．
+    """
+    expr = '<math>a</math>'
+    uri_id = 2
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", str(uri_id), "3", "ja", "ja", "ja")
+        )
+
+    actual = Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_2(cursor, uri_id, expr)
+    expected = '$.uri_id[1]'
+    assert actual == expected
+
+
+def test_select_json_search_uri_id_1_from_inverted_index_where_expr_id_2_1(cursor):
+    """Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_id_2()のテスト．"""
+    expr = '<math>a</math>'
+    uri_id = 2
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", str(uri_id), "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id: int = cursor.fetchone()[0]
+
+    actual = Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, uri_id, expr_id)
+    expected = '$.uri_id[1]'
+    assert actual == expected
+
+
+def test_select_json_search_uri_id_1_from_inverted_index_where_expr_id_2_2(cursor):
+    """Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_id_2()のテスト．
+    含まれないuri_idを探す処理
+    """
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id: int = cursor.fetchone()[0]
+
+    actual = Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, 10, expr_id)
+    expected = None
+    assert actual == expected
+
+
+def test_update_inverted_index_set_info_1_where_expr_2(cursor):
+    """Cursor.update_inverted_index_set_info_1_where_expr_2()のテスト．"""
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
+        (expr, "1", "2", "ja", "ja")
+        )
+    expected_info = {
+        "uri_id": ["1", "2"],
+        "lang": ["ja", "en"]
+        }
+    Cursor.update_inverted_index_set_info_1_where_expr_2(cursor, json.dumps(expected_info), expr)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual_info = json.loads(cursor.fetchone()[0])
+    assert actual_info == expected_info
+
+
+def test_update_inverted_index_set_info_1_where_expr_id_2(cursor):
+    """Cursor.update_inverted_index_set_info_1_where_expr_id_2()のテスト．"""
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s), "lang", JSON_ARRAY(%s, %s)))',
+        (expr, "1", "2", "ja", "ja")
+        )
+    expected_info = {
+        "uri_id": ["1", "2"],
+        "lang": ["ja", "en"]
+        }
+
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id: int = cursor.fetchone()[0]
+    Cursor.update_inverted_index_set_info_1_where_expr_id_2(cursor, json.dumps(expected_info), expr_id)
+
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    actual_info = json.loads(cursor.fetchone()[0])
+    assert actual_info == expected_info
+
+
+def test_update_page_set_exprs_title_snippet_where_uri_id_1(cursor):
+    """Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4()のテスト．
     """
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     # insert
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)', 
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     # get uri_id
@@ -616,8 +745,8 @@ def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
     # update
     new_exprs = ['new_expr1', 'new_expr2']
     new_title = 'new title'
-    new_descr = 'new description'
-    Cursor.update_page_set_exprs_1_title_2_descr_3_where_uri_id_4(cursor, new_exprs, new_title, new_descr, uri_id)
+    new_snippet = 'new snippet'
+    Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, new_exprs, new_title, new_snippet, uri_id)
 
     # check updated record
     cursor.execute('SELECT * FROM page WHERE uri_id = %s', (uri_id,))
@@ -626,10 +755,28 @@ def test_update_page_set_exprs_title_descr_where_uri_id_1(cursor):
     result_uri_id = result[1]
     result_exprs = json.loads(result[2])
     result_title = result[3]
-    result_descr = result[4]
+    result_snippet = result[4]
     assert result_exprs == new_exprs
     assert result_title == new_title
-    assert result_descr == new_descr
+    assert result_snippet == new_snippet
+
+
+def test_update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor):
+    """Cursor.update_path_dictionary_set_expr_ids_1_where_expr_path_2()のテスト．
+    """
+    expr_path = 'path1'
+    expr_ids = ['1', '2', '3', '5']
+    cursor.execute(
+        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
+        (expr_path, json.dumps(expr_ids))
+        )
+
+    new_expr_ids = ['2', '7', '10', '11', '100']
+    Cursor.update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, json.dumps(new_expr_ids), expr_path)
+
+    cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
+    actual = json.loads(cursor.fetchone()[0])
+    assert actual == new_expr_ids
 
 
 def test_uri_is_already_registered_1(cursor):
@@ -638,11 +785,11 @@ def test_uri_is_already_registered_1(cursor):
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = ['expr1', 'expr2']
     title = '総和 - Wikipedia'
-    descr = 'descr'
+    snippet = 'snippet'
 
     cursor.execute(
-        'INSERT INTO page (uri, exprs, title, descr) VALUES (%s, %s, %s, %s)',
-        (uri, json.dumps(exprs), title, descr)
+        'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
+        (uri, json.dumps(exprs), title, snippet)
         )
 
     # Trueの場合

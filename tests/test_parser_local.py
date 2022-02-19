@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 """this file has tests for functions not implemented.
-made by Hisashi
 """
 
-import latex2mathml.converter
-from lark import Tree, Token
-
 from twels.expr.parser import Parser
-from twels.constant.const import Const
 
 
 def test_get_parsed_tree_mspace_1():

@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+"""module description
+"""
+
+from twels.searcher.snippet_formatter import SnippetFormatter
+
+
+def test_excerpt_1():
+    """SnippetFormatter._excerpt()のテスト．
+    ハイライトされた数式とハイライトされていない数式を含む場合．
+    先頭に140文字がある．
+    """
+    snippet =   'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
+                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
+                    '<span class="hl">'\
+                    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">'\
+                    '<mrow>'\
+                    '<mn>1</mn>'\
+                    '<mo>&#x0002B;</mo>'\
+                    '<mn>2</mn>'\
+                    '</mrow>'\
+                    '</math>'\
+                    '</span>'\
+                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
+                    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">'\
+                    '<mrow>'\
+                    '<mn>3</mn>'\
+                    '<mo>&#x0002B;</mo>'\
+                    '<mn>4</mn>'\
+                    '</mrow>'\
+                    '</math>'\
+                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'
+
+    head = snippet.find('<span class="hl">')
+    tail = snippet.find('</span>') + len('</span>')
+    result = SnippetFormatter._excerpt(snippet, head, tail)
+    assert True == result  # デバッグ用

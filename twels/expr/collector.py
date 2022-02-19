@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 from lark import Token, Tree
-
-from twels.constant.const import Const
 
 
 def get_path_set(tree: Tree) -> set:
@@ -69,7 +66,11 @@ def _skip_some_paths(node_data: str, fix: list[str], child_tmp: list[str]):
         fix: 確定したPath Set．
         child_tmp: 子ノードから得られたPath Set．登録したければfixに追加する．
     """
+    # 引数を2つ以上取る関数のリスト．
+    # 引数の順番（pseudo num: #1など）の情報を持つ．
+    need_args = ['elements', 'neg', 'frac', 'sup', 'sub', 'root', 'subsup', 'over', 'under', 'underover']
+
     # 2/negのとき，2で止まったら困る．
     # 1/#1/fracのとき，1/#1で止まったら困る．
-    if node_data not in Const.need_args:
+    if node_data not in need_args:
         fix.extend(child_tmp)

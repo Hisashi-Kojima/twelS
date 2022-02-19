@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 import latex2mathml.converter
 from lark import Tree, Token
 
 from twels.expr.parser import Parser
-from twels.constant.const import Const
+from twels.expr.parser_const import ParserConst
 
 
 def test_get_parsed_tree_add_1():
@@ -21,9 +20,9 @@ def test_get_parsed_tree_add_1():
                         <mn>2</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sum_data, [
-            Token(Const.token_type, '1'), Token(Const.token_type, '2')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sum_data, [
+            Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2')
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -42,9 +41,9 @@ def test_get_parsed_tree_add_2():
                         <mi>a</mi>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sum_data, [
-            Token(Const.token_type, '1'), Token(Const.token_type, '2'), Token(Const.token_type, 'a')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sum_data, [
+            Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, 'a')
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -60,8 +59,8 @@ def test_get_parsed_tree_add_3():
                         <mn>7</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Token(Const.token_type, '7')
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '7')
     ])
     assert expected == Parser.get_parsed_tree(mathml)
 
@@ -77,9 +76,9 @@ def test_get_parsed_tree_subtract_1():
                         <mn>2</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sum_data, [
-            Token(Const.token_type, '3'), Tree(Const.neg_data, [Token(Const.token_type, '2')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sum_data, [
+            Token(ParserConst.token_type, '3'), Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '2')])
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -95,8 +94,8 @@ def test_get_parsed_tree_subtract_2():
                         <mn>5</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.neg_data, [Token(Const.token_type, '5')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '5')])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
 
@@ -112,9 +111,9 @@ def test_get_parsed_tree_mul_1():
                         <mn>5</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Token(Const.token_type, '2'), Token(Const.token_type, '5')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -131,9 +130,9 @@ def test_get_parsed_tree_mul_2():
                         <mi>c</mi>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Token(Const.token_type, 'a'), Token(Const.token_type, 'b'), Token(Const.token_type, 'c')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'a'), Token(ParserConst.token_type, 'b'), Token(ParserConst.token_type, 'c')
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -155,10 +154,10 @@ def test_get_parsed_tree_frac_1():
                         </mfrac>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.frac_data, [
-            Tree('#0', [Token(Const.token_type, '2')]),
-            Tree('#1', [Token(Const.token_type, '3')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.frac_data, [
+            Tree('#0', [Token(ParserConst.token_type, '2')]),
+            Tree('#1', [Token(ParserConst.token_type, '3')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -187,20 +186,20 @@ def test_get_parsed_tree_frac_2():
                         </msup>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Tree(Const.frac_data, [
-                Tree('#0', [Token(Const.token_type, 'd')]),
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.frac_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'd')]),
                 Tree('#1', [
-                    Tree(Const.product_data, [
-                        Token(Const.token_type, 'd'),
-                        Token(Const.token_type, 'x')
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, 'd'),
+                        Token(ParserConst.token_type, 'x')
                     ])
                 ])
             ]),
-            Tree(Const.sup_data, [
-                Tree('#0', [Token(Const.token_type, 'e')]),
-                Tree('#1', [Token(Const.token_type, 'x')])
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'e')]),
+                Tree('#1', [Token(ParserConst.token_type, 'x')])
             ])
         ])
     ])
@@ -243,30 +242,30 @@ def test_get_parsed_tree_frac_3():
                         <annotation encoding="application/x-tex">{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Tree(Const.frac_data, [
-                Tree('#0', [Token(Const.token_type, 'd')]),
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.frac_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'd')]),
                 Tree('#1', [
-                    Tree(Const.product_data, [
-                        Token(Const.token_type, 'd'),
-                        Token(Const.token_type, 'x')
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, 'd'),
+                        Token(ParserConst.token_type, 'x')
                     ])
                 ])
             ]),
-            Tree(Const.sup_data, [
-                Tree('#0', [Token(Const.token_type, 'e')]),
-                Tree('#1', [Token(Const.token_type, 'x')])
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'e')]),
+                Tree('#1', [Token(ParserConst.token_type, 'x')])
             ])
         ]),
-        Tree(Const.equal_data, []),
-        Tree(Const.product_data, [
-            Tree(Const.sup_data, [
-                Tree('#0', [Token(Const.token_type, 'e')]),
-                Tree('#1', [Token(Const.token_type, 'x')])
+        Tree(ParserConst.equal_data, []),
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'e')]),
+                Tree('#1', [Token(ParserConst.token_type, 'x')])
             ]),
             # TODO: 式の最後にある','は無視するように修正
-            Token(Const.token_type, ',')
+            Token(ParserConst.token_type, ',')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -283,11 +282,11 @@ def test_get_parsed_tree_div_1():
                         <mn>4</mn>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Token(Const.token_type, '3'), Tree(Const.frac_data, [
-                Tree('#0', [Token(Const.token_type, '1')]),
-                Tree('#1', [Token(Const.token_type, '4')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '3'), Tree(ParserConst.frac_data, [
+                Tree('#0', [Token(ParserConst.token_type, '1')]),
+                Tree('#1', [Token(ParserConst.token_type, '4')])
             ])
         ])
     ])
@@ -306,11 +305,11 @@ def test_get_parsed_tree_eq_1():
                         <mi>x</mi>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Token(Const.token_type, 'y'),
-        Tree(Const.equal_data, []),
-        Tree(Const.product_data, [
-            Token(Const.token_type, 'a'), Token(Const.token_type, 'x')
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'y'),
+        Tree(ParserConst.equal_data, []),
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'a'), Token(ParserConst.token_type, 'x')
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -329,12 +328,12 @@ def test_get_parsed_tree_eq_2():
                         <mi>c</mi>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Token(Const.token_type, 'a'),
-        Tree(Const.equal_data, []),
-        Token(Const.token_type, 'b'),
-        Tree(Const.equal_data, []),
-        Token(Const.token_type, 'c')
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'a'),
+        Tree(ParserConst.equal_data, []),
+        Token(ParserConst.token_type, 'b'),
+        Tree(ParserConst.equal_data, []),
+        Token(ParserConst.token_type, 'c')
     ])
     assert expected == Parser.get_parsed_tree(mathml)
 
@@ -354,11 +353,11 @@ def test_get_parsed_tree_paren_1():
                         <mo stretchy="false">&#x00029;</mo>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Token(Const.token_type, '3'), Tree(Const.paren_data, [
-                Tree(Const.sum_data, [
-                    Token(Const.token_type, '4'), Token(Const.token_type, '5')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '3'), Tree(ParserConst.paren_data, [
+                Tree(ParserConst.sum_data, [
+                    Token(ParserConst.token_type, '4'), Token(ParserConst.token_type, '5')
                 ])
             ])
         ])
@@ -380,10 +379,10 @@ def test_get_parsed_tree_sup_1():
                         </msup>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sup_data, [
-            Tree('#0', [Token(Const.token_type, 'e')]),
-            Tree('#1', [Token(Const.token_type, 'x')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sup_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'e')]),
+            Tree('#1', [Token(ParserConst.token_type, 'x')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -403,10 +402,10 @@ def test_get_parsed_tree_sub_1():
                         </msub>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sub_data, [
-            Tree('#0', [Token(Const.token_type, 'x')]),
-            Tree('#1', [Token(Const.token_type, 'i')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sub_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'x')]),
+            Tree('#1', [Token(ParserConst.token_type, 'i')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -429,11 +428,11 @@ def test_get_parsed_tree_subsup_1():
                         </msubsup>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.subsup_data, [
-            Tree('#0', [Token(Const.token_type, 'x')]),
-            Tree('#1', [Token(Const.token_type, 'i')]),
-            Tree('#2', [Token(Const.token_type, '2')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.subsup_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'x')]),
+            Tree('#1', [Token(ParserConst.token_type, 'i')]),
+            Tree('#2', [Token(ParserConst.token_type, '2')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -452,9 +451,9 @@ def test_get_parsed_tree_sqrt_1():
                         </msqrt>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sqrt_data, [
-            Token(Const.token_type, '3')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sqrt_data, [
+            Token(ParserConst.token_type, '3')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -476,10 +475,10 @@ def test_get_parsed_tree_root_1():
                         </mroot>
                     </mrow>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.func_root_data, [
-            Tree('#0', [Token(Const.token_type, '5')]),
-            Tree('#1', [Token(Const.token_type, '3')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.func_root_data, [
+            Tree('#0', [Token(ParserConst.token_type, '5')]),
+            Tree('#1', [Token(ParserConst.token_type, '3')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -501,14 +500,14 @@ def test_get_parsed_tree_over_1():
                         <mo> &#x23DE; <!--TOP CURLY BRACKET--> </mo>
                     </mover>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.over_data, [
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.over_data, [
             Tree('#0', [
-                Tree(Const.sum_data, [
-                    Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
+                Tree(ParserConst.sum_data, [
+                    Token(ParserConst.token_type, 'x'), Token(ParserConst.token_type, 'y'), Token(ParserConst.token_type, 'z')
                 ])
             ]),
-            Tree('#1', [Token(Const.token_type, '&#x23DE;')])
+            Tree('#1', [Token(ParserConst.token_type, '&#x23DE;')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -530,14 +529,14 @@ def test_get_parsed_tree_under_1():
                         <mo> &#x23DF; <!--BOTTOM CURLY BRACKET--> </mo>
                     </munder>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.under_data, [
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.under_data, [
             Tree('#0', [
-                Tree(Const.sum_data, [
-                    Token(Const.token_type, 'x'), Token(Const.token_type, 'y'), Token(Const.token_type, 'z')
+                Tree(ParserConst.sum_data, [
+                    Token(ParserConst.token_type, 'x'), Token(ParserConst.token_type, 'y'), Token(ParserConst.token_type, 'z')
                 ])
             ]),
-            Tree('#1', [Token(Const.token_type, '&#x23DF;')])
+            Tree('#1', [Token(ParserConst.token_type, '&#x23DF;')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -554,11 +553,11 @@ def test_get_parsed_tree_underover_1():
                         <mi> &#x221E; <!--INFINITY--> </mi>
                     </munderover>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.underover_data, [
-            Tree('#0', [Token(Const.token_type, '&#x222B;')]),
-            Tree('#1', [Token(Const.token_type, '0')]),
-            Tree('#2', [Token(Const.token_type, '&#x221E;')])
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.underover_data, [
+            Tree('#0', [Token(ParserConst.token_type, '&#x222B;')]),
+            Tree('#1', [Token(ParserConst.token_type, '0')]),
+            Tree('#2', [Token(ParserConst.token_type, '&#x221E;')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -587,20 +586,20 @@ def test_get_parsed_tree_summation_1():
                         </mrow>
                     </msub>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Tree(Const.underover_data, [
-                Tree('#0', [Token(Const.token_type, '&#x2211;')]),
-                Tree('#1', [Tree(Const.expr_data, [
-                    Token(Const.token_type, 'i'),
-                    Tree(Const.equal_data, []),
-                    Token(Const.token_type, '1')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.underover_data, [
+                Tree('#0', [Token(ParserConst.token_type, '&#x2211;')]),
+                Tree('#1', [Tree(ParserConst.expr_data, [
+                    Token(ParserConst.token_type, 'i'),
+                    Tree(ParserConst.equal_data, []),
+                    Token(ParserConst.token_type, '1')
                 ])]),
-                Tree('#2', [Token(Const.token_type, 'n')])
+                Tree('#2', [Token(ParserConst.token_type, 'n')])
             ]),
-            Tree(Const.sub_data, [
-                Tree('#0', [Token(Const.token_type, 'x')]),
-                Tree('#1', [Token(Const.token_type, 'i')])
+            Tree(ParserConst.sub_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                Tree('#1', [Token(ParserConst.token_type, 'i')])
             ])
         ])
     ])
@@ -615,10 +614,10 @@ def test_get_parsed_tree_summation_2():
                     <mo>&#x2211;<!-- ∑ --></mo>
                     <mi>R</mi>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Token(Const.token_type, '&#x2211;'),
-            Token(Const.token_type, 'R')
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '&#x2211;'),
+            Token(ParserConst.token_type, 'R')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -639,19 +638,19 @@ def test_get_parsed_tree_summation_3():
                     </munder>
                     <mi>x</mi>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.product_data, [
-            Tree(Const.under_data, [
-                Tree('#0', [Token(Const.token_type, '&#x2211;')]),
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.under_data, [
+                Tree('#0', [Token(ParserConst.token_type, '&#x2211;')]),
                 Tree('#1', [
-                    Tree(Const.expr_data, [
-                        Token(Const.token_type, 'x'),
-                        Tree(Const.in_data, []),
-                        Token(Const.token_type, 'R')
+                    Tree(ParserConst.expr_data, [
+                        Token(ParserConst.token_type, 'x'),
+                        Tree(ParserConst.in_data, []),
+                        Token(ParserConst.token_type, 'R')
                     ])
                 ])
             ]),
-            Token(Const.token_type, 'x')
+            Token(ParserConst.token_type, 'x')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -697,28 +696,28 @@ def test_get_parsed_tree_annotation_1():
                         <annotation encoding="application/x-tex">{\displaystyle \left(x+1\right)^{2}=x^{2}+2x+1}</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-        Tree(Const.sup_data, [
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sup_data, [
             Tree('#0', [
-                Tree(Const.paren_data, [
-                    Tree(Const.sum_data, [
-                        Token(Const.token_type, 'x'), Token(Const.token_type, '1')
+                Tree(ParserConst.paren_data, [
+                    Tree(ParserConst.sum_data, [
+                        Token(ParserConst.token_type, 'x'), Token(ParserConst.token_type, '1')
                     ])
                 ])
             ]),
-            Tree('#1', [Token(Const.token_type, '2')])
+            Tree('#1', [Token(ParserConst.token_type, '2')])
         ]),
-        Tree(Const.equal_data, []),
-        Tree(Const.sum_data, [
-            Tree(Const.sup_data, [
-                Tree('#0', [Token(Const.token_type, 'x')]),
-                Tree('#1', [Token(Const.token_type, '2')])
+        Tree(ParserConst.equal_data, []),
+        Tree(ParserConst.sum_data, [
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                Tree('#1', [Token(ParserConst.token_type, '2')])
             ]),
-            Tree(Const.product_data, [
-                Token(Const.token_type, '2'),
-                Token(Const.token_type, 'x')
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, '2'),
+                Token(ParserConst.token_type, 'x')
             ]),
-            Token(Const.token_type, '1')
+            Token(ParserConst.token_type, '1')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -747,21 +746,21 @@ def test_get_parsed_tree_table_1():
                     </mtable>
                 </math>"""
     # TODO: trやtdに引数の番号を割り当てるか検討．
-    expected = Tree(Const.root_data, [
-        Token(Const.token_type, 'X'),
-        Tree(Const.equal_data, []),
-        Tree(Const.table_data, [
-            Tree(Const.tr_data, [
-                Tree(Const.td_data, [Token(Const.token_type, 'A')]),
-                Tree(Const.td_data, [Token(Const.token_type, 'B')])
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'X'),
+        Tree(ParserConst.equal_data, []),
+        Tree(ParserConst.table_data, [
+            Tree(ParserConst.tr_data, [
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'A')]),
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'B')])
             ]),
-            Tree(Const.tr_data, [
-                Tree(Const.td_data, [Token(Const.token_type, 'C')]),
-                Tree(Const.td_data, [Token(Const.token_type, 'D')])
+            Tree(ParserConst.tr_data, [
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'C')]),
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'D')])
             ]),
-            Tree(Const.tr_data, [
-                Tree(Const.td_data, [Token(Const.token_type, 'E')]),
-                Tree(Const.td_data, [Token(Const.token_type, 'F')])
+            Tree(ParserConst.tr_data, [
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'E')]),
+                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'F')])
             ])
         ])
     ])
@@ -796,15 +795,15 @@ def test_get_parsed_tree_table_3():
                         <annotation encoding="application/x-tex">{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-            Tree(Const.table_data, [
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.table_data, [
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                         ])
                     ])
                 ])
@@ -832,11 +831,11 @@ def test_get_parsed_tree_mtext_1():
                         <annotation encoding="application/x-tex">{\displaystyle {\text{inv}}(A)=\#\{(A_{i},A_{j})\mid i&lt;j{\text{ and }}A_{i}&gt;A_{j}\}}</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-            Tree(Const.product_data, [
-                Token(Const.token_type, 'inv'),
-                Tree(Const.paren_data, [
-                    Token(Const.token_type, 'A')
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'inv'),
+                Tree(ParserConst.paren_data, [
+                    Token(ParserConst.token_type, 'A')
                 ])
             ])
         ])
@@ -857,8 +856,8 @@ def test_get_parsed_tree_cdots_1():
                         </mrow>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-            Tree(Const.omit_data, [Token(Const.token_type, '0.9')]),
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')]),
         ])
     assert expected == Parser.get_parsed_tree(mathml)
 
@@ -896,21 +895,21 @@ def test_get_parsed_tree_cdots_2():
                         <annotation encoding="application/x-tex">{\displaystyle 0.999\cdots =0.9+0.09+\cdots +9\cdot 10^{-n}+\cdots }</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-            Tree(Const.omit_data, [Token(Const.token_type, '0.9')]),
-            Tree(Const.equal_data, []),
-            Tree(Const.sum_data, [
-                Token(Const.token_type, '0.9'),
-                Token(Const.token_type, '0.09'),
-                Tree(Const.cdots_data, []),
-                Tree(Const.product_data, [
-                    Token(Const.token_type, '9'),
-                    Tree(Const.sup_data, [
-                        Tree('#0', [Token(Const.token_type, '10')]),
-                        Tree('#1', [Tree(Const.neg_data, [Token(Const.token_type, 'n')])])
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')]),
+            Tree(ParserConst.equal_data, []),
+            Tree(ParserConst.sum_data, [
+                Token(ParserConst.token_type, '0.9'),
+                Token(ParserConst.token_type, '0.09'),
+                Tree(ParserConst.cdots_data, []),
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, '9'),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '10')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [Token(ParserConst.token_type, 'n')])])
                     ])
                 ]),
-                Tree(Const.cdots_data, []),
+                Tree(ParserConst.cdots_data, []),
             ])
         ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -994,73 +993,73 @@ def test_get_parsed_tree_cdots_3():
                         <annotation encoding="application/x-tex">{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}</annotation>
                     </semantics>
                 </math>"""
-    expected = Tree(Const.root_data, [
-            Tree(Const.table_data, [
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.table_data, [
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                         ])
                     ])
                 ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Tree(Const.product_data, [
-                        Token(Const.token_type, '10'),
-                        Token(Const.token_type, 'c')
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, '10'),
+                        Token(ParserConst.token_type, 'c')
                     ])]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Tree(Const.omit_data, [Token(Const.token_type, '9.9')])
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')])
                         ])
                     ])
                 ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Tree(Const.sum_data, [
-                        Tree(Const.product_data, [
-                            Token(Const.token_type, '10'),
-                            Token(Const.token_type, 'c')
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [Tree(ParserConst.sum_data, [
+                        Tree(ParserConst.product_data, [
+                            Token(ParserConst.token_type, '10'),
+                            Token(ParserConst.token_type, 'c')
                         ]),
-                        Tree(Const.neg_data, [Token(Const.token_type, 'c')])
+                        Tree(ParserConst.neg_data, [Token(ParserConst.token_type, 'c')])
                     ])]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Tree(Const.sum_data, [
-                                Tree(Const.omit_data, [Token(Const.token_type, '9.9')]),
-                                Tree(Const.neg_data, [
-                                    Tree(Const.omit_data, [Token(Const.token_type, '0.9')])
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Tree(ParserConst.sum_data, [
+                                Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')]),
+                                Tree(ParserConst.neg_data, [
+                                    Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                                 ])
                             ])
                         ])
                     ])
                 ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [
-                        Tree(Const.product_data, [
-                            Token(Const.token_type, '9'),
-                            Token(Const.token_type, 'c')
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.product_data, [
+                            Token(ParserConst.token_type, '9'),
+                            Token(ParserConst.token_type, 'c')
                         ])]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Token(Const.token_type, '9')
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Token(ParserConst.token_type, '9')
                         ])
                     ])
                 ]),
-                Tree(Const.tr_data, [
-                    Tree(Const.td_data, [Token(Const.token_type, 'c')]),
-                    Tree(Const.td_data, [
-                        Tree(Const.expr_data, [
-                            Tree(Const.atom_data, []),
-                            Tree(Const.equal_data, []),
-                            Token(Const.token_type, '1')
+                Tree(ParserConst.tr_data, [
+                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
+                    Tree(ParserConst.td_data, [
+                        Tree(ParserConst.expr_data, [
+                            Tree(ParserConst.atom_data, []),
+                            Tree(ParserConst.equal_data, []),
+                            Token(ParserConst.token_type, '1')
                         ])
                     ])
                 ])
@@ -1074,7 +1073,7 @@ def test_parse_num_1():
     7
     """
     actual = Parser.parse(latex2mathml.converter.convert('7'))
-    root = Const.root_data
+    root = ParserConst.root_data
     expected = {'7', f'7/{root}'}
     assert actual == expected
 
@@ -1084,8 +1083,8 @@ def test_parse_add_1():
     1+2
     """
     actual = Parser.parse(latex2mathml.converter.convert('1+2'))
-    sum_ = Const.sum_data
-    root = Const.root_data
+    sum_ = ParserConst.sum_data
+    root = ParserConst.root_data
     expected = {
         '1', f'1/{sum_}', f'1/{sum_}/{root}',
         '2', f'2/{sum_}', f'2/{sum_}/{root}'
@@ -1098,9 +1097,9 @@ def test_parse_subtract_1():
     3-2
     """
     actual = Parser.parse(latex2mathml.converter.convert('3-2'))
-    sum_ = Const.sum_data
-    root = Const.root_data
-    neg = Const.neg_data
+    sum_ = ParserConst.sum_data
+    root = ParserConst.root_data
+    neg = ParserConst.neg_data
     expected = {
         '3', f'3/{sum_}', f'3/{sum_}/{root}',
         f'2/{neg}', f'2/{neg}/{sum_}', f'2/{neg}/{sum_}/{root}'
@@ -1113,8 +1112,8 @@ def test_parse_product_1():
     4*5
     """
     actual = Parser.parse(latex2mathml.converter.convert('4*5'))
-    product = Const.product_data
-    root = Const.root_data
+    product = ParserConst.product_data
+    root = ParserConst.root_data
     expected = {
         '4', f'4/{product}', f'4/{product}/{root}',
         '5', f'5/{product}', f'5/{product}/{root}'
@@ -1128,9 +1127,9 @@ def test_parse_div_1():
     これは3*(1/2)として処理する．
     """
     actual = Parser.parse(latex2mathml.converter.convert('3/2'))
-    product = Const.product_data
-    root = Const.root_data
-    frac = Const.frac_data
+    product = ParserConst.product_data
+    root = ParserConst.root_data
+    frac = ParserConst.frac_data
     expected = {
         '3', f'3/{product}', f'3/{product}/{root}',
         '1', f'1/#0/{frac}', f'1/#0/{frac}/{product}', f'1/#0/{frac}/{product}/{root}',
@@ -1144,8 +1143,8 @@ def test_parse_eq_1():
     a=b
     """
     actual = Parser.parse(latex2mathml.converter.convert('a=b'))
-    root = Const.root_data
-    equal = Const.equal_data
+    root = ParserConst.root_data
+    equal = ParserConst.equal_data
     expected = {
         'a', f'a/{equal}', f'a/{equal}/{root}',
         'b', f'b/{equal}', f'b/{equal}/{root}'
@@ -1171,8 +1170,8 @@ def test_parse_eq_2():
                     </semantics>
                 </math>"""
     actual = Parser.parse(mathml)
-    root = Const.root_data
-    equal = Const.equal_data
+    root = ParserConst.root_data
+    equal = ParserConst.equal_data
     expected = {
         'y', f'y/{equal}', f'y/{equal}/{root}',
         '0', f'0/{equal}', f'0/{equal}/{root}'
@@ -1185,28 +1184,28 @@ def test_parse_eq_3():
     """
     actual = Parser.parse(latex2mathml.converter.convert('a'))
     expected = {
-        'a', f'a/{Const.root_data}'
+        'a', f'a/{ParserConst.root_data}'
     }
     assert actual == expected
 
 
 def test_make_new_trees_1():
-    tree = Tree(Const.root_data, [
-        Token(Const.token_type, 'y'),
-        Tree(Const.equal_data, []),
-        Tree(Const.product_data, [
-            Token(Const.token_type, 'a'),
-            Token(Const.token_type, 'x')
+    tree = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'y'),
+        Tree(ParserConst.equal_data, []),
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'x')
             ])
         ])
     actual = Parser._make_new_trees(tree)
     expected = [
-        Tree(Const.root_data, [
-            Tree(Const.equal_data, [
-                Token(Const.token_type, 'y'),
-                Tree(Const.product_data, [
-                    Token(Const.token_type, 'a'),
-                    Token(Const.token_type, 'x')
+        Tree(ParserConst.root_data, [
+            Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'y'),
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, 'a'),
+                    Token(ParserConst.token_type, 'x')
                 ])
             ])
         ])

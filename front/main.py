@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module for debugging
-made by Hisashi
 """
 
 import os

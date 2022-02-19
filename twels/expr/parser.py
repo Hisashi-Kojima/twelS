@@ -1,33 +1,21 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
-import json
 import os
-
-from twels.constant.const import Const
-
-base_path = os.path.abspath(__file__)  # parser.pyのpath
-
-from logging import getLogger, config
-
-# for logger
-# log_cfg_path = os.path.normpath(os.path.join(base_path, '../../wiki_crawler/log_config.json'))
-# with open(log_cfg_path) as f:
-#     config.dictConfig(json.load(f))
-# logger = getLogger('scrapy')
 
 from lark import Lark, exceptions, Tree
 
-from twels.expr.tree import MathMLTree
 from twels.expr.collector import get_path_set
+from twels.expr.parser_const import ParserConst
+from twels.expr.tree import MathMLTree
 from twels.utils.utils import print_in_red
 
 
 def get_lark_parser():
     """Lark parserを返す関数．
     """
+    base_path = os.path.abspath(__file__)  # parser.pyのpath
     path = os.path.normpath(os.path.join(base_path, '../mathml.lark'))
     try:
         with open(path, encoding='utf-8') as _grammar:
@@ -93,7 +81,7 @@ class Parser:
             return [tree]
 
         result = []
-        equal = Tree(Const.equal_data, [])
+        equal = Tree(ParserConst.equal_data, [])
         # 子にequalを1つ以上持つノードそれぞれを変形．
         for tree_having_ro in tree.find_pred(lambda t: equal in t.children):
             # ROの位置を得る
@@ -101,8 +89,8 @@ class Parser:
 
             if len(index_list) == 1 and index_list[0] == 1 and len(tree_having_ro.children) == 3:
                 # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
-                new_tree = Tree(Const.root_data, [
-                    Tree(Const.equal_data, [
+                new_tree = Tree(ParserConst.root_data, [
+                    Tree(ParserConst.equal_data, [
                         tree_having_ro.children[0],
                         tree_having_ro.children[2],
                     ])
@@ -121,7 +109,7 @@ class Parser:
         """
         result = []
         for i, child in enumerate(tree.children):
-            equal = Tree(Const.equal_data, [])
+            equal = Tree(ParserConst.equal_data, [])
             if child == equal:
                 result.append(i)
         return result

@@ -24,6 +24,9 @@ services:
     container_name: $DB_CONTAINER_NAME
     image: mysql:$MYSQL_VERSION
     ports:
+      # host port : container port
+      # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
+      # host portは何でもよい．
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
