@@ -387,6 +387,22 @@ def test_select_all_from_path_dict_where_expr_path_1(cursor):
     assert result_expr_ids == expr_ids
 
 
+def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
+    """Cursor.select_expr_from_inverted_index_where_expr_id_1()のテスト．
+    """
+    expr = '<math>a</math>'
+    cursor.execute(
+        'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
+        (expr, "1", "2", "3", "ja", "ja", "ja")
+        )
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    expr_id = cursor.fetchone()[0]
+    assert type(expr_id) == int
+
+    actual = Cursor.select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id)
+    assert actual == expr
+
+
 def test_select_expr_id_from_inverted_index_where_expr_1(cursor):
     """Cursor.select_expr_id_from_inverted_index_where_expr_1()のテスト．
     """
