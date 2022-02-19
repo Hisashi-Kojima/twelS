@@ -2,7 +2,7 @@
 `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
 
 # 開発用サーバの起動
-`docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.test up`  
+`docker compose -f docker-compose.yml -f docker-compose.dev.yml up`  
 
 # crawl
 `docker compose -f docker-compose.yml -f docker-compose.scrape.yml up`  
