@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """module description
-made by Hisashi
 """
 
 from twels.searcher.snippet_formatter import SnippetFormatter

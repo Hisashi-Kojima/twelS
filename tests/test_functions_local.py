@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """this file has tests for functions not implemented.
-made by Hisashi
 """
 
 import pytest
