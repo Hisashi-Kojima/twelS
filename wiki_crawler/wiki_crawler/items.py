@@ -17,3 +17,9 @@ class Page(scrapy.Item):
     snippet = scrapy.Field()
     lang = scrapy.Field()
     exprs = scrapy.Field()  # そのページにあるMathMLすべて
+
+
+class DownloadItem(scrapy.Item):
+    title = scrapy.Field()
+    file_urls = scrapy.Field()
+    files = scrapy.Field()
