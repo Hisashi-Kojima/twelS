@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-"""module description
-"""
+"""Scrapy settings for wiki_crawler project
 
-# Scrapy settings for wiki_crawler project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     https://docs.scrapy.org/en/latest/topics/settings.html
-#     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+For simplicity, this file contains only settings considered important or
+commonly used. You can find more settings consulting the documentation:
+
+   https://docs.scrapy.org/en/latest/topics/settings.html
+   https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
+   https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+"""
 
 BOT_NAME = 'wiki_crawler'
 
 SPIDER_MODULES = ['wiki_crawler.spiders']
 NEWSPIDER_MODULE = 'wiki_crawler.spiders'
 
-SPLASH_URL = 'http://127.0.0.1:8050'
+# connect the splash server and a splash request with the splash service name.
+SPLASH_URL = 'http://splash:8050'
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 
