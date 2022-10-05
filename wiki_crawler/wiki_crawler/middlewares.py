@@ -11,6 +11,7 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+import traceback
 import twisted
 
 from twels.utils.utils import print_in_red
@@ -106,6 +107,7 @@ class WikiCrawlerDownloaderMiddleware:
         # - return a Request object: stops process_exception() chain
         if isinstance(exception, twisted.internet.error.ConnectionRefusedError):
             print_in_red('Splashがlistenしているか確認してください．')
+            print_in_red(traceback.format_exc())
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)

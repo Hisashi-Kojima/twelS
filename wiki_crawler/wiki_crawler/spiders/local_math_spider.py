@@ -19,7 +19,8 @@ class LocalMathSpider(scrapy.Spider):
     name = 'local_math'
     custom_settings = {
         'DOWNLOAD_DELAY': 0,
-        'ROBOTSTXT_OBEY': False  # because not exists in local
+        'ROBOTSTXT_OBEY': False,  # because not exists in local
+        'ITEM_PIPELINES': {'wiki_crawler.pipelines.WikiCrawlerPipeline': 300}
     }
 
     base_path = os.path.abspath(__file__)  # local_math_spider.pyのpath

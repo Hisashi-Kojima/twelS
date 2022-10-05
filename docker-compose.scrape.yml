@@ -12,3 +12,11 @@ services:
       # ここだけdocker-compose.ymlを上書きする．
       # mysqlディレクトリが空の場合，テーブルを作成して，データは空のままにしていたい．
       - ./sqls/initdb:/docker-entrypoint-initdb.d
+
+  splash:
+    image: scrapinghub/splash:3.5
+    ports:
+      # host port : container port
+      - 8050:8050
+    networks:
+      - app_net

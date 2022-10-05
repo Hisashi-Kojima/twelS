@@ -18,7 +18,19 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+from scrapy.http import Request
+from scrapy.pipelines.files import FilesPipeline
+
 from twels.indexer.indexer import Indexer
+
+
+class DownloadPipeline(FilesPipeline):
+    """
+    source code of FilesPipeline: https://github.com/scrapy/scrapy/blob/master/scrapy/pipelines/files.py
+    """
+    def file_path(self, request: Request, response=None, info=None, *, item):
+        title = item['title']
+        return f'{title}.html'
 
 
 class WikiCrawlerPipeline:

@@ -3,6 +3,9 @@ version: '3'
 services:
   # dbはdocker-compose.ymlのものをそのまま使うため，ここには書かれていない．
   python:
+    # commandを上書きする。
+    # you can access Django at http://127.0.0.1:8000/
+    # Djangoのsettings.pyのDEBUGをTrueにすることでstyleが反映される。
     command: >
       sh -c '
         ./entrypoint.sh
@@ -11,9 +14,7 @@ services:
     volumes: 
       - ./front:/code/front
       - ./wiki_crawler:/code/wiki_crawler
-      - ./uwsgi:/code/uwsgi
       - ./tests:/code/tests  # for test
-      - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     ports:
       # host port : container port
       - 8000:8000
