@@ -47,22 +47,17 @@ class Cursor:
     @staticmethod
     def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str):
         """path_dictionaryのexpr_pathに対応するexpr_idsにexpr_idが未登録であれば登録する関数．
-        Returns:
-            expr_ids: expr_idのjson．
         """
-        # TODO: この関数をもっと効率よくできそう
-        tpl = __class__.select_all_from_path_dict_where_expr_path_1(cursor, expr_path)
-        # path_dictionaryにexpr_pathがまだ登録されていない場合
-        if tpl is None:
-            __class__.insert_into_path_dictionary_values_1_2(cursor, expr_path, expr_id)
-            return __class__.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
-        else:
-            id_path = __class__.select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id, expr_path)
-            if id_path is None:
-                # expr_idが未登録のとき
-                return __class__.select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id, expr_path)
-            else:
-                return __class__.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
+        query = """
+        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s)
+        """
+
+        data = {
+            'path': expr_path,
+            'ids': json.dumps([str(expr_id)]),
+            'id': str(expr_id)
+        }
+        cursor.execute(query, data)
 
     @staticmethod
     def delete_from_inverted_index_where_expr_1(cursor, expr: str):
