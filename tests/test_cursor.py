@@ -370,23 +370,6 @@ def test_select_all_from_page_where_uri_id_1(cursor):
     assert result_snippet == snippet
 
 
-def test_select_all_from_path_dict_where_expr_path_1(cursor):
-    """Cursor.select_all_from_path_dict_where_expr_path_1()のテスト．
-    """
-    expr_path = 'expr_path_1'
-    expr_ids = ['1', '3']
-    cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
-        )
-
-    result = Cursor.select_all_from_path_dict_where_expr_path_1(cursor, expr_path)
-    result_expr_path = result[0]
-    result_expr_ids = json.loads(result[1])
-    assert result_expr_path == expr_path
-    assert result_expr_ids == expr_ids
-
-
 def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
     """Cursor.select_expr_from_inverted_index_where_expr_id_1()のテスト．
     """
@@ -497,25 +480,6 @@ def test_select_uri_id_from_page_where_uri_2(cursor):
     uri_2 = 'uri2'
     result_uri_id = Cursor.select_uri_id_from_page_where_uri_1(cursor, uri_2)
     assert result_uri_id == None  # idの値は毎回異なるので，型の確認だけする
-
-
-def test_select_json_array_append_expr_ids_where_expr_path_2(cursor):
-    """Cursor.select_json_array_append_expr_ids_where_expr_path_2()のテスト．
-    """
-    expr_path = 'path1'
-    expr_ids = ['1', '2', '3', '5']
-    cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
-        )
-
-    expr_id = 10
-    Cursor.select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id, expr_path)
-
-    cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
-    actual = json.loads(cursor.fetchone()[0])
-    expected = ['1', '2', '3', '5', str(expr_id)]
-    assert actual == expected
 
 
 def test_select_json_array_append_lang_1(cursor):
