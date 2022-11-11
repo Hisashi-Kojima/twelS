@@ -106,10 +106,6 @@ class Cursor:
         cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, snippet))
 
     @staticmethod
-    def insert_into_path_dictionary_values_1_2(cursor, expr_path: str, expr_id: int):
-        cursor.execute('INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', (expr_path, json.dumps([str(expr_id)])))
-
-    @staticmethod
     def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str) -> list:
         """expr_idsから引数のexpr_idを削除する関数．
         Returns:
@@ -152,11 +148,6 @@ class Cursor:
             return None
         else:
             return tpl
-
-    @staticmethod
-    def select_all_from_path_dict_where_expr_path_1(cursor, expr_path: str) -> tuple | None:
-        cursor.execute('SELECT * FROM path_dictionary WHERE expr_path = %s', (expr_path,))
-        return cursor.fetchone()
 
     @staticmethod
     def select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> str | None:
@@ -209,18 +200,6 @@ class Cursor:
             return None
         else:
             return tpl[0]
-
-    @staticmethod
-    def select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id: int, expr_path: str):
-        """expr_idsの末尾に引数のexpr_idを追加する関数．
-        """
-        cursor.execute(
-            'SELECT JSON_ARRAY_APPEND(expr_ids, "$", %s) FROM path_dictionary WHERE expr_path = %s',
-            (str(expr_id), expr_path)
-            )
-        expr_ids_json = cursor.fetchone()[0]
-        __class__.update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, expr_ids_json, expr_path)
-        return json.loads(expr_ids_json)
 
     @staticmethod
     def select_json_array_append_lang(cursor, lang: str, expr_id: int) -> dict:
