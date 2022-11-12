@@ -1,24 +1,21 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import (
-    LoginView, LogoutView
-)
-from django.views import generic
-from .forms import LoginForm
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import (
-    LoginView, LogoutView
+    LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView,
+    PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 )
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
-from django.http import Http404, HttpResponseBadRequest
-from django.shortcuts import redirect
+from django.http import HttpResponseBadRequest
+from django.shortcuts import redirect, resolve_url
 from django.template.loader import render_to_string
 from django.views import generic
 from .forms import (
-    LoginForm, UserCreateForm
+    LoginForm, UserCreateForm, UserUpdateForm, MyPasswordChangeForm,
+    MyPasswordResetForm, MySetPasswordForm
 )
+from django.urls import reverse_lazy
 
 User = get_user_model()
 
@@ -65,8 +62,8 @@ class UserCreate(generic.CreateView):
             'user': user,
         }
 
-        subject = render_to_string('mail_template/subject.txt', context)
-        message = render_to_string('mail_template/message.txt', context)
+        subject = render_to_string('mail_template/user_create/subject.txt', context)
+        message = render_to_string('mail_template/user_create/message.txt', context)
 
         user.email_user(subject, message)
         return redirect('login:user_create_done')
@@ -110,3 +107,54 @@ class UserCreateComplete(generic.TemplateView):
                     return super().get(request, **kwargs)
 
         return HttpResponseBadRequest()
+
+
+class OnlyYouMixin(UserPassesTestMixin):
+    raise_exception = True
+
+    def test_func(self):
+        user = self.request.user
+        return user.pk == self.kwargs['pk'] or user.is_superuser
+
+
+class UserPage(OnlyYouMixin, generic.TemplateView):
+    model = User
+    template_name = 'htmls/user.html'
+
+
+class PasswordChange(PasswordChangeView):
+    """パスワード変更ビュー"""
+    form_class = MyPasswordChangeForm
+    success_url = reverse_lazy('login:password_change_done')
+    template_name = 'htmls/password_change.html'
+
+
+class PasswordChangeDone(PasswordChangeDoneView):
+    """パスワード変更しました"""
+    template_name = 'htmls/password_change_done.html'
+
+
+class PasswordReset(PasswordResetView):
+    """パスワード変更用URLの送付ページ"""
+    subject_template_name = 'mail_template/password_reset/subject.txt'
+    email_template_name = 'mail_template/password_reset/message.txt'
+    template_name = 'htmls/password_reset_form.html'
+    form_class = MyPasswordResetForm
+    success_url = reverse_lazy('login:password_reset_done')
+
+
+class PasswordResetDone(PasswordResetDoneView):
+    """パスワード変更用URLを送りましたページ"""
+    template_name = 'htmls/password_reset_done.html'
+
+
+class PasswordResetConfirm(PasswordResetConfirmView):
+    """新パスワード入力ページ"""
+    form_class = MySetPasswordForm
+    success_url = reverse_lazy('login:password_reset_complete')
+    template_name = 'htmls/password_reset_confirm.html'
+
+
+class PasswordResetComplete(PasswordResetCompleteView):
+    """新パスワード設定しましたページ"""
+    template_name = 'htmls/password_reset_complete.html'

@@ -23,7 +23,7 @@ urlpatterns = [
     # superuserを作っていないが，一応adminのpathを推測できないものにする
     path('4KkEH5XsLQRC/', admin.site.urls),
     path('', include('search.urls')),
-    path('login', include('login.urls')), # login
+    path('login/', include('login.urls')), # login
 
 # ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)  # this line is executed when DEBUG is set to True.
 ]
