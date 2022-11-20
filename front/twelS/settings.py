@@ -198,3 +198,8 @@ LOGIN_URL = 'login:login'
 LOGIN_REDIRECT_URL = 'login:top'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'login.auth_backend.PasswordlessAuthBackend',
+]

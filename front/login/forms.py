@@ -4,8 +4,11 @@ from django.contrib.auth.forms import (
     PasswordResetForm, SetPasswordForm
 )
 from django.contrib.auth import get_user_model
+from .models import EmailUser
+
 
 User = get_user_model()
+Emailuser = EmailUser
 
 
 class LoginForm(AuthenticationForm):
@@ -74,3 +77,19 @@ class MySetPasswordForm(SetPasswordForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+
+
+class EmailLoginForm(forms.ModelForm):
+    class Meta:
+        model = EmailUser
+        fields = ('email',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        Emailuser.objects.filter(email=email, is_active=False).delete()
+        return email

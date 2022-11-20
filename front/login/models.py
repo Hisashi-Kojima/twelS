@@ -80,3 +80,28 @@ class User(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+
+class EmailUser(AbstractBaseUser):
+    """メール認証ログイン用の一時的なユーザ"""
+    email = models.EmailField(
+        _('email address'), unique=True, validators=[email_validater])
+    password = models.CharField(_('password'), max_length=128, blank=True, null=True)
+    last_login = models.DateTimeField(_('last login'), blank=True, null=True)
+
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
+    )
+
+    EMAIL_FIELD = 'email'
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    def email_user(self, subject, message, from_email=None, **kwargs):
+        """Send an email to this user."""
+        send_mail(subject, message, from_email, [self.email], **kwargs)

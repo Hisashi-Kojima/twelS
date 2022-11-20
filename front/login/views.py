@@ -8,16 +8,22 @@ from django.contrib.auth.views import (
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
 from django.http import HttpResponseBadRequest
-from django.shortcuts import redirect, resolve_url
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views import generic
 from .forms import (
-    LoginForm, UserCreateForm, UserUpdateForm, MyPasswordChangeForm,
-    MyPasswordResetForm, MySetPasswordForm
+    LoginForm, UserCreateForm, MyPasswordChangeForm,
+    MyPasswordResetForm, MySetPasswordForm, EmailLoginForm
 )
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
+from .models import EmailUser
+
+
 
 User = get_user_model()
+Emailuser = EmailUser
 
 
 class Try(generic.TemplateView):
@@ -34,9 +40,18 @@ class Login(LoginView):
     template_name = 'htmls/login.html'
 
 
-class Logout(LogoutView):
-    """ログアウトページ"""
-    template_name = 'htmls/top.html'
+class Logout(generic.View):
+
+    def get(self, request):
+
+        """メール認証ログインユーザーはログアウト時にis_active=False"""
+        emailuser: EmailUser = Emailuser.objects.get(email=request.user)
+        if emailuser:
+            emailuser.is_active = False
+            emailuser.save()
+
+        logout(request)
+        return redirect('login:login')
 
 
 class UserCreate(generic.CreateView):
@@ -158,3 +173,69 @@ class PasswordResetConfirm(PasswordResetConfirmView):
 class PasswordResetComplete(PasswordResetCompleteView):
     """新パスワード設定しましたページ"""
     template_name = 'htmls/password_reset_complete.html'
+
+
+class EmailLogin(generic.FormView):
+    """メールアドレスでのログインページ"""
+    form_class = EmailLoginForm
+    template_name = 'htmls/email_login.html'
+
+    def form_valid(self, form):
+        """ログインのためのメール送信"""
+
+        emailuser: EmailUser = form.save(commit=False)
+        emailuser.is_active = False
+        emailuser.save()
+        # アクティベーションURLの送付
+        current_site = get_current_site(self.request)
+        domain = current_site.domain
+        context = {
+            'protocol': self.request.scheme,
+            'domain': domain,
+            'token': dumps(emailuser.pk),
+            'user': emailuser,
+        }
+        print(f"form_valid: {type(emailuser)}")
+
+        subject = render_to_string('mail_template/email_login/subject.txt', context)
+        message = render_to_string('mail_template/email_login/message.txt', context)
+
+        emailuser.email_user(subject, message)
+        return redirect('login:email_login_sent')
+
+
+class EmailLoginSent(generic.TemplateView):
+    template_name = 'htmls/email_login_sent.html'
+
+
+class EmailLoginComplete(generic.TemplateView):
+    template_name = 'htmls/email_login_complete.html'
+    timeout_seconds = getattr(settings, 'ACTIVATION_TIMEOUT_SECONDS', 60*5)  # デフォルトでは5分以内
+
+    def get(self, request, **kwargs):
+        token = kwargs.get('token')
+        try:
+            user_pk = loads(token, max_age=self.timeout_seconds)
+
+        # 期限切れ
+        except SignatureExpired:
+            return HttpResponseBadRequest()
+
+        # tokenが間違っている
+        except BadSignature:
+            return HttpResponseBadRequest()
+
+        # tokenは問題なし
+        else:
+            try:
+                emailuser = Emailuser.objects.get(pk=user_pk)
+            except Emailuser.DoesNotExist:
+                return HttpResponseBadRequest()
+            else:
+                if not emailuser.is_active:
+                    # 問題なければ本登録とする
+                    emailuser.is_active = True
+                    emailuser.save()
+                    login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
+                    return super().get(request, **kwargs)
+        return HttpResponseBadRequest()
