@@ -22,7 +22,22 @@
 
 	"extensions": [
 		"ms-python.python"
-	]
+	],
+
+	"settings": {
+		// for flake8 and autopep8
+		"python.linting.flake8Enabled": true,
+		"files.autoSave": "afterDelay",
+		"files.autoSaveDelay": 1000,
+		"python.linting.lintOnSave": true,
+		"python.linting.flake8Args": [
+			"--max-complexity=20"
+		],
+	
+		"python.formatting.provider": "autopep8",
+
+		"workbench.editor.enablePreview": false
+	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
