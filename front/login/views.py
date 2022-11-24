@@ -45,8 +45,14 @@ class Logout(generic.View):
     def get(self, request):
 
         """メール認証ログインユーザーはログアウト時にis_active=False"""
-        emailuser: EmailUser = Emailuser.objects.get(email=request.user)
-        if emailuser:
+        try:
+            emailuser: EmailUser = Emailuser.objects.get(email=request.user)
+
+        except Emailuser.DoesNotExist:
+            print("not emailuser")
+            pass
+        else:
+            emailuser: EmailUser = Emailuser.objects.get(email=request.user)
             emailuser.is_active = False
             emailuser.save()
 
