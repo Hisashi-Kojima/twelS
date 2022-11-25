@@ -30,7 +30,7 @@ env = environ.Env()
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -195,7 +195,7 @@ AUTH_USER_MODEL = 'login.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login:login'
-LOGIN_REDIRECT_URL = 'login:top'
+LOGIN_REDIRECT_URL = 'search:index' #ログイン後は数式検索ページにリダイレクト
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
