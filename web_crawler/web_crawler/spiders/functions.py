@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """functions for spiders.
 """
+import json
 import re
 
 from bs4 import BeautifulSoup, Comment
+import requests
 
 
 def get_lang(response) -> str:
@@ -44,12 +46,30 @@ def get_exprs(response) -> list[str]:
     return result
 
 
+def render_katex(expr_katex: str) -> str:
+    """KaTeXをMathMLに変換する関数。
+    Args:
+        expr_katex: KaTeXで書かれた数式。
+        ex. a+b
+    Returns:
+        MathML.
+    Note:
+        This function calls AWS Lambda function.
+        Do not call too much this function,
+        because if you calls this function too much,
+        the price of AWS Lambda is expensive.
+    """
+    url = "https://vl1wuswquk.execute-api.ap-northeast-1.amazonaws.com/renderKatex"
+    data = json.dumps({'expr': expr_katex})
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(url, data=data, headers=headers)
+    return _clean_mathml(response.text)
+
+
 def _clean_text(text: str) -> str:
     """不要なタグなどを削除する関数．
-    bodyタグの削除
-    TODO:
-        不要な情報を削除することで，登録するデータ量を小さくする．
-        classなどが自作のものとかぶっても困るので，そのあたりの削除．
+    不要な情報を削除することで，登録するデータ量を小さくする．
+    classなどが自作のものとかぶっても困るので，そのあたりの削除．
     """
     soup = BeautifulSoup(text, 'lxml')
     soup.html.unwrap()
@@ -102,6 +122,20 @@ def _clean_text(text: str) -> str:
 
     result = str(soup)
     return result.replace('\n', '')
+
+
+def _clean_mathml(response_text: str) -> str:
+    """KaTeXをrenderした結果から不要なタグを削除する関数。
+    """
+    # remove double quotes on both ends.
+    text = response_text.strip('"')
+    # remove all span tags.
+    soup = BeautifulSoup(text, 'lxml')
+    soup.html.unwrap()
+    soup.body.unwrap()
+    for span in soup.find_all('span'):
+        span.unwrap()
+    return str(soup)
 
 
 def _remove_comments(soup: BeautifulSoup):
