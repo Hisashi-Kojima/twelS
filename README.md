@@ -68,11 +68,11 @@ test_cursor.pyのみをテストする。
 ### crawlにかかる時間
 
 CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)、メモリ16GBのWindows PCで  
-日本語のWikipediaの数学と物理学のページ合わせて7859ページを  
+日本語のWikipediaの数学と物理学のページ合わせて8,147ページを  
 シングルプロセスのスクレイピングをしたとき、  
-17,234秒（4時間47分14秒）かかった。  
-request_bytes: 2490609 (約2.4MB)  
-response_bytes: 712761985 (約680MB)  
+19,852秒（5時間30分52秒）かかった。  
+request_bytes: 2,571,985 (約2.5MB)  
+response_bytes: 849,254,335 (約850MB)  
 
 ## mysqlのバックアップ
 
