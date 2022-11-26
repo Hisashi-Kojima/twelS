@@ -70,7 +70,7 @@ test_cursor.pyのみをテストする。
 CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)、メモリ16GBのWindows PCで  
 日本語のWikipediaの数学と物理学のページ合わせて7859ページを  
 シングルプロセスのスクレイピングをしたとき、  
-509097秒（5日21時間24分57秒）かかった。  
+17,234秒（4時間47分14秒）かかった。  
 request_bytes: 2490609 (約2.4MB)  
 response_bytes: 712761985 (約680MB)  
 
@@ -90,7 +90,7 @@ mysqlのバックアップのファイル名には221007_mysql_backup.sql（2022
 git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME
 ```
 
-ex.
+ex.  
 
 ```sh
 git pull origin develop:develop
@@ -108,7 +108,7 @@ sudo systemctl restart docker
 docker compose config
 ```
 
-または
+または  
 
 ```sh
 docker compose -f docker-compose.yml -f docker-compose.prod.yml config

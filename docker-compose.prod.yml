@@ -26,7 +26,7 @@ services:
       - ./wiki_crawler:/code/wiki_crawler
       - ./uwsgi:/code/uwsgi
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
-    restart: always
+    tty: true
 
   db:
     restart: always

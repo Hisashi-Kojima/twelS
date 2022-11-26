@@ -11,6 +11,7 @@ services:
       sh -c '
         ./entrypoint.sh
         uwsgi /code/uwsgi/uwsgi.ini
+        /bin/sh
       '
     volumes:
       - ./.env:/code/.env  # for django-environ
