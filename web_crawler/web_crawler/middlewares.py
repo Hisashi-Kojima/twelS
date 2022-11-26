@@ -17,7 +17,7 @@ import twisted
 from twels.utils.utils import print_in_red
 
 
-class WikiCrawlerSpiderMiddleware:
+class WebCrawlerSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -64,7 +64,7 @@ class WikiCrawlerSpiderMiddleware:
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class WikiCrawlerDownloaderMiddleware:
+class WebCrawlerDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.

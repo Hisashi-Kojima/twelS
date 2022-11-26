@@ -33,7 +33,7 @@ class DownloadPipeline(FilesPipeline):
         return f'{title}.html'
 
 
-class WikiCrawlerPipeline:
+class WebCrawlerPipeline:
     def process_item(self, item, spider):
         """数式をデータベースに登録する関数．
         """

@@ -20,7 +20,7 @@ class LocalSpider(scrapy.Spider):
     custom_settings = {
         'DOWNLOAD_DELAY': 0,
         'ROBOTSTXT_OBEY': False,  # because not exists in local
-        'ITEM_PIPELINES': {'web_crawler.pipelines.WikiCrawlerPipeline': 300}
+        'ITEM_PIPELINES': {'web_crawler.pipelines.WebCrawlerPipeline': 300}
     }
 
     base_path = os.path.abspath(__file__)  # local_spider.pyのpath
