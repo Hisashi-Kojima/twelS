@@ -7,7 +7,7 @@ import time
 import scrapy
 
 
-class WikiSpider(scrapy.Spider):
+class WikiPhysicsSpider(scrapy.Spider):
     """Wikipediaの物理学のページをダウンロードするためのクラス．
     """
     # type 'scrapy crawl wiki_physics' to crawl.
@@ -34,6 +34,6 @@ class WikiSpider(scrapy.Spider):
         time.sleep(3)  # 3秒のDOWNLOAD_DELAY
         title = response.css('title::text').get()
         title = title.replace('/', '÷')  # avoid FileNotFoundError because of '/'
-        filename = f'wiki_pages/physics/{title}.html'
+        filename = f'web_pages/wiki/physics/{title}.html'
         with open(filename, 'wb') as f:
             f.write(response.body)

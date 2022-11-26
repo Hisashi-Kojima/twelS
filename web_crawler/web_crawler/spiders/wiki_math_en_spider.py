@@ -10,7 +10,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from ..items import DownloadItem
 
 
-class WikiSpider(CrawlSpider):
+class WikiEnSpider(CrawlSpider):
     """Wikipediaの英語の数学のページをダウンロードするためのクラス．
     TODO:
         CategoryがMathematicsあるいはMathematicsのSubcategoriesである
@@ -25,8 +25,8 @@ class WikiSpider(CrawlSpider):
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
-        'FILES_STORE': 'wiki_pages/en/math',
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
+        'FILES_STORE': 'web_pages/wiki/en/math',
+        'ITEM_PIPELINES': {'web_crawler.pipelines.DownloadPipeline': 300},
     }
 
     count = 0

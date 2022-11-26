@@ -26,7 +26,7 @@ class WikiSpider(scrapy.Spider):
     def parse(self, response):
         # そのページをダウンロード
         __class__.count += 1
-        filename = f'wiki_pages/page_{__class__.count}.html'
+        filename = f'web_pages/wiki/page_{__class__.count}.html'
         with open(filename, 'wb') as f:
             f.write(response.body)
 
@@ -49,6 +49,6 @@ class WikiSpider(scrapy.Spider):
         time.sleep(3)  # 3秒のDOWNLOAD_DELAY
         title = response.css('title::text').get()
         title = title.replace('/', '÷')  # avoid FileNotFoundError because of '/'
-        filename = f'wiki_pages/{title}.html'
+        filename = f'web_pages/wiki/{title}.html'
         with open(filename, 'wb') as f:
             f.write(response.body)

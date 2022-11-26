@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""module description
+"""test modules of functions.py.
 """
 
 import pytest
 from scrapy.http.response.html import HtmlResponse
 
-from wiki_crawler.wiki_crawler.spiders import functions
+from web_crawler.web_crawler.spiders import functions
 
 
 @pytest.fixture
@@ -27,3 +27,19 @@ def test_get_title_1(response):
     actual = functions.get_title(response)
     expected = '方程式 - Wikipedia'
     assert actual == expected
+
+
+def test_render_katex_1():
+    """KaTeXで書かれた数式がMathMLに変換されているか確認するテスト。
+    """
+    expr_katex = 'a+b'
+    actual = functions.render_katex(expr_katex)
+    assert '<math' in actual
+
+
+def test_render_katex_2():
+    """変換後の数式がきれいなMathMLになっているか確認するテスト。
+    """
+    expr_katex = 'a-b'
+    actual = functions.render_katex(expr_katex)
+    assert actual[:5] == '<math'

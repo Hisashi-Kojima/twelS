@@ -14,27 +14,27 @@ from ..items import Page
 from ..spiders import functions
 
 
-class LocalMathSpider(scrapy.Spider):
-    # type 'scrapy crawl local_math' to crawl.
-    name = 'local_math'
+class LocalSpider(scrapy.Spider):
+    # type 'scrapy crawl local' to crawl.
+    name = 'local'
     custom_settings = {
         'DOWNLOAD_DELAY': 0,
         'ROBOTSTXT_OBEY': False,  # because not exists in local
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.WikiCrawlerPipeline': 300}
+        'ITEM_PIPELINES': {'web_crawler.pipelines.WebCrawlerPipeline': 300}
     }
 
-    base_path = os.path.abspath(__file__)  # local_math_spider.pyのpath
-    path = os.path.normpath(os.path.join(base_path, '../../../wiki_pages'))
+    base_path = os.path.abspath(__file__)  # local_spider.pyのpath
+    norm_path = os.path.normpath(os.path.join(base_path, '../../../web_pages'))
     # 数学と物理学のページを登録
-    target_paths = glob.glob(f'{path}/math/*')
-    target_paths.extend(glob.glob(f'{path}/physics/*'))
+    target_paths = glob.glob(f'{norm_path}/wiki/math/*')
+    target_paths.extend(glob.glob(f'{norm_path}/wiki/physics/*'))
     start_urls = [f'file://{path}' for path in target_paths]
 
     count = 0
 
     def parse(self, response: HtmlResponse):
-        LocalMathSpider.count += 1
-        print(f'{LocalMathSpider.count}番目')
+        LocalSpider.count += 1
+        print(f'{LocalSpider.count}番目')
         yield Page(
             uri=self._get_wiki_uri(response),
             title=functions.get_title(response),
