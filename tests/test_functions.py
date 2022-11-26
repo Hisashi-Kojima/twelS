@@ -5,7 +5,7 @@
 import pytest
 from scrapy.http.response.html import HtmlResponse
 
-from wiki_crawler.wiki_crawler.spiders import functions
+from web_crawler.web_crawler.spiders import functions
 
 
 @pytest.fixture

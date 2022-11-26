@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Scrapy settings for wiki_crawler project
+"""Scrapy settings for web_crawler project
 
 For simplicity, this file contains only settings considered important or
 commonly used. You can find more settings consulting the documentation:
@@ -9,10 +9,10 @@ commonly used. You can find more settings consulting the documentation:
    https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 """
 
-BOT_NAME = 'wiki_crawler'
+BOT_NAME = 'web_crawler'
 
-SPIDER_MODULES = ['wiki_crawler.spiders']
-NEWSPIDER_MODULE = 'wiki_crawler.spiders'
+SPIDER_MODULES = ['web_crawler.spiders']
+NEWSPIDER_MODULE = 'web_crawler.spiders'
 
 # connect the splash server and a splash request with the splash service name.
 SPLASH_URL = 'http://splash:8050'
@@ -20,7 +20,7 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'wiki_crawler (+http://www.yourdomain.com)'
+#USER_AGENT = 'web_crawler (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -51,14 +51,14 @@ DOWNLOAD_DELAY = 3
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-#   'wiki_crawler.middlewares.WikiCrawlerSpiderMiddleware': 543,
+#   'web_crawler.middlewares.WikiCrawlerSpiderMiddleware': 543,
    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
 }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'wiki_crawler.middlewares.WikiCrawlerDownloaderMiddleware': 543,
+   'web_crawler.middlewares.WikiCrawlerDownloaderMiddleware': 543,
    'scrapy_splash.SplashCookiesMiddleware': 723,
    'scrapy_splash.SplashMiddleware': 725,
    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,

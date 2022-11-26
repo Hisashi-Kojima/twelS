@@ -4,7 +4,7 @@ services:
   python:
     volumes: 
       - ./front:/code/front  # TODO: frontをvolumeする必要があるか確認．
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
     tty: true
 
   db:

@@ -5,7 +5,7 @@
 import os
 import subprocess
 
-from wiki_crawler.wiki_crawler.spiders.local_math_spider import LocalMathSpider
+from web_crawler.web_crawler.spiders.local_spider import LocalSpider
 
 
 def test_crawl_1():
@@ -17,7 +17,7 @@ def test_crawl_1():
     """
     # move to scrapy root directory.
     # use os.path.join() because Windows use '\' and Linux use '/'.
-    os.chdir(os.path.join(os.path.dirname(__file__), '..', 'wiki_crawler'))
+    os.chdir(os.path.join(os.path.dirname(__file__), '..', 'web_crawler'))
 
     command = ['scrapy', 'list']
     subprocess.run(command, check=True)
@@ -28,5 +28,5 @@ def test_get_domain_from_uri_1():
     """与えたURIからドメインを正しく抽出できているか確認するテスト"""
     expected = 'https://docs.scrapy.org'
     uri = 'https://docs.scrapy.org/en/latest/_modules/scrapy/spidermiddlewares/offsite.html'
-    actual = LocalMathSpider._get_domain_from_uri(uri)
+    actual = LocalSpider._get_domain_from_uri(uri)
     assert expected == actual
