@@ -12,6 +12,10 @@ from ..items import DownloadItem
 
 class WikiEnSpider(CrawlSpider):
     """Wikipediaの英語の数学のページをダウンロードするためのクラス．
+    TODO:
+        CategoryがMathematicsあるいはMathematicsのSubcategoriesである
+        ページのみをクロールする．
+        サブフォルダを作成する？
     """
     # type 'scrapy crawl wiki_math_en' to crawl.
     name = 'wiki_math_en'
@@ -32,13 +36,25 @@ class WikiEnSpider(CrawlSpider):
     ]
 
     category_path = 'wiki/Category:'
+    next_page = '/w/index'
     rules = (
         # extract category links to crawl all categories.
-        Rule(LinkExtractor(allow=(category_path,))),
+        Rule(
+            LinkExtractor(
+                allow=(category_path, next_page),
+                restrict_xpaths=([
+                    '//div[@id="mw-subcategories"]',
+                    '//a[contains(text(), "next page")]',  # for 'next page' links
+                ]),
+            )
+        ),
 
         # extract page links to download.
         Rule(
-            LinkExtractor(allow=('wiki/',), deny=(category_path,)),
+            LinkExtractor(
+                allow=('wiki/',),
+                restrict_xpaths=(['//div[@id="mw-pages"]']),
+            ),
             callback='parse_item'
         ),
     )
