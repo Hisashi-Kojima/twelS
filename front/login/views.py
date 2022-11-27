@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.views import generic
 from .forms import (
-    LoginForm, UserCreateForm, MyPasswordChangeForm,
+    LoginForm, MyUserCreateForm, MyPasswordChangeForm,
     MyPasswordResetForm, MySetPasswordForm, EmailLoginForm
 )
 from django.urls import reverse_lazy
@@ -62,7 +62,7 @@ class Logout(generic.View):
 class UserCreate(generic.CreateView):
     """ユーザー仮登録"""
     template_name = 'htmls/user_create.html'
-    form_class = UserCreateForm
+    form_class = MyUserCreateForm
 
     def form_valid(self, form):
         """仮登録と本登録用メールの発行."""
