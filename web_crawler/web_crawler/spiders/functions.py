@@ -50,7 +50,7 @@ def render_katex(expr_katex: str) -> str:
     """KaTeXをMathMLに変換する関数。
     Args:
         expr_katex: KaTeXで書かれた数式。
-        ex. a+b
+        ex. a+b, $a+b$, $$a+b$$
     Returns:
         MathML.
     Note:
@@ -64,6 +64,33 @@ def render_katex(expr_katex: str) -> str:
     headers = {'Content-Type': 'application/json'}
     response = requests.post(url, data=data, headers=headers)
     return _clean_mathml(response.text)
+
+
+def render_katex_page(text: str) -> str:
+    """KaTeXで書かれた数式を含んだ文章をMathMLで書かれた数式を含んだ文章に変換する関数。
+    Args:
+        KaTeXで書かれた数式を含んだ文章。
+    Returns:
+        KaTeXで書かれた数式がrenderされた文章。
+    """
+    result = text
+
+    # render $$expr$$
+    # use "?:" because non-capture version of regular parentheses is better here.
+    katex_list: list[str] = re.findall(r'\$\$(?:.|\s)+\$\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    # render $expr$
+    katex_list: list[str] = re.findall(r'\$.+?\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    return result
 
 
 def _clean_text(text: str) -> str:

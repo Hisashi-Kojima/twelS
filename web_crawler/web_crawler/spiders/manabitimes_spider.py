@@ -6,7 +6,8 @@ import scrapy
 from scrapy.http import TextResponse
 from scrapy.spiders import SitemapSpider
 
-from ..items import DownloadItem
+from ..items import DownloadKatexItem
+from .functions import render_katex_page
 
 
 class ManabitimesSpider(SitemapSpider):
@@ -19,13 +20,14 @@ class ManabitimesSpider(SitemapSpider):
     ]
 
     custom_settings = {
-        'FILES_STORE': 'wiki_pages/manabitimes',
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
+        'FILES_STORE': 'web_pages/manabitimes',
+        'ITEM_PIPELINES': {'web_crawler.pipelines.DownloadKatexPipeline': 300},
     }
 
     count = 0
+
     sitemap_urls = [
-        # List of Physics and math Articles
+        # List of physics and math articles
         'https://manabitimes.jp/sitemap.xml',
     ]
 
@@ -35,10 +37,12 @@ class ManabitimesSpider(SitemapSpider):
     ]
 
     def parse_item(self, response: TextResponse) -> scrapy.Item:
-        """ページを解析する関数．"""
-        return DownloadItem(
+        """KaTeXで書かれた数式をrenderしてpipelineに渡す関数。
+        """
+        rendered_text = render_katex_page(response.text)
+        return DownloadKatexItem(
             # replace in order to avoid FileNotFoundError because of '/'
             title=response.css('title::text').get().replace('/', '÷'),
             # FilesPipeline needs 'file_urls' and 'files' fields.
-            file_urls=[response.url]
+            snippet=rendered_text
         )
