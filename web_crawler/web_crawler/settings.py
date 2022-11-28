@@ -51,7 +51,7 @@ DOWNLOAD_DELAY = 3
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-#   'web_crawler.middlewares.WebCrawlerSpiderMiddleware': 543,
+   'web_crawler.middlewares.WebCrawlerSpiderMiddleware': 543,
    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
 }
 
@@ -95,3 +95,10 @@ HTTPCACHE_DIR = 'httpcache'
 HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+
+# Determines which request fingerprinting algorithm is used
+# by the default request fingerprinter class.
+# 2.7 version of implementation was introduced in Scrapy 2.7
+# to fix an issue of the previous implementation.
+# New projects should use this value.
+REQUEST_FINGERPRINTER_IMPLEMENTATION = '2.7'
