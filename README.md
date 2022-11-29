@@ -25,7 +25,7 @@ docker compose -f docker-compose.yml -f docker-compose.scrape.yml up
 ```sh
 docker exec -it python_container /bin/bash
 cd web_crawler
-scrapy crawl local
+scrapy crawl local_wiki
 ```
 
 ## test

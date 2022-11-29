@@ -43,6 +43,5 @@ class ManabitimesSpider(SitemapSpider):
         return DownloadKatexItem(
             # replace in order to avoid FileNotFoundError because of '/'
             title=response.css('title::text').get().replace('/', '÷'),
-            # FilesPipeline needs 'file_urls' and 'files' fields.
             snippet=rendered_text
         )
