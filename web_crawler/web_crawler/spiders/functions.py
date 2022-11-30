@@ -6,6 +6,7 @@ import re
 
 from bs4 import BeautifulSoup, Comment
 import requests
+from scrapy.utils.httpobj import urlparse
 
 
 def get_lang(response) -> str:
@@ -29,6 +30,12 @@ def get_snippet(response) -> str:
     return _clean_text(body)
 
 
+def get_domain_from_uri(uri: str) -> str:
+    """URIからドメインを抽出して返す関数．"""
+    parseResult = urlparse(uri)
+    return f'{parseResult.scheme}://{parseResult.netloc}'
+
+
 def get_exprs(response) -> list[str]:
     """ページの式のリストを返す関数．"""
     result = []
@@ -48,9 +55,10 @@ def get_exprs(response) -> list[str]:
 
 def render_katex(expr_katex: str) -> str:
     """KaTeXをMathMLに変換する関数。
+    I don't use this function now, but I maybe use this in the future.
     Args:
         expr_katex: KaTeXで書かれた数式。
-        ex. a+b
+        ex. a+b, $a+b$, $$a+b$$
     Returns:
         MathML.
     Note:
@@ -64,6 +72,37 @@ def render_katex(expr_katex: str) -> str:
     headers = {'Content-Type': 'application/json'}
     response = requests.post(url, data=data, headers=headers)
     return _clean_mathml(response.text)
+
+
+def render_katex_page(text: str) -> str:
+    """KaTeXで書かれた数式を含んだ文章をMathMLで書かれた数式を含んだ文章に変換する関数。
+    I don't use this function now, but I maybe use this in the future.
+    Args:
+        KaTeXで書かれた数式を含んだ文章。
+    Returns:
+        KaTeXで書かれた数式がrenderされた文章。
+    Note:
+        textのサイズが大きくなるとre.findall()にかかる時間がとても長くなり、
+        render_katex_page()の処理が終わらないように見える。
+    """
+    result = text
+
+    # render $$expr$$
+    # use "?:" because non-capture version of regular parentheses is better here.
+    katex_list: list[str] = re.findall(r'\$\$(?:.|\s)+\$\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    # render $expr$
+    katex_list: list[str] = re.findall(r'\$.+?\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    return result
 
 
 def _clean_text(text: str) -> str:
@@ -126,6 +165,7 @@ def _clean_text(text: str) -> str:
 
 def _clean_mathml(response_text: str) -> str:
     """KaTeXをrenderした結果から不要なタグを削除する関数。
+    I don't use this function now, but I maybe use this in the future.
     """
     # remove double quotes on both ends.
     text = response_text.strip('"')

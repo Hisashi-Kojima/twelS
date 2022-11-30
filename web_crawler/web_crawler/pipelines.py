@@ -20,6 +20,7 @@ from itemadapter import ItemAdapter
 
 from scrapy.http import Request
 from scrapy.pipelines.files import FilesPipeline
+from scrapy.spiders import Spider
 
 from twels.indexer.indexer import Indexer
 
@@ -33,8 +34,19 @@ class DownloadPipeline(FilesPipeline):
         return f'{title}.html'
 
 
+class DownloadKatexPipeline(object):
+    """KaTeXで書かれたページをダウンロードする関数。
+    """
+    def process_item(self, item, spider: Spider):
+        title = item['title']
+        filename = f'web_pages/manabitimes/{title}.html'
+        with open(filename, 'w') as f:
+            f.write(item['snippet'])
+        return item
+
+
 class WebCrawlerPipeline:
-    def process_item(self, item, spider):
+    def process_item(self, item, spider: Spider):
         """数式をデータベースに登録する関数．
         """
         Indexer.update_db(ItemAdapter(item))

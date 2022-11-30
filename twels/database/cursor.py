@@ -16,9 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 env = environ.Env()
 
-environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env.test'))
-test_env = environ.Env()
-
 
 class Cursor:
     """Databaseと接続するためのクラス．
@@ -37,9 +34,9 @@ class Cursor:
     # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': test_env('MY_HISASHI_PASSWORD'),
-        'host': test_env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
-        'database': test_env('MY_TEST_DB_NAME'),
+        'password': env('MY_HISASHI_PASSWORD'),
+        'host': env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_TEST_DB_NAME'),
         'port': 3306,  # container側のportは3306．
         'connection_timeout': 100  # second
     }

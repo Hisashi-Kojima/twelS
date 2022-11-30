@@ -4,8 +4,6 @@ test_data/
 # remove static root directory from git because it's created automatically
 front/static
 
-.env.test
-
 ### https://raw.github.com/github/gitignore/991e760c1c6d50fdda246e0178b9c58b06770b90/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
