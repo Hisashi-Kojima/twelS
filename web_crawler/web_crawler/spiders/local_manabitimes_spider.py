@@ -3,14 +3,13 @@
 """
 
 import glob
-import json
 import os
 
 import scrapy
 from scrapy.http.response.html import HtmlResponse
 
-from ..items import Page
-from ..spiders import functions
+from web_crawler.web_crawler.items import Page
+from web_crawler.web_crawler.spiders import functions
 
 
 class LocalManabitimesSpider(scrapy.Spider):
@@ -19,7 +18,9 @@ class LocalManabitimesSpider(scrapy.Spider):
     custom_settings = {
         'DOWNLOAD_DELAY': 0,
         'ROBOTSTXT_OBEY': False,  # because not exists in local
-        'ITEM_PIPELINES': {'web_crawler.pipelines.WebCrawlerPipeline': 300}
+        # ITEM_PIPELINES raise exception because of path when you type 'scrapy crawl local_wiki'.
+        # use local_spider.py.
+        'ITEM_PIPELINES': {'web_crawler.web_crawler.pipelines.WebCrawlerPipeline': 300}
     }
 
     base_path = os.path.abspath(__file__)  # local_nanabitimes_spider.pyのpath
@@ -43,6 +44,4 @@ class LocalManabitimesSpider(scrapy.Spider):
 
     def _get_manabitimes_uri(self, response: HtmlResponse) -> str:
         """manabitimesのページからそのページのURI(URL)を取得する関数．"""
-        info_json: str = response.xpath('//meta[@data-hid="og:url"]/@content').get()
-        info_dict: dict = json.loads(info_json)
-        return info_dict['url']
+        return response.xpath('//meta[@data-hid="og:url"]/@content').get()

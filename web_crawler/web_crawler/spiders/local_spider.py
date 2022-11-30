@@ -8,6 +8,8 @@ from local_wiki_spider import LocalWikiSpider
 
 
 if __name__ == "__main__":
+    # multiple spiders run simultaneously.
+    # LocalManabitimesSpider ends before LocalWikiSpider.
     process = CrawlerProcess()
     process.crawl(LocalWikiSpider)
     process.crawl(LocalManabitimesSpider)

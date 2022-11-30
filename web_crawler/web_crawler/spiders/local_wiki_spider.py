@@ -9,8 +9,8 @@ import os
 import scrapy
 from scrapy.http.response.html import HtmlResponse
 
-from ..items import Page
-from ..spiders import functions
+from web_crawler.web_crawler.items import Page
+from web_crawler.web_crawler.spiders import functions
 
 
 class LocalWikiSpider(scrapy.Spider):
@@ -19,7 +19,9 @@ class LocalWikiSpider(scrapy.Spider):
     custom_settings = {
         'DOWNLOAD_DELAY': 0,
         'ROBOTSTXT_OBEY': False,  # because not exists in local
-        'ITEM_PIPELINES': {'web_crawler.pipelines.WebCrawlerPipeline': 300}
+        # ITEM_PIPELINES raise exception because of path when you type 'scrapy crawl local_wiki'.
+        # use local_spider.py.
+        'ITEM_PIPELINES': {'web_crawler.web_crawler.pipelines.WebCrawlerPipeline': 300}
     }
 
     base_path = os.path.abspath(__file__)  # local_wiki_spider.pyのpath
