@@ -28,6 +28,14 @@ def test_get_title_1(response):
     expected = '方程式 - Wikipedia'
     assert actual == expected
 
+
+def test_get_domain_from_uri_1():
+    """与えたURIからドメインを正しく抽出できているか確認するテスト"""
+    expected = 'https://docs.scrapy.org'
+    uri = 'https://docs.scrapy.org/en/latest/_modules/scrapy/spidermiddlewares/offsite.html'
+    actual = functions.get_domain_from_uri(uri)
+    assert expected == actual
+
 # I don't use this function now, but I maybe use this in the future.
 # def test_render_katex_1():
 #     """KaTeXで書かれた数式がMathMLに変換されているか確認するテスト。
