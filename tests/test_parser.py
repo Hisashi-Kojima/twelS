@@ -1455,6 +1455,8 @@ def test_parse_table_1():
 
 
 def test_make_new_trees_1():
+    """等式が分解しやすい形に変更されていることを確認するテスト。
+    """
     tree = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, 'y'),
         Tree(ParserConst.equal_data, []),
@@ -1464,6 +1466,7 @@ def test_make_new_trees_1():
             ])
         ])
     actual = Parser._make_new_trees(tree)
+
     expected = [
         Tree(ParserConst.root_data, [
             Tree(ParserConst.equal_data, [
