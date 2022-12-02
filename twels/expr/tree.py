@@ -56,6 +56,48 @@ class MathMLTree(Transformer):
         """
         return _get_tree_of(ParserConst.product_data, nodes, 'div', _get_reciprocal)
 
+    def table(self, nodes: list[Tree]):
+        """tableの要素に引数の順番の情報を付与してtr,tdを削除する関数。
+        Args:
+        ex.
+        [
+            Tree('tr', [
+                Tree('td', [Token('TOKEN', 'A')]),
+                Tree('td', [Token('TOKEN', 'B')])
+            ]),
+            Tree('tr', [
+                Tree('td', [Token('TOKEN', 'C')]),
+                Tree('td', [Token('TOKEN', 'D')])
+            ]),
+            Tree('tr', [
+                Tree('td', [Token('TOKEN', 'E')]),
+                Tree('td', [Token('TOKEN', 'F')])
+            ])
+        ]
+
+        Returns:
+        ex.
+        [
+            Tree('#0', [
+                Tree('#0', [Token('TOKEN', 'A')]),
+                Tree('#1', [Token('TOKEN', 'B')])
+            ]),
+            Tree('#1', [
+                Tree('#0', [Token('TOKEN', 'C')]),
+                Tree('#1', [Token('TOKEN', 'D')])
+            ]),
+            Tree('#2', [
+                Tree('#0', [Token('TOKEN', 'E')]),
+                Tree('#1', [Token('TOKEN', 'F')])
+            ])
+        ]
+        """
+        table: list[Tree] = []
+        tr_num = len(nodes)
+        for i in range(tr_num):
+            table.append(_get_tr(nodes[i], i))
+        return Tree(ParserConst.table_data, table)
+
     def __default__(self, data, children, meta):
         """Default funciton that is called if there is no attribute matching 'data'."""
         return Tree(data, children, meta)
@@ -132,7 +174,7 @@ def _get_reciprocal(node) -> Tree:
         return _get_fraction(1, node)
 
 
-def _get_pseudo_tree(pseudo_num: int, node) -> Tree:
+def _get_pseudo_tree(pseudo_num: int, node: Tree | Token) -> Tree:
     """引数の順番の情報を追加する関数．"""
     return Tree(f'#{pseudo_num}', [node])
 
@@ -157,6 +199,31 @@ def _get_fraction(numerator, denominator) -> Tree:
     nodes.append(_get_pseudo_tree_wrapper(0, numerator))
     nodes.append(_get_pseudo_tree_wrapper(1, denominator))
     return Tree(ParserConst.frac_data, nodes)
+
+
+def _get_tr(tr: Tree, pseudo_num: int) -> Tree:
+    """引数の順番の情報を追加したtrを返す関数。
+    Args:
+        ex.
+        Tree('tr', [
+            Tree('td', [Token('TOKEN', 'A')]),
+            Tree('td', [Token('TOKEN', 'B')])
+        ])
+
+    Returns:
+        ex.
+        Tree('#0', [
+            Tree('#0', [Token('TOKEN', 'A')]),
+            Tree('#1', [Token('TOKEN', 'B')])
+        ])
+    """
+    children: list[Tree] = []
+    td_num = len(tr.children)
+    for i in range(td_num):
+        td: Tree = tr.children[i]
+        token: Token = td.children[0]
+        children.append(_get_pseudo_tree(i, token))
+    return Tree(f'#{pseudo_num}', children)
 
 
 def _skip_this_node(nodes: list):
