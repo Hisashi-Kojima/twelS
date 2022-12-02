@@ -68,9 +68,17 @@ test_cursor.pyのみをテストする。
 ### crawlにかかる時間
 
 CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)、メモリ16GBのWindows PCで  
-日本語のWikipediaの数学と物理学のページ合わせて8,147ページを  
+日本語のWikipedia  
+* 数学 (7,021 pages)
+* 物理学 (1,127 pages)
+
+manabitimes.jp (1,270 pages)  
+* 数学
+* 物理学
+
+これらのページ合わせて9,418ページ（一部無関係のファイルを含む）を  
 シングルプロセスのスクレイピングをしたとき、  
-19,852秒（5時間30分52秒）かかった。  
+25,375秒（7時間2分55秒）かかった。  
 request_bytes: 2,571,985 (約2.5MB)  
 response_bytes: 849,254,335 (約850MB)  
 
