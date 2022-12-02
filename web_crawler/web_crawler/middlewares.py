@@ -7,17 +7,17 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+from scrapy.http import Response
 from scrapy import signals
 
 # useful for handling different item types with a single interface
-from itemadapter import is_item, ItemAdapter
 import traceback
 import twisted
 
 from twels.utils.utils import print_in_red
 
 
-class WikiCrawlerSpiderMiddleware:
+class WebCrawlerSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -64,7 +64,7 @@ class WikiCrawlerSpiderMiddleware:
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class WikiCrawlerDownloaderMiddleware:
+class WebCrawlerDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
@@ -91,6 +91,11 @@ class WikiCrawlerDownloaderMiddleware:
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
 
+        # print message when the status is error number.
+        if isinstance(response, Response):
+            if response.status >= 400:
+                print_in_red(response.body.decode('unicode-escape'))
+
         # Must either;
         # - return a Response object
         # - return a Request object
@@ -107,6 +112,9 @@ class WikiCrawlerDownloaderMiddleware:
         # - return a Request object: stops process_exception() chain
         if isinstance(exception, twisted.internet.error.ConnectionRefusedError):
             print_in_red('Splashがlistenしているか確認してください．')
+            print_in_red('settings.pyのSPLASH_URLが有効な形であるか確認してください．')
+            print_in_red(traceback.format_exc())
+        else:
             print_in_red(traceback.format_exc())
 
     def spider_opened(self, spider):

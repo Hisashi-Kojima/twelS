@@ -10,8 +10,12 @@ from scrapy.spiders import CrawlSpider, Rule
 from ..items import DownloadItem
 
 
-class WikiSpider(CrawlSpider):
+class WikiEnSpider(CrawlSpider):
     """Wikipediaの英語の数学のページをダウンロードするためのクラス．
+    TODO:
+        CategoryがMathematicsあるいはMathematicsのSubcategoriesである
+        ページのみをクロールする．
+        サブフォルダを作成する？
     """
     # type 'scrapy crawl wiki_math_en' to crawl.
     name = 'wiki_math_en'
@@ -21,8 +25,8 @@ class WikiSpider(CrawlSpider):
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
-        'FILES_STORE': 'wiki_pages/en/math',
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
+        'FILES_STORE': 'web_pages/wiki/en/math',
+        'ITEM_PIPELINES': {'web_crawler.pipelines.DownloadPipeline': 300},
     }
 
     count = 0
@@ -32,13 +36,25 @@ class WikiSpider(CrawlSpider):
     ]
 
     category_path = 'wiki/Category:'
+    next_page = '/w/index'
     rules = (
         # extract category links to crawl all categories.
-        Rule(LinkExtractor(allow=(category_path,))),
+        Rule(
+            LinkExtractor(
+                allow=(category_path, next_page),
+                restrict_xpaths=([
+                    '//div[@id="mw-subcategories"]',
+                    '//a[contains(text(), "next page")]',  # for 'next page' links
+                ]),
+            )
+        ),
 
         # extract page links to download.
         Rule(
-            LinkExtractor(allow=('wiki/',), deny=(category_path,)),
+            LinkExtractor(
+                allow=('wiki/',),
+                restrict_xpaths=(['//div[@id="mw-pages"]']),
+            ),
             callback='parse_item'
         ),
     )

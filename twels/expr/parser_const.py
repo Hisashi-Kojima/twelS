@@ -14,9 +14,7 @@ class ParserConst:
     expr_data = 'expr'
     sum_data = 'sum'
     product_data = 'product'
-    equal_data = 'equal'
     atom_data = 'atom'
-    in_data = 'in'
     neg_data = 'neg'
     paren_data = 'paren'
     frac_data = 'frac'
@@ -29,7 +27,12 @@ class ParserConst:
     under_data = 'under'
     underover_data = 'underover'
     table_data = 'table'
-    tr_data = 'tr'
-    td_data = 'td'
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
+
+    equal_data = 'equal'
+    less_data = 'less'
+    greater_data = 'greater'
+    in_data = 'in'
+
+    relational_operators = [expr_data, less_data, greater_data, in_data]

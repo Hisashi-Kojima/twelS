@@ -13,7 +13,7 @@ services:
       '
     volumes: 
       - ./front:/code/front
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
       - ./tests:/code/tests  # for test
     ports:
       # host port : container port

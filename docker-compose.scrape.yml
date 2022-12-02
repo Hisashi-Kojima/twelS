@@ -4,7 +4,7 @@ services:
   python:
     volumes: 
       - ./front:/code/front  # TODO: frontをvolumeする必要があるか確認．
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
     tty: true
 
   db:
@@ -15,8 +15,11 @@ services:
 
   splash:
     image: scrapinghub/splash:3.5
+    command: --disable-lua-sandbox  # to use standard Lua modules (ex. io)
     ports:
       # host port : container port
       - 8050:8050
+    volumes:
+      - ./headless_browser:/code/headless_browser
     networks:
       - app_net

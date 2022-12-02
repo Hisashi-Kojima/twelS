@@ -4,7 +4,6 @@
 
 from lark import Lark
 
-from twels.expr.collector import get_path_set
 from twels.expr.tree import ChangeOperator, CheckEachNode
 
 
@@ -24,4 +23,3 @@ def parse(expr: str):
         new_tree = CheckEachNode().transform(tmp_tree)
         print('tree: ', new_tree)
         print(new_tree.pretty())
-        print('path set: ', get_path_set(new_tree))

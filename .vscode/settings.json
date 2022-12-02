@@ -1,6 +1,4 @@
 {
-    "python.defaultInterpreterPath": "/Users/hisashi/.pyenv/shims/python",
-
     // for flake8 and autopep8
     "python.linting.flake8Enabled": true,
     "files.autoSave": "afterDelay",
