@@ -12,8 +12,8 @@ from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.views import generic
 from .forms import (
-    LoginForm, MyUserCreateForm, MyPasswordChangeForm,
-    MyPasswordResetForm, MySetPasswordForm, EmailLoginForm
+    LoginForm, CustomUserCreateForm, CustomPasswordChangeForm,
+    MyPasswordResetForm, CustomSetPasswordForm, EmailLoginForm
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
@@ -62,7 +62,7 @@ class Logout(generic.View):
 class UserCreate(generic.CreateView):
     """ユーザー仮登録"""
     template_name = 'htmls/user_create.html'
-    form_class = MyUserCreateForm
+    form_class = CustomUserCreateForm
 
     def form_valid(self, form):
         """仮登録と本登録用メールの発行."""
@@ -144,7 +144,7 @@ class UserPage(OnlyYouMixin, generic.TemplateView):
 
 class PasswordChange(PasswordChangeView):
     """パスワード変更ビュー"""
-    form_class = MyPasswordChangeForm
+    form_class = CustomPasswordChangeForm
     success_url = reverse_lazy('login:password_change_done')
     template_name = 'htmls/password_change.html'
 
@@ -170,7 +170,7 @@ class PasswordResetDone(PasswordResetDoneView):
 
 class PasswordResetConfirm(PasswordResetConfirmView):
     """新パスワード入力ページ"""
-    form_class = MySetPasswordForm
+    form_class = CustomSetPasswordForm
     success_url = reverse_lazy('login:password_reset_complete')
     template_name = 'htmls/password_reset_confirm.html'
 

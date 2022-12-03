@@ -1,5 +1,7 @@
 {% extends "htmls/base.html" %}
+{% load static %}
 {% block content %}
+<script src="{% static 'js/mask_password.js' %}"></script>
 <form action="" method="POST">
     {{ form.non_field_errors }}
     {% for field in form %}
@@ -9,7 +11,10 @@
         {{ field.errors }}
     </div>
     {% endfor %}
+    <!-- An element to toggle between password visibility -->
+    <input type="checkbox" onclick="mask_password()">Show Password
     {% csrf_token %}
     <button type="submit" class="btn btn-primary btn-lg">送信</button>
 </form>
+
 {% endblock %}

@@ -32,7 +32,7 @@ class UsernameField(forms.CharField):
         }
 
 
-class MyUserCreateForm(forms.ModelForm):
+class CustomUserCreateForm(forms.ModelForm):
     """ユーザー登録フォーム
     パスワード確認なし"""
     password = forms.CharField(
@@ -52,6 +52,8 @@ class MyUserCreateForm(forms.ModelForm):
             self.fields[self._meta.model.USERNAME_FIELD].widget.attrs[
                 "autofocus"
             ] = True
+        self.fields['password'].widget.attrs['id'] = 'Password'
+
     
     def _post_clean(self):
         """パスワードのバリデーション
@@ -74,7 +76,7 @@ class MyUserCreateForm(forms.ModelForm):
         return user
 
 
-class MyPasswordChangeForm(forms.Form):
+class CustomPasswordChangeForm(forms.Form):
     """パスワード変更フォーム
     パスワード確認なし"""
     error_messages = {
@@ -102,6 +104,8 @@ class MyPasswordChangeForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        self.fields['new_password'].widget.attrs['id'] = 'Password'
+
     
     def clean_old_password(self):
         """
@@ -143,16 +147,7 @@ class MyPasswordResetForm(PasswordResetForm):
             field.widget.attrs['class'] = 'form-control'
 
 
-class MySetPasswordForm(SetPasswordForm):
-    """パスワード再設定用フォーム(パスワード忘れて再設定)"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs['class'] = 'form-control'
-
-
-class MySetPasswordForm(forms.Form):
+class CustomSetPasswordForm(forms.Form):
     """パスワードを忘れたとき，新パスワード入力フォーム
     パスワード確認なし"""
     new_password = forms.CharField(
@@ -164,6 +159,7 @@ class MySetPasswordForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        self.fields['new_password'].widget.attrs['id'] = 'Password'
     
     def clean_new_password(self):
         """パスワードのバリデーション
