@@ -106,7 +106,6 @@ class CustomPasswordChangeForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['new_password'].widget.attrs['id'] = 'Password'
 
-    
     def clean_old_password(self):
         """
         Validate that the old_password field is correct.
@@ -118,7 +117,7 @@ class CustomPasswordChangeForm(forms.Form):
                 code="password_incorrect",
             )
         return old_password
-    
+
     def clean_new_password(self):
         """パスワードのバリデーション
         条件を満たしてなかったら入力内容を削除
@@ -137,6 +136,7 @@ class CustomPasswordChangeForm(forms.Form):
         if commit:
             self.user.save()
         return self.user
+
 
 class MyPasswordResetForm(PasswordResetForm):
     """パスワード忘れたときのフォーム"""
@@ -160,7 +160,7 @@ class CustomSetPasswordForm(forms.Form):
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['new_password'].widget.attrs['id'] = 'Password'
-    
+
     def clean_new_password(self):
         """パスワードのバリデーション
         条件を満たしてなかったら入力内容を削除
@@ -172,7 +172,7 @@ class CustomSetPasswordForm(forms.Form):
             except ValidationError as error:
                 self.add_error("new_password", error)
         return new_password
-    
+
     def save(self, commit=True):
         password = self.cleaned_data["new_password"]
         self.user.set_password(password)
