@@ -6,7 +6,7 @@ import os
 
 from lark import Lark, exceptions, Tree
 
-from twels.expr.collector import get_path_set
+from twels.expr.pathset import PathSet
 from twels.expr.parser_const import ParserConst
 from twels.expr.tree import MathMLTree
 from twels.utils.utils import print_in_red
@@ -46,7 +46,7 @@ class Parser:
         # TODO: 1つの式を複数の式に分割したときに，それぞれにexpr_idを割り当てなくてよいのか考える．
         result = set()
         for t in tree_list:
-            result = result.union(get_path_set(t))
+            result = result.union(PathSet(t))
         return result
 
     @staticmethod

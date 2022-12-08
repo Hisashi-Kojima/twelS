@@ -23,3 +23,8 @@ class DownloadItem(scrapy.Item):
     title = scrapy.Field()
     file_urls = scrapy.Field()
     files = scrapy.Field()
+
+
+class DownloadKatexItem(scrapy.Item):
+    title = scrapy.Field()
+    snippet = scrapy.Field()

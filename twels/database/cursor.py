@@ -16,9 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 env = environ.Env()
 
-environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env.test'))
-test_env = environ.Env()
-
 
 class Cursor:
     """Databaseと接続するためのクラス．
@@ -37,9 +34,9 @@ class Cursor:
     # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': test_env('MY_HISASHI_PASSWORD'),
-        'host': test_env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
-        'database': test_env('MY_TEST_DB_NAME'),
+        'password': env('MY_HISASHI_PASSWORD'),
+        'host': env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_TEST_DB_NAME'),
         'port': 3306,  # container側のportは3306．
         'connection_timeout': 100  # second
     }
@@ -47,22 +44,17 @@ class Cursor:
     @staticmethod
     def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str):
         """path_dictionaryのexpr_pathに対応するexpr_idsにexpr_idが未登録であれば登録する関数．
-        Returns:
-            expr_ids: expr_idのjson．
         """
-        # TODO: この関数をもっと効率よくできそう
-        tpl = __class__.select_all_from_path_dict_where_expr_path_1(cursor, expr_path)
-        # path_dictionaryにexpr_pathがまだ登録されていない場合
-        if tpl is None:
-            __class__.insert_into_path_dictionary_values_1_2(cursor, expr_path, expr_id)
-            return __class__.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
-        else:
-            id_path = __class__.select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id, expr_path)
-            if id_path is None:
-                # expr_idが未登録のとき
-                return __class__.select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id, expr_path)
-            else:
-                return __class__.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
+        query = """
+        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s)
+        """
+
+        data = {
+            'path': expr_path,
+            'ids': json.dumps([str(expr_id)]),
+            'id': str(expr_id)
+        }
+        cursor.execute(query, data)
 
     @staticmethod
     def delete_from_inverted_index_where_expr_1(cursor, expr: str):
@@ -111,10 +103,6 @@ class Cursor:
         cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, snippet))
 
     @staticmethod
-    def insert_into_path_dictionary_values_1_2(cursor, expr_path: str, expr_id: int):
-        cursor.execute('INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)', (expr_path, json.dumps([str(expr_id)])))
-
-    @staticmethod
     def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str) -> list:
         """expr_idsから引数のexpr_idを削除する関数．
         Returns:
@@ -157,11 +145,6 @@ class Cursor:
             return None
         else:
             return tpl
-
-    @staticmethod
-    def select_all_from_path_dict_where_expr_path_1(cursor, expr_path: str) -> tuple | None:
-        cursor.execute('SELECT * FROM path_dictionary WHERE expr_path = %s', (expr_path,))
-        return cursor.fetchone()
 
     @staticmethod
     def select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> str | None:
@@ -214,18 +197,6 @@ class Cursor:
             return None
         else:
             return tpl[0]
-
-    @staticmethod
-    def select_json_array_append_expr_ids_where_expr_path_2(cursor, expr_id: int, expr_path: str):
-        """expr_idsの末尾に引数のexpr_idを追加する関数．
-        """
-        cursor.execute(
-            'SELECT JSON_ARRAY_APPEND(expr_ids, "$", %s) FROM path_dictionary WHERE expr_path = %s',
-            (str(expr_id), expr_path)
-            )
-        expr_ids_json = cursor.fetchone()[0]
-        __class__.update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, expr_ids_json, expr_path)
-        return json.loads(expr_ids_json)
 
     @staticmethod
     def select_json_array_append_lang(cursor, lang: str, expr_id: int) -> dict:

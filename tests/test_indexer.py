@@ -6,7 +6,7 @@ import json
 
 from itemadapter import ItemAdapter
 
-from wiki_crawler.wiki_crawler.items import Page
+from web_crawler.web_crawler.items import Page
 from twels.database.cursor import Cursor
 from twels.indexer.indexer import Indexer
 from twels.expr.parser import Parser

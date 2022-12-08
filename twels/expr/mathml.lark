@@ -13,7 +13,7 @@ start: _open mathml _close
 _annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
 
 // deal with relational operators
-?expr: _open expr _close  // for mrow
+?expr: _open _mspace* expr _mspace* _close  // for mrow
      | sum _more_sum*
 
 _more_sum: relational_operator sum
@@ -49,13 +49,17 @@ _mi_empty.-1: "<mi" _attr* "></mi>"
 
 ?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
 
+// some mspace tags are used for a math expression delimiter.
+// some other mspace tags are used for just spaces. <- not a delimiter.
+_mspace: "<mspace" _attr* "/>"
+
 // tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
-?func: "<msqrt" _attr* ">" sum "</msqrt>" -> sqrt
-     | "<mfrac" _attr* ">" sum sum "</mfrac>" -> frac
-     | "<msup" _attr* ">" sum sum "</msup>" -> sup
-     | "<msub" _attr* ">" sum sum "</msub>" -> sub
-     | "<mroot" _attr* ">" sum sum "</mroot>" -> root
-     | "<msubsup" _attr* ">" sum sum sum "</msubsup>" -> subsup
+?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
+     | "<mfrac" _attr* ">" expr expr "</mfrac>" -> frac
+     | "<msup" _attr* ">" expr expr "</msup>" -> sup
+     | "<msub" _attr* ">" expr expr "</msub>" -> sub
+     | "<mroot" _attr* ">" expr expr "</mroot>" -> root
+     | "<msubsup" _attr* ">" expr expr expr "</msubsup>" -> subsup
      // use expr for dealing with relational operators
      | "<mover" _attr* ">" expr expr "</mover>" -> over
      | "<munder" _attr* ">" expr expr "</munder>" -> under
@@ -113,7 +117,6 @@ _ELEMENTS: "math"
          | "mscarry"
          | "msgroup"
          | "msline"
-         | "mspace"
          | "msrow"
          | "mstack"
          | "mstyle"
@@ -125,6 +128,6 @@ _ELEMENTS: "math"
          | "annotation"
          | "annotation-xml"
 
-%import common.WS  // white space
-%ignore WS
+%import common.WS -> _WS  // white space
+%ignore _WS
 %ignore COMMENT
