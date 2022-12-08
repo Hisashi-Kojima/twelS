@@ -33,11 +33,11 @@ jobs:
     steps:
       # This action check-out my repository under $GITHUB_WORKSPACE, 
       # so my workflow can access it.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2  # setup-python version is 2
+        uses: actions/setup-python@v4
         with: 
-          python-version: '3.10.2'
+          python-version: '3.11.0'
           
       - name: Update pip
         run: pip install --upgrade pip
@@ -52,9 +52,6 @@ jobs:
           echo '################'
           cd ../
           ls
-
-      - name: spider test
-        run: pytest tests/test_spider.py
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py

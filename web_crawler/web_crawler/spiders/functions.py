@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """functions for spiders.
 """
+import json
 import re
 
 from bs4 import BeautifulSoup, Comment
+import requests
+from scrapy.utils.httpobj import urlparse
 
 
 def get_lang(response) -> str:
@@ -27,6 +30,12 @@ def get_snippet(response) -> str:
     return _clean_text(body)
 
 
+def get_domain_from_uri(uri: str) -> str:
+    """URIからドメインを抽出して返す関数．"""
+    parseResult = urlparse(uri)
+    return f'{parseResult.scheme}://{parseResult.netloc}'
+
+
 def get_exprs(response) -> list[str]:
     """ページの式のリストを返す関数．"""
     result = []
@@ -44,12 +53,62 @@ def get_exprs(response) -> list[str]:
     return result
 
 
+def render_katex(expr_katex: str) -> str:
+    """KaTeXをMathMLに変換する関数。
+    I don't use this function now, but I maybe use this in the future.
+    Args:
+        expr_katex: KaTeXで書かれた数式。
+        ex. a+b, $a+b$, $$a+b$$
+    Returns:
+        MathML.
+    Note:
+        This function calls AWS Lambda function.
+        Do not call too much this function,
+        because if you calls this function too much,
+        the price of AWS Lambda is expensive.
+    """
+    url = "https://vl1wuswquk.execute-api.ap-northeast-1.amazonaws.com/renderKatex"
+    data = json.dumps({'expr': expr_katex})
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(url, data=data, headers=headers)
+    return _clean_mathml(response.text)
+
+
+def render_katex_page(text: str) -> str:
+    """KaTeXで書かれた数式を含んだ文章をMathMLで書かれた数式を含んだ文章に変換する関数。
+    I don't use this function now, but I maybe use this in the future.
+    Args:
+        KaTeXで書かれた数式を含んだ文章。
+    Returns:
+        KaTeXで書かれた数式がrenderされた文章。
+    Note:
+        textのサイズが大きくなるとre.findall()にかかる時間がとても長くなり、
+        render_katex_page()の処理が終わらないように見える。
+    """
+    result = text
+
+    # render $$expr$$
+    # use "?:" because non-capture version of regular parentheses is better here.
+    katex_list: list[str] = re.findall(r'\$\$(?:.|\s)+\$\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    # render $expr$
+    katex_list: list[str] = re.findall(r'\$.+?\$', result)
+
+    for katex in katex_list:
+        mathml = render_katex(katex.strip('$'))
+        result = result.replace(katex, mathml)
+
+    return result
+
+
 def _clean_text(text: str) -> str:
     """不要なタグなどを削除する関数．
-    bodyタグの削除
-    TODO:
-        不要な情報を削除することで，登録するデータ量を小さくする．
-        classなどが自作のものとかぶっても困るので，そのあたりの削除．
+    不要な情報を削除することで，登録するデータ量を小さくする．
+    classなどが自作のものとかぶっても困るので，そのあたりの削除．
     """
     soup = BeautifulSoup(text, 'lxml')
     soup.html.unwrap()
@@ -102,6 +161,21 @@ def _clean_text(text: str) -> str:
 
     result = str(soup)
     return result.replace('\n', '')
+
+
+def _clean_mathml(response_text: str) -> str:
+    """KaTeXをrenderした結果から不要なタグを削除する関数。
+    I don't use this function now, but I maybe use this in the future.
+    """
+    # remove double quotes on both ends.
+    text = response_text.strip('"')
+    # remove all span tags.
+    soup = BeautifulSoup(text, 'lxml')
+    soup.html.unwrap()
+    soup.body.unwrap()
+    for span in soup.find_all('span'):
+        span.unwrap()
+    return str(soup)
 
 
 def _remove_comments(soup: BeautifulSoup):

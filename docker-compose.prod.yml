@@ -23,7 +23,7 @@ services:
   python:
     volumes: 
       - ./front:/code/front
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
       - ./uwsgi:/code/uwsgi
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     tty: true
