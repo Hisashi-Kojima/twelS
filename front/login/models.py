@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.mail import send_mail
+from django.core.mail import send_mail as send
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
@@ -77,10 +77,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
+    def send_mail(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+        send(subject, message, from_email, [self.email], **kwargs)
 
 
 class EmailUser(AbstractBaseUser):
@@ -103,7 +103,7 @@ class EmailUser(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
+    def send_mail(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+        send(subject, message, from_email, [self.email], **kwargs)
