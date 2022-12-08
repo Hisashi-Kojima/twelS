@@ -79,6 +79,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
+        from_email = '22801001@edu.cc.saga-u.ac.jp'
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
@@ -104,4 +105,5 @@ class EmailUser(AbstractBaseUser):
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
+        from_email = '22801001@edu.cc.saga-u.ac.jp'
         send_mail(subject, message, from_email, [self.email], **kwargs)

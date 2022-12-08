@@ -1,5 +1,10 @@
-{% extends "htmls/base.html" %}
-{% block content %}
+{% extends "search/base.html" %}
+
+{% block head %}
+<title>ログイン</title>
+{% endblock head %}
+
+{% block body %}
 <div class="row">
     <!-- 左側、ログインエリア -->
     <div class="card col-md-6">
@@ -27,4 +32,4 @@
         </div>
     </div><!-- 右側、会員登録エリアおわり -->
 </div>
-{% endblock %}
+{% endblock body %}
