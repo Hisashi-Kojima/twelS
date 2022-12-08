@@ -85,7 +85,7 @@ class UserCreate(generic.CreateView):
         subject = render_to_string('mail_template/user_create/subject.txt', context)
         message = render_to_string('mail_template/user_create/message.txt', context)
 
-        user.email_user(subject, message)
+        user.send_mail(subject, message)
         return redirect('login:user_create_done')
 
 
@@ -205,7 +205,7 @@ class EmailLogin(generic.FormView):
         subject = render_to_string('mail_template/email_login/subject.txt', context)
         message = render_to_string('mail_template/email_login/message.txt', context)
 
-        emailuser.email_user(subject, message)
+        emailuser.send_mail(subject, message)
         return redirect('login:email_login_sent')
 
 
