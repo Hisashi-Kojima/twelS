@@ -1,0 +1,14 @@
+{% extends "htmls/base.html" %}
+{% block content %}
+<table class="table">
+    <tbody>
+        <tr>
+            <th>ユーザー名</th>
+            <td>{{ user.email }}</td>
+        </tr>
+    </tbody>
+    <a class="btn btn-primary btn-lg" href="{% url 'login:password_change' %}">パスワード変更</a>
+
+
+</table>
+{% endblock %}

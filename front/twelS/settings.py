@@ -54,6 +54,7 @@ except requests.exceptions.RequestException:
 # Application definition
 
 INSTALLED_APPS = [
+    'login.apps.LoginConfig', # login
     'search.apps.SearchConfig',  # my app
     'django.contrib.admin',
     'django.contrib.auth',
@@ -121,6 +122,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # 追記箇所
+    {
+        'NAME': 'utils.validations.CustomPasswordValidator',
+    },
 ]
 
 
@@ -183,3 +188,18 @@ LOGGING = {
         },
     }
 }
+
+# 追記
+AUTH_USER_MODEL = 'login.User'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login:login'
+LOGIN_REDIRECT_URL = 'search:index' #ログイン後は数式検索ページにリダイレクト
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'login.auth_backend.PasswordlessAuthBackend',
+]
