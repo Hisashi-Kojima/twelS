@@ -1,6 +1,6 @@
-{% extends "htmls/base.html" %}
+{% extends "search/base.html" %}
 {% load static %}
-{% block content %}
+{% block body %}
 <script src="{% static 'js/mask_password.js' %}"></script>
 <form action="" method="POST">
     {{ form.non_field_errors }}
@@ -17,4 +17,4 @@
     <button type="submit" class="btn btn-primary btn-lg">送信</button>
 </form>
 
-{% endblock %}
+{% endblock body %}

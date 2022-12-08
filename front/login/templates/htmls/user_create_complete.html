@@ -1,8 +1,8 @@
-{% extends "htmls/base.html" %}
-{% block content %}
+{% extends "search/base.html" %}
+{% block body %}
 <p>
     本登録が完了しました。<br>
     登録されたメールアドレスとパスワードでログインしてください。<br>
     <a class="btn btn-primary btn-lg" href="{% url 'login:login' %}">ログイン</a>
 </p>
-{% endblock %}
+{% endblock body %}
