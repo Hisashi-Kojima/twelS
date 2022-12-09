@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '.twels.jp',
+    '.eagle4.fu.is.saga-u.ac.jp',
     env('ELASTIC_IP_ADDRESS'),
     env('LB_DNS_NAME'),
 ]
@@ -211,4 +212,8 @@ EMAIL_USE_TLS = True
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'login.auth_backend.PasswordlessAuthBackend',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.eagle4.fu.is.saga-u.ac.jp'
 ]
