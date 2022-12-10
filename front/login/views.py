@@ -73,11 +73,9 @@ class UserCreate(generic.CreateView):
         user.save()
 
         # アクティベーションURLの送付
-        current_site = get_current_site(self.request)
-        domain = current_site.domain
+        origin: str = self.request.headers["Origin"]
         context = {
-            'protocol': self.request.scheme,
-            'domain': domain,
+            'origin': origin,
             'token': dumps(user.pk),
             'user': user,
         }
@@ -192,11 +190,9 @@ class EmailLogin(generic.FormView):
         emailuser.is_active = False
         emailuser.save()
         # アクティベーションURLの送付
-        current_site = get_current_site(self.request)
-        domain = current_site.domain
+        origin: str = self.request.headers["Origin"]
         context = {
-            'protocol': self.request.scheme,
-            'domain': domain,
+            'origin': origin,
             'token': dumps(emailuser.pk),
             'user': emailuser,
         }
