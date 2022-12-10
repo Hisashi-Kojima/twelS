@@ -18,6 +18,7 @@ class LoginForm(AuthenticationForm):
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
             field.widget.attrs['placeholder'] = field.label  # placeholderにフィールドのラベルを入れる
+        self.fields['password'].widget.attrs['id'] = 'Password'
 
 
 class UsernameField(forms.CharField):
@@ -104,6 +105,7 @@ class CustomPasswordChangeForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        self.fields['old_password'].widget.attrs['id'] = 'OldPassword'
         self.fields['new_password'].widget.attrs['id'] = 'Password'
 
     def clean_old_password(self):

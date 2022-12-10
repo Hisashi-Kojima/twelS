@@ -63,10 +63,3 @@ def robots_txt(request):
     with open(f'{BASE_DIR}/search/static/search/robots.txt') as f:
         text = f.read()
     return HttpResponse(text, content_type='text/plain')
-
-
-@login_required
-def coming_soon(request):
-    """公開前に表示するページ．
-    """
-    return render(request, 'search/coming_soon.html', {})
