@@ -4,7 +4,7 @@
 
 from django.urls import path
 
-from front.search.views import index, robots_txt, coming_soon, privacy_policy
+from front.search.views import index, robots_txt, privacy_policy
 
 app_name='search'
 

@@ -1,10 +1,12 @@
 {% extends "search/base.html" %}
+{% load static %}
 
 {% block head %}
 <title>ログイン</title>
 {% endblock head %}
 
 {% block body %}
+<script src="{% static 'js/mask_password.js' %}"></script>
 <div class="row">
     <!-- 左側、ログインエリア -->
     <div class="card col-md-6">
@@ -16,6 +18,8 @@
                     {{ field.errors }}
                     <hr>
                 {% endfor %}
+                <!-- An element to toggle between password visibility -->
+                <input type="checkbox" onclick="mask_password()">Show Password
                 <button type="submit" class="btn btn-success btn-lg btn-block" >ログイン</button>
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% csrf_token %}
