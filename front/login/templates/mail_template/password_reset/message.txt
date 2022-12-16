@@ -3,4 +3,4 @@
 下記URLよりサイトにアクセスの上、パスワードの再設定を行ってください。
 
 再設定用URL
-{{ protocol}}://{{ domain }}{% url 'login:password_reset_confirm' uid token %}
+{{ origin }}{% url 'login:password_reset_confirm' uid token %}
