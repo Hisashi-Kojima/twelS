@@ -9,8 +9,10 @@ from django.shortcuts import render
 
 from front.twelS.settings import BASE_DIR
 from twels.searcher.searcher import Searcher
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def index(request):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
@@ -46,12 +48,14 @@ def index(request):
     return render(request, 'search/index.html', context)
 
 
+@login_required
 def privacy_policy(request):
     """プライバシーポリシーのページ．
     """
     return render(request, 'search/privacy_policy.html', {})
 
 
+@login_required
 def robots_txt(request):
     """robots.txtを表示するための関数．
     """
@@ -59,9 +63,3 @@ def robots_txt(request):
     with open(f'{BASE_DIR}/search/static/search/robots.txt') as f:
         text = f.read()
     return HttpResponse(text, content_type='text/plain')
-
-
-def coming_soon(request):
-    """公開前に表示するページ．
-    """
-    return render(request, 'search/coming_soon.html', {})

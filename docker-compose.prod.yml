@@ -8,7 +8,7 @@ services:
       dockerfile: ./webserver/Dockerfile
     ports:
       # host port : container port
-      - 80:80
+      - 8070:8070  # avoid to conflict with eagle4 nginx at port 80
       - 8000:8000
     volumes:
       - ./webserver/conf.d:/etc/nginx/conf.d
