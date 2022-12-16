@@ -9,13 +9,13 @@ from django.core.exceptions import ValidationError
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
 
 User = get_user_model()
 Emailuser = EmailUser
+
 
 def _unicode_ci_compare(s1, s2):
     """
@@ -74,7 +74,6 @@ class CustomUserCreateForm(forms.ModelForm):
             ] = True
         self.fields['password'].widget.attrs['id'] = 'Password'
 
-    
     def _post_clean(self):
         """パスワードのバリデーション
         条件を満たしてなかったら入力内容を削除
@@ -86,7 +85,6 @@ class CustomUserCreateForm(forms.ModelForm):
                 password_validation.validate_password(password, self.instance)
             except ValidationError as error:
                 self.add_error("password", error)
-
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -227,13 +225,13 @@ class MyPasswordResetForm(forms.Form):
         user.
         """
         email = self.cleaned_data["email"]
-        domain = request.headers["Origin"]
+        origin: str = request.headers["Origin"]
         email_field_name = User.get_email_field_name()
         for user in self.get_users(email):
             user_email = getattr(user, email_field_name)
             context = {
                 "email": user_email,
-                "domain": domain,
+                "origin": origin,
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 "token": token_generator.make_token(user),
@@ -248,7 +246,6 @@ class MyPasswordResetForm(forms.Form):
                 user_email,
                 html_email_template_name=html_email_template_name,
             )
- 
 
 
 class CustomSetPasswordForm(forms.Form):
