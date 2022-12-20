@@ -227,6 +227,8 @@ class MyPasswordResetForm(forms.Form):
         email = self.cleaned_data["email"]
         origin: str = request.headers["Origin"]
         email_field_name = User.get_email_field_name()
+        from_email = '22801001@edu.cc.saga-u.ac.jp'
+
         for user in self.get_users(email):
             user_email = getattr(user, email_field_name)
             context = {
