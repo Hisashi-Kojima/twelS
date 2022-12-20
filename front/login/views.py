@@ -16,20 +16,24 @@ from .forms import (
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
-from .models import EmailUser
-
+from .models import EmailUser, IPAddress
+from django.utils import timezone
+from django.http import HttpResponseRedirect
 
 
 User = get_user_model()
 Emailuser = EmailUser
 
 
-class Try(generic.TemplateView):
-    template_name = 'htmls/try.html'
-
-
-class Top(generic.TemplateView):
-    template_name = 'htmls/top.html'
+def get_ip(request):
+    forwarded_addresses = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_addresses:
+        # 'HTTP_X_FORWARDED_FOR'ヘッダがある場合: 転送経路の先頭要素を取得する。
+        current_ip = forwarded_addresses.split(',')[0]
+    else:
+        # 'HTTP_X_FORWARDED_FOR'ヘッダがない場合: 直接接続なので'REMOTE_ADDR'ヘッダを参照する。
+        current_ip = request.META.get('REMOTE_ADDR')
+    return current_ip
 
 
 class Login(LoginView):
@@ -37,6 +41,47 @@ class Login(LoginView):
     form_class = LoginForm
     template_name = 'htmls/login.html'
 
+    def form_valid(self, form):
+        print('called')
+
+        login(self.request, form.get_user())
+
+        if(self.request.user.is_authenticated):
+            print('authenticated')
+            try:
+                user = User.objects.get(pk=self.request.user.pk)
+
+                current_ip = get_ip(self.request)
+                print(current_ip)
+                
+                ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
+
+                if ip:
+                    print('exist')
+                    ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
+                    ip_address.last_access = timezone.now()
+                    ip_address.save()
+                    print('dddddddd')
+                    pass
+                else:
+                    print('not exist')
+                    IPAddress.objects.create(user=user, ip_address=current_ip)
+
+                    origin: str = self.request.headers["Origin"]
+                    context = {
+                        'origin': origin,
+                        'user': user,
+                        'ip': current_ip
+                    }
+
+                    subject = render_to_string('mail_template/unknown_ip/subject.txt', context)
+                    message = render_to_string('mail_template/unknown_ip/message.txt', context)
+
+                    user.send_mail(subject, message)
+
+            except :
+                pass
+        return HttpResponseRedirect(self.get_success_url())
 
 class Logout(generic.View):
 
@@ -47,7 +92,6 @@ class Logout(generic.View):
             emailuser: EmailUser = Emailuser.objects.get(email=request.user)
 
         except Emailuser.DoesNotExist:
-            print("not emailuser")
             pass
         else:
             emailuser: EmailUser = Emailuser.objects.get(email=request.user)
@@ -70,6 +114,10 @@ class UserCreate(generic.CreateView):
         user = form.save(commit=False)
         user.is_active = False
         user.save()
+
+        current_ip = get_ip(self.request)
+        IPAddress.objects.create(user=user, ip_address=current_ip) #登録時にIP保存
+        
 
         # アクティベーションURLの送付
         origin: str = self.request.headers["Origin"]

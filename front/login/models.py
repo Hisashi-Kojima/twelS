@@ -83,6 +83,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         send(subject, message, from_email, [self.email], **kwargs)
 
 
+class IPAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ip_address = models.GenericIPAddressField()
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    last_access = models.DateTimeField(_('last access'), default=timezone.now)
+
+
 class EmailUser(AbstractBaseUser):
     """メール認証ログイン用の一時的なユーザ"""
     email = models.EmailField(

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, EmailUser, IPAddress
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -27,7 +27,7 @@ class MyUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'),
+            'fields': ('email', 'password1'),
         }),
     )
     form = MyUserChangeForm
@@ -39,3 +39,7 @@ class MyUserAdmin(UserAdmin):
 
 
 admin.site.register(User, MyUserAdmin)
+
+admin.site.register(EmailUser)
+
+admin.site.register(IPAddress)
