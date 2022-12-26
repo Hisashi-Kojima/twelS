@@ -156,6 +156,11 @@ class CustomPasswordChangeForm(forms.Form):
             self.user.save()
         return self.user
 
+def user_exist(email):
+    user = User.objects.filter(email=email, is_active=True)
+
+    if not user:
+        raise ValidationError("入力されたユーザーは登録されていません")
 
 class MyPasswordResetForm(forms.Form):
     """パスワード忘れたときのフォーム"""
@@ -163,6 +168,7 @@ class MyPasswordResetForm(forms.Form):
         label=("Email"),
         max_length=254,
         widget=forms.EmailInput(attrs={"autocomplete": "email"}),
+        validators=[user_exist]
     )
 
     def send_mail(
