@@ -1,24 +1,44 @@
 # -*- coding: utf-8 -*-
 """module description
 """
+import json
+
 from twels.indexer.info import Info
 
 
 def test_info_1():
-    """正の数。
+    """2ページ登録されている場合。
     """
-    foo = {
-        "lang": ["ja"],
-        "uri_id": ["1"],
-        "area": [
-            [[40, 54], [200, 214]]
+    data = {
+        "lang": ["ja", "en"],
+        "uri_id": ["1", "2"],
+        "expr_start_pos": [
+            [40, 74],
+            [200, 310, 440]
         ]
     }
-    actual = Info(foo)
+    actual = Info(data)
 
     expected_lang = 'ja'
     expected_uri_id = '1'
-    expected_area = [40, 54]
+    expected_expr_start_pos = [40, 74]
     assert actual.lang_list[0] == expected_lang
     assert actual.uri_id_list[0] == expected_uri_id
-    assert actual.area_list[0][0] == expected_area
+    assert actual.expr_start_pos_list[0] == expected_expr_start_pos
+
+
+def test_dumps_1():
+    """Info.dumps()のテスト。
+    """
+    data = {
+        "uri_id": ["1", "2"],
+        "lang": ["ja", "en"],
+        "expr_start_pos": [
+            [40, 74],
+            [200, 310, 440]
+        ]
+    }
+    info = Info(data)
+    actual = info.dumps()
+    expected = json.dumps(data)
+    assert actual == expected

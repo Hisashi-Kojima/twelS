@@ -9,6 +9,8 @@ from itemadapter import ItemAdapter
 from web_crawler.web_crawler.items import Page
 from twels.database.cursor import Cursor
 from twels.indexer.indexer import Indexer
+from twels.indexer.info import Info
+from twels.indexer.snippet import Snippet
 from twels.expr.parser import Parser
 
 # Indexerのメソッド内のCursor.connect()と競合しないように，
@@ -28,127 +30,6 @@ def reset_tables():
             cursor.execute('TRUNCATE TABLE path_dictionary')
 
 
-def test_check_expr_id_1():
-    """Indexer._check_expr_id()のテスト．
-    未登録の数式の場合にはinverted_indexに登録する．
-    """
-    try:
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        query = 'SELECT * FROM inverted_index'
-        uri_id = 1
-        lang = 'ja'
-
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                cursor.execute(query)
-                first = cursor.fetchone()
-        assert first is None
-
-        expr_id_1, was_registered = Indexer._check_expr_id(mathml, uri_id, lang, test=True)
-        assert was_registered is False
-
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                cursor.execute(query)
-                expr_id_2, result_expr, info_str = cursor.fetchone()
-
-        assert result_expr == mathml
-        assert json.loads(info_str) == {'uri_id': ['1'], 'lang': ['ja']}
-        assert expr_id_1 == expr_id_2
-
-    finally:
-        reset_tables()
-
-
-def test_check_expr_id_2():
-    """Indexer._check_expr_id()のテスト．
-    登録済みの数式の場合にはinverted_indexを更新．
-    """
-    try:
-        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        query = 'SELECT * FROM inverted_index'
-        uri_id = 1
-        lang = 'ja'
-
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                cursor.execute(query)
-                first = cursor.fetchone()
-        assert first is None
-
-        expr_id_1, was_registered = Indexer._check_expr_id(mathml, uri_id, lang, test=True)
-        assert was_registered is False
-
-        expr_id_2, was_registered = Indexer._check_expr_id(mathml, uri_id, 'en', test=True)
-        assert expr_id_1 == expr_id_2
-        assert was_registered is True
-
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                cursor.execute(query)
-                expr_id_3, result_expr, info_str = cursor.fetchone()
-
-        assert json.loads(info_str) == {'uri_id': ['1'], 'lang': ['en']}
-
-    finally:
-        reset_tables()
-
-
-def test_update_index_table_1():
-    """Indexer._update_index_table()のテスト．
-    """
-    try:
-        uri_id = 2
-        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>&#x0002B;</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                cursor.execute(
-                    'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s, %s, %s), "lang", JSON_ARRAY(%s, %s, %s)))',
-                    (expr, "1", str(uri_id), "7", "ja", "ja", "ja")
-                    )
-                expr_id = Cursor.select_expr_id_from_inverted_index_where_expr_1(cursor, expr)
-            cnx.commit()
-
-        assert expr_id is not None
-
-        lang = 'en'
-        # Indexer._update_index_table()のテスト．
-        with Cursor.connect(test=True) as cnx:
-            with Cursor.cursor(cnx) as cursor:
-                Indexer._update_index_table(cursor, uri_id, lang, expr_id)
-                actual = Cursor.select_all_from_index_where_expr_id_1(cursor, expr_id)
-
-        actual_expr_id = actual[0]
-        actual_expr = actual[1]
-        actual_info = json.loads(actual[2])
-
-        expected_info = {'uri_id': ['1', str(uri_id), '7'], 'lang': ['ja', lang, 'ja']}
-
-        assert actual_expr == expr
-        assert actual_info == expected_info
-
-    finally:
-        reset_tables()
-
-
 def test_update_page_table_1():
     """Indexer._update_page_table()のテスト．
     新規登録の場合．
@@ -161,7 +42,7 @@ def test_update_page_table_1():
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
-                            <mo>&#x0002B;</mo>
+                            <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
@@ -196,7 +77,7 @@ def test_update_page_table_2():
         old_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
-                            <mo>&#x0002B;</mo>
+                            <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
@@ -214,7 +95,7 @@ def test_update_page_table_2():
         new_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>5</mn>
-                            <mo>&#x0002B;</mo>
+                            <mo>+</mo>
                             <mn>8</mn>
                         </mrow>
                     </math>"""
@@ -244,16 +125,26 @@ def test_update_index_and_path_table_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        snippet = 'snippet'
+        body = """
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+            <mrow>
+                <mn>1</mn>
+                <mo>+</mo>
+                <mn>2</mn>
+            </mrow>
+        </math>は数式です。
+        """
+        snippet = Snippet(body)
         lang = 'ja'
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
-                            <mo>&#x0002B;</mo>
+                            <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        exprs = [expr]
+        cleaned_expr = Snippet.remove_spaces(expr)
+        exprs = [cleaned_expr]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
@@ -266,19 +157,31 @@ def test_update_index_and_path_table_1():
 
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
-                cursor.execute('SELECT * FROM inverted_index WHERE expr = %s', (expr,))
+                cursor.execute('SELECT * FROM inverted_index WHERE expr = %s', (cleaned_expr,))
                 inverted_index_result = cursor.fetchone()
                 cursor.execute('SELECT expr_path FROM path_dictionary')
                 path_dict_result = cursor.fetchall()
+
         expr_id = inverted_index_result[0]
         actual_expr = inverted_index_result[1]
-        actual_info = json.loads(inverted_index_result[2])
+        actual_expr_len = inverted_index_result[2]
+        actual_info = Info(json.loads(inverted_index_result[3]))
         actual_paths = set([path_dict_result[i][0] for i in range(len(path_dict_result))])
-        expected_info = {'uri_id': [str(uri_id)], 'lang': [lang]}
-        expected_paths = Parser.parse(expr)
+
+        expr_start_pos_list = [
+            [0]
+        ]
+        expected_info = Info({
+            'uri_id': [str(uri_id)],
+            'lang': [lang],
+            'expr_start_pos': expr_start_pos_list
+        })
+        expected_paths = Parser.parse(cleaned_expr)
+
         assert type(expr_id) == int
-        assert actual_expr == expr
-        assert actual_info == expected_info
+        assert actual_expr == cleaned_expr
+        assert actual_expr_len == len(cleaned_expr)
+        assert str(actual_info) == str(expected_info)
         assert actual_paths == expected_paths
 
     finally:
@@ -292,23 +195,32 @@ def test_update_db_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        snippet = 'snippet'
+        body = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </math>は数式です。"""
+        snippet1 = Snippet(body)
         lang = 'ja'
         expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
-                            <mo>&#x0002B;</mo>
+                            <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        exprs = [expr]
+        cleaned_expr = Snippet.remove_spaces(expr)
+        exprs = [cleaned_expr]
 
-        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet1, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
         assert Indexer.update_db(page_info_1, test=True) == True
 
         uri_2 = 'uri_2'
-        page_item_2 = Page(uri=uri_2, title=title, snippet=snippet, lang=lang, exprs=exprs)
+        snippet2 = Snippet(f'文章。{body}')
+        page_item_2 = Page(uri=uri_2, title=title, snippet=snippet2, lang=lang, exprs=exprs)
         page_info_2 = ItemAdapter(page_item_2)
         assert Indexer.update_db(page_info_2, test=True) == True
 
@@ -322,9 +234,74 @@ def test_update_db_1():
 
                 # infoの取得
                 cursor.execute('SELECT info FROM inverted_index')  # どうせ1つしかないからWHEREは使わない．
-                result = json.loads(cursor.fetchone()[0])
+                actual_info = Info(json.loads(cursor.fetchone()[0]))
 
-        assert result == {'uri_id': [uri_id_1, uri_id_2], 'lang': ['ja', 'ja']}
+        expr_start_pos_list = [
+            [0],
+            [3]
+        ]
+
+        expected_info = Info({
+            'uri_id': [uri_id_1, uri_id_2],
+            'lang': ['ja', 'ja'],
+            'expr_start_pos': expr_start_pos_list
+        })
+        assert str(actual_info) == str(expected_info)
+    finally:
+        reset_tables()
+
+
+def test_update_db_2():
+    """Indexer.update_db()のテスト．
+    1回目の登録では数式が含まれていたが、2回目の登録では数式が含まれていない場合。
+    そのページがデータベースから削除されていることを確認。
+    """
+    try:
+        uri = 'https://example.com'
+        title = 'title'
+        body = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </math>は数式です。"""
+        snippet1 = Snippet(body)
+        lang = 'ja'
+        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </math>"""
+        cleaned_expr = Snippet.remove_spaces(expr)
+        exprs = [cleaned_expr]
+
+        page_item_1 = Page(uri=uri, title=title, snippet=snippet1, lang=lang, exprs=exprs)
+        page_info_1 = ItemAdapter(page_item_1)
+        assert Indexer.update_db(page_info_1, test=True)
+
+        # ページが登録されていることの確認。
+        query = 'SELECT uri_id FROM page WHERE uri = %s'
+        with Cursor.connect(test=True) as cnx:
+            with Cursor.cursor(cnx) as cursor:
+                cursor.execute(query, (uri,))
+                uri_id = cursor.fetchone()[0]
+        assert isinstance(uri_id, int)
+
+        new_exprs = []
+        snippet2 = Snippet(f'文章。{body}')
+        page_item_2 = Page(uri=uri, title=title, snippet=snippet2, lang=lang, exprs=new_exprs)
+        page_info_2 = ItemAdapter(page_item_2)
+        assert Indexer.update_db(page_info_2, test=True)
+
+        # ページが削除されていることの確認。
+        with Cursor.connect(test=True) as cnx:
+            with Cursor.cursor(cnx) as cursor:
+                cursor.execute('SELECT COUNT(*) FROM page')
+                page_num = cursor.fetchone()[0]
+        assert page_num == 0
     finally:
         reset_tables()
 

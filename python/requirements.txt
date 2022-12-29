@@ -10,7 +10,7 @@ Django==4.1.3
 django-environ==0.9.0
 lark-parser==0.12.0
 latex2mathml==3.74.1
-mysql-connector-python==8.0.26
+mysql-connector-python==8.0.30
 Scrapy==2.7.1
 scrapy-splash==0.8.0
 
