@@ -52,11 +52,11 @@ class Searcher:
         """sorted_expr_idsからいくつかのidだけを取得する関数．
         Args:
             sorted_expr_ids: ("expr_id", 出現回数)を出現回数に並べたlist．
-            ex. [('1', 7), ('2', 3), ('3', 1)]
+            e.g. [('1', 7), ('2', 3), ('3', 1)]
             start: 検索開始位置．
         Returns:
             expr_idを出現回数の降順に並べたlist.
-            ex. ['1', '2']
+            e.g. ['1', '2']
         """
         result: list[str] = []
         try:
@@ -75,7 +75,7 @@ class Searcher:
         """path setをクエリにpath_dictionary tableからexpr_idを取得する関数．
         Returns:
             ("expr_id", 出現回数)を出現回数に並べたlist．
-            ex. [('1', 7), ('2', 3), ('3', 1)]
+            e.g. [('1', 7), ('2', 3), ('3', 1)]
         """
         expr_ids: list[str] = []
         for path in path_set:
@@ -96,7 +96,7 @@ class Searcher:
         expr_idが多い順に，expr_idをクエリにinverted_index tableからinfo(uri_id, lang)を取得する．
         Args:
             extracted_ids: expr_idを出現回数の降順に並べたlist.
-            ex. ['1', '2']
+            e.g. ['1', '2']
             start: 検索開始位置．
         Returns:
             info: {'uri_id': ['1', '2'], 'lang': ['ja', 'en']}のような形式．
@@ -132,7 +132,7 @@ class Searcher:
         Args:
             info: info.
             extracted_ids: expr_idを出現回数の降順に並べたlist.
-            ex. ['1', '2']
+            e.g. ['1', '2']
         """
         # 現在の_get_infoのアルゴリズムだと，特定のページが複数回出てくる可能性がある
         uri_ids = []  # 表示するuri_idのリスト

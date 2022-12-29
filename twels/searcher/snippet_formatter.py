@@ -19,7 +19,7 @@ class SnippetFormatter:
         Args:
             snippet: snippet.
             extracted_ids: expr_idを出現回数の降順に並べたlist.
-            ex. ['1', '2']
+            e.g. ['1', '2']
         Returns:
             excerpted_snippet: 抜粋された文章．
         """

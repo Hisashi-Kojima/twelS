@@ -15,7 +15,7 @@ services:
 
   splash:
     image: scrapinghub/splash:3.5
-    command: --disable-lua-sandbox  # to use standard Lua modules (ex. io)
+    command: --disable-lua-sandbox  # to use standard Lua modules (e.g. io)
     ports:
       # host port : container port
       - 8050:8050

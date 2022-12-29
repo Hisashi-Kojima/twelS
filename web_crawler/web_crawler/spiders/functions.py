@@ -58,7 +58,7 @@ def render_katex(expr_katex: str) -> str:
     I don't use this function now, but I maybe use this in the future.
     Args:
         expr_katex: KaTeXで書かれた数式。
-        ex. a+b, $a+b$, $$a+b$$
+        e.g. a+b, $a+b$, $$a+b$$
     Returns:
         MathML.
     Note:
