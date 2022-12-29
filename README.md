@@ -69,16 +69,18 @@ test_cursor.pyのみをテストする。
 
 CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)、メモリ16GBのWindows PCで  
 日本語のWikipedia  
+
 * 数学 (7,021 pages)
 * 物理学 (1,127 pages)
 
 manabitimes.jp (1,270 pages)  
+
 * 数学
 * 物理学
 
 これらのページ合わせて9,418ページ（一部無関係のファイルを含む）を  
 シングルプロセスのスクレイピングをしたとき、  
-25,375秒（7時間2分55秒）かかった。  
+3,215秒（53分35秒）かかった。  
 request_bytes: 2,571,985 (約2.5MB)  
 response_bytes: 849,254,335 (約850MB)  
 
@@ -98,7 +100,7 @@ mysqlのバックアップのファイル名には221007_mysql_backup.sql（2022
 git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME
 ```
 
-ex.  
+e.g.  
 
 ```sh
 git pull origin develop:develop
