@@ -3,7 +3,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
 from django.contrib.auth import get_user_model, password_validation
-from .models import EmailUser, UserAccess
+from .models import EmailUser, UserRequest
 import unicodedata
 from django.core.exceptions import ValidationError
 from django.template import loader
@@ -159,7 +159,7 @@ class CustomPasswordChangeForm(forms.Form):
 
 
 def check_request_times(user):
-    user_access = UserAccess.objects.get(user=user)
+    user_access = UserRequest.objects.get(user=user)
 
     if user_access.email_request_times <=3:
         user_access.email_request_times += 1
@@ -171,7 +171,7 @@ def check_request_times(user):
 
 def check_request_date(user):
     try:
-        user_access = UserAccess.objects.get(user=user)
+        user_access = UserRequest.objects.get(user=user)
 
         now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         user_date = user_access.first_request_date.strftime('%Y/%m/%d %H:%M:%S')

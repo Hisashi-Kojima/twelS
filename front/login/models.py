@@ -91,7 +91,7 @@ class IPAddress(models.Model):
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
 
-class UserAccess(models.Model):
+class UserRequest(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email_request_times = models.PositiveSmallIntegerField(
         _('email request times'),
