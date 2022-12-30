@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """module description
 """
-from twels.indexer.snippet import Snippet
+from twels.snippet.snippet import Snippet
 
 
 def test_search_expr_start_pos_1():

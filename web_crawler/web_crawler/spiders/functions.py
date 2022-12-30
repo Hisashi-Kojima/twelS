@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 from scrapy.utils.httpobj import urlparse
 
-from twels.indexer.snippet import Snippet
+from twels.snippet.snippet import Snippet
 
 
 def get_lang(response) -> str:

@@ -10,7 +10,7 @@ from lark import exceptions
 from twels.database.cursor import Cursor
 from twels.expr.parser import Parser
 from twels.indexer.info import Info
-from twels.indexer.snippet import Snippet
+from twels.snippet.snippet import Snippet
 from twels.utils.utils import print_in_red
 
 

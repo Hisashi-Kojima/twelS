@@ -10,7 +10,7 @@ from web_crawler.web_crawler.items import Page
 from twels.database.cursor import Cursor
 from twels.indexer.indexer import Indexer
 from twels.indexer.info import Info
-from twels.indexer.snippet import Snippet
+from twels.snippet.snippet import Snippet
 from twels.expr.parser import Parser
 
 # Indexerのメソッド内のCursor.connect()と競合しないように，

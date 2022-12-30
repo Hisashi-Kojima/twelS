@@ -11,7 +11,7 @@ import environ
 import mysql.connector
 
 from twels.indexer.info import Info
-from twels.indexer.snippet import Snippet
+from twels.snippet.snippet import Snippet
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
