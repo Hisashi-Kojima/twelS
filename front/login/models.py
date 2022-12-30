@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
+import datetime
 
 
 def email_validater(email):
@@ -88,6 +89,18 @@ class IPAddress(models.Model):
     ip_address = models.GenericIPAddressField()
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
+
+
+class UserAccess(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
 
 
 class EmailUser(AbstractBaseUser):

@@ -16,9 +16,12 @@ from .forms import (
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
-from .models import EmailUser, IPAddress
+from .models import EmailUser, IPAddress, UserAccess
 from django.utils import timezone
 from django.http import HttpResponseRedirect
+from django.utils.http import urlsafe_base64_decode
+from django.core.exceptions import ValidationError
+import datetime
 
 
 User = get_user_model()
@@ -115,10 +118,6 @@ class UserCreate(generic.CreateView):
         user.is_active = False
         user.save()
 
-        current_ip = get_ip(self.request)
-        IPAddress.objects.create(user=user, ip_address=current_ip) #登録時にIP保存
-        
-
         # アクティベーションURLの送付
         origin: str = self.request.headers["Origin"]
         context = {
@@ -162,6 +161,11 @@ class UserCreateComplete(generic.TemplateView):
         else:
             try:
                 user = User.objects.get(pk=user_pk)
+
+                current_ip = get_ip(self.request)
+                IPAddress.objects.create(user=user, ip_address=current_ip)
+
+                UserAccess.objects.create(user=user)
             except User.DoesNotExist:
                 return HttpResponseBadRequest()
             else:
@@ -218,6 +222,29 @@ class PasswordResetConfirm(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
     success_url = reverse_lazy('login:password_reset_complete')
     template_name = 'htmls/password_reset_confirm.html'
+
+    def get_user(self, uidb64):
+        try:
+            # urlsafe_base64_decode() decodes to bytestring
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User._default_manager.get(pk=uid)
+            user.save()
+
+            user_access = UserAccess.objects.get(user=user)
+
+            user_access.email_request_times = 0
+            user_access.first_request_date = datetime.datetime.now()
+            user_access.save()
+
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            User.DoesNotExist,
+            ValidationError,
+        ):
+            user = None
+        return user
 
 
 class PasswordResetComplete(PasswordResetCompleteView):

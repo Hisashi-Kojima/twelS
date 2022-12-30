@@ -3,7 +3,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
 from django.contrib.auth import get_user_model, password_validation
-from .models import EmailUser
+from .models import EmailUser, UserAccess
 import unicodedata
 from django.core.exceptions import ValidationError
 from django.template import loader
@@ -11,6 +11,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+import datetime
 
 
 User = get_user_model()
@@ -156,11 +157,48 @@ class CustomPasswordChangeForm(forms.Form):
             self.user.save()
         return self.user
 
-def user_exist(email):
-    user = User.objects.filter(email=email, is_active=True)
 
-    if not user:
-        raise ValidationError("入力されたユーザーは登録されていません")
+def check_request_times(user):
+    user_access = UserAccess.objects.get(user=user)
+
+    if user_access.email_request_times <=3:
+        user_access.email_request_times += 1
+        user_access.save()
+    
+    else:
+        raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
+
+
+def check_request_date(user):
+    try:
+        user_access = UserAccess.objects.get(user=user)
+
+        now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+        user_date = user_access.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+
+        now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+        user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
+
+        elapsed_time = abs(now - user_date)
+
+        if elapsed_time.days > 1:
+            user_access.first_request_date = datetime.datetime.now()
+            user_access.email_request_times = 0
+            user_access.save()
+    
+    except:
+        pass
+
+def check_user(email):
+    user_exist = User.objects.filter(email=email, is_active=True)
+
+    if user_exist:
+        user = User.objects.get(email=email, is_active=True)
+        check_request_date(user)
+        check_request_times(user)
+    if not user_exist:
+        raise ValidationError("not exist")
+
 
 class MyPasswordResetForm(forms.Form):
     """パスワード忘れたときのフォーム"""
@@ -168,7 +206,7 @@ class MyPasswordResetForm(forms.Form):
         label=("Email"),
         max_length=254,
         widget=forms.EmailInput(attrs={"autocomplete": "email"}),
-        validators=[user_exist]
+        validators=[check_user]
     )
 
     def send_mail(
