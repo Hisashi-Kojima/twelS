@@ -16,20 +16,27 @@ from .forms import (
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
-from .models import EmailUser
-
+from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
+from django.utils import timezone
+from django.http import HttpResponseRedirect
+from django.utils.http import urlsafe_base64_decode
+from django.core.exceptions import ValidationError
+import datetime
 
 
 User = get_user_model()
 Emailuser = EmailUser
 
 
-class Try(generic.TemplateView):
-    template_name = 'htmls/try.html'
-
-
-class Top(generic.TemplateView):
-    template_name = 'htmls/top.html'
+def get_ip(request):
+    forwarded_addresses = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_addresses:
+        # 'HTTP_X_FORWARDED_FOR'ヘッダがある場合: 転送経路の先頭要素を取得する。
+        current_ip = forwarded_addresses.split(',')[0]
+    else:
+        # 'HTTP_X_FORWARDED_FOR'ヘッダがない場合: 直接接続なので'REMOTE_ADDR'ヘッダを参照する。
+        current_ip = request.META.get('REMOTE_ADDR')
+    return current_ip
 
 
 class Login(LoginView):
@@ -37,6 +44,42 @@ class Login(LoginView):
     form_class = LoginForm
     template_name = 'htmls/login.html'
 
+    def form_valid(self, form):
+
+        login(self.request, form.get_user())
+
+        if(self.request.user.is_authenticated):
+            try:
+                user = User.objects.get(pk=self.request.user.pk)
+
+                current_ip = get_ip(self.request)
+                print(current_ip)
+                
+                ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
+
+                if ip:
+                    ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
+                    ip_address.last_access = timezone.now()
+                    ip_address.save()
+                    pass
+                else:
+                    IPAddress.objects.create(user=user, ip_address=current_ip)
+
+                    origin: str = self.request.headers["Origin"]
+                    context = {
+                        'origin': origin,
+                        'user': user,
+                        'ip': current_ip
+                    }
+
+                    subject = render_to_string('mail_template/unknown_ip/subject.txt', context)
+                    message = render_to_string('mail_template/unknown_ip/message.txt', context)
+
+                    user.send_mail(subject, message)
+
+            except :
+                pass
+        return HttpResponseRedirect(self.get_success_url())
 
 class Logout(generic.View):
 
@@ -47,7 +90,6 @@ class Logout(generic.View):
             emailuser: EmailUser = Emailuser.objects.get(email=request.user)
 
         except Emailuser.DoesNotExist:
-            print("not emailuser")
             pass
         else:
             emailuser: EmailUser = Emailuser.objects.get(email=request.user)
@@ -114,6 +156,14 @@ class UserCreateComplete(generic.TemplateView):
         else:
             try:
                 user = User.objects.get(pk=user_pk)
+
+                current_ip = get_ip(self.request)
+                IPAddress.objects.create(user=user, ip_address=current_ip)
+
+                PasswordResetRequest.objects.create(user=user)
+
+                UserCreateRequest.objects.filter(email=user.email).delete()
+
             except User.DoesNotExist:
                 return HttpResponseBadRequest()
             else:
@@ -170,6 +220,29 @@ class PasswordResetConfirm(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
     success_url = reverse_lazy('login:password_reset_complete')
     template_name = 'htmls/password_reset_confirm.html'
+
+    def get_user(self, uidb64):
+        try:
+            # urlsafe_base64_decode() decodes to bytestring
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User._default_manager.get(pk=uid)
+            user.save()
+
+            user_request = PasswordResetRequest.objects.get(user=user)
+
+            user_request.email_request_times = 0
+            user_request.first_request_date = datetime.datetime.now()
+            user_request.save()
+
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            User.DoesNotExist,
+            ValidationError,
+        ):
+            user = None
+        return user
 
 
 class PasswordResetComplete(PasswordResetCompleteView):
@@ -229,6 +302,8 @@ class EmailLoginComplete(generic.TemplateView):
         else:
             try:
                 emailuser = Emailuser.objects.get(pk=user_pk)
+                EmailLoginRequest.objects.filter(email=emailuser.email).delete()
+
             except Emailuser.DoesNotExist:
                 return HttpResponseBadRequest()
             else:
