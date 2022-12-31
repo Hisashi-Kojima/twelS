@@ -16,7 +16,7 @@ from .forms import (
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
-from .models import EmailUser, IPAddress, UserRequest
+from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest
 from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.utils.http import urlsafe_base64_decode
@@ -165,7 +165,10 @@ class UserCreateComplete(generic.TemplateView):
                 current_ip = get_ip(self.request)
                 IPAddress.objects.create(user=user, ip_address=current_ip)
 
-                UserRequest.objects.create(user=user)
+                PasswordResetRequest.objects.create(user=user)
+
+                UserCreateRequest.objects.filter(email=user.email).delete()
+
             except User.DoesNotExist:
                 return HttpResponseBadRequest()
             else:
@@ -230,7 +233,7 @@ class PasswordResetConfirm(PasswordResetConfirmView):
             user = User._default_manager.get(pk=uid)
             user.save()
 
-            user_request = UserRequest.objects.get(user=user)
+            user_request = PasswordResetRequest.objects.get(user=user)
 
             user_request.email_request_times = 0
             user_request.first_request_date = datetime.datetime.now()

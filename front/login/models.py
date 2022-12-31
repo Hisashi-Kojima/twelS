@@ -91,8 +91,20 @@ class IPAddress(models.Model):
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
 
-class UserRequest(models.Model):
+class PasswordResetRequest(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+
+
+class UserCreateRequest(models.Model):
+    email = models.EmailField(_('email address'), unique=True)
     email_request_times = models.PositiveSmallIntegerField(
         _('email request times'),
         default=0,
