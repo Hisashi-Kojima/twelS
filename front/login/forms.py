@@ -3,7 +3,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
 from django.contrib.auth import get_user_model, password_validation
-from .models import EmailUser, PasswordResetRequest, UserCreateRequest
+from .models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 import unicodedata
 from django.core.exceptions import ValidationError
 from django.template import loader
@@ -377,6 +377,38 @@ class CustomSetPasswordForm(forms.Form):
         return self.user
 
 
+def check_email_login_request_times(email):
+        user_request = EmailLoginRequest.objects.get(email=email)
+
+        if user_request.email_request_times < 3:
+            user_request.email_request_times += 1
+            user_request.save()
+        
+        else:
+            raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
+    
+def check_email_login_request_date(email):
+    try:
+        user_request = EmailLoginRequest.objects.get(email=email)
+
+        now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+        user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+
+        now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+        user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
+
+        elapsed_time = abs(now - user_date)
+
+
+        if elapsed_time.days > 1:
+            user_request.first_request_date = datetime.datetime.now()
+            user_request.email_request_times = 0
+            user_request.save()
+
+    except:
+        pass
+
+
 class EmailLoginForm(forms.ModelForm):
     class Meta:
         model = EmailUser
@@ -390,4 +422,15 @@ class EmailLoginForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data['email']
         Emailuser.objects.filter(email=email, is_active=False).delete()
+
+        email_login_request_exist = EmailLoginRequest.objects.filter(email=email)
+
+        if email_login_request_exist:
+            check_email_login_request_date(email)
+            check_email_login_request_times(email)
+        
+        if not email_login_request_exist:
+            EmailLoginRequest.objects.create(email=email)
+            check_email_login_request_times(email)
+
         return email

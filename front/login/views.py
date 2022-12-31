@@ -16,7 +16,7 @@ from .forms import (
 )
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
-from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest
+from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.utils.http import urlsafe_base64_decode
@@ -45,12 +45,10 @@ class Login(LoginView):
     template_name = 'htmls/login.html'
 
     def form_valid(self, form):
-        print('called')
 
         login(self.request, form.get_user())
 
         if(self.request.user.is_authenticated):
-            print('authenticated')
             try:
                 user = User.objects.get(pk=self.request.user.pk)
 
@@ -60,14 +58,11 @@ class Login(LoginView):
                 ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
 
                 if ip:
-                    print('exist')
                     ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
                     ip_address.last_access = timezone.now()
                     ip_address.save()
-                    print('dddddddd')
                     pass
                 else:
-                    print('not exist')
                     IPAddress.objects.create(user=user, ip_address=current_ip)
 
                     origin: str = self.request.headers["Origin"]
@@ -307,6 +302,8 @@ class EmailLoginComplete(generic.TemplateView):
         else:
             try:
                 emailuser = Emailuser.objects.get(pk=user_pk)
+                EmailLoginRequest.objects.filter(email=emailuser.email).delete()
+
             except Emailuser.DoesNotExist:
                 return HttpResponseBadRequest()
             else:

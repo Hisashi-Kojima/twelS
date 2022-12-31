@@ -139,3 +139,15 @@ class EmailUser(AbstractBaseUser):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
         send(subject, message, from_email, [self.email], **kwargs)
+
+
+class EmailLoginRequest(models.Model):
+    email = models.EmailField(_('email address'), unique=True)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
