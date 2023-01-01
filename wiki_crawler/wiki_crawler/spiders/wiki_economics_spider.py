@@ -18,7 +18,7 @@ def _load_script(path: str) -> str:
     return script
 
 
-class MathSpider(CrawlSpider):
+class WikiEconomicsSpider(CrawlSpider):
     # type 'scrapy crawl math' to crawl.
     name = 'economics'
 

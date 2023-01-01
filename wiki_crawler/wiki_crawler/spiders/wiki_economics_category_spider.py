@@ -10,7 +10,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from ..items import DownloadItem
 
 
-class WikiSpider(CrawlSpider):
+class WikiEconomicsCategorySpider(CrawlSpider):
     # type 'scrapy crawl wiki_economics' to crawl.
     name = 'economics_category'
     allowed_domains = [
@@ -21,8 +21,6 @@ class WikiSpider(CrawlSpider):
         'ROBOTSTXT_OBEY': False,
         'DEPTH_LIMIT': 3,
     }
-
-
 
     count = 0
     start_urls = [
@@ -60,13 +58,6 @@ class WikiSpider(CrawlSpider):
     # Get wiki category links
     def parse(self, response: TextResponse) -> scrapy.Item:
         with open("wiki_crawler/spiders/category.txt", "a", encoding='utf-8',newline="\n") as file:
-            # file.write(response.css('title::text').get()),
-            # file.write("\n"),
-
             file.write(response.url),
             file.write("\n"),
-            # file.write("\n"),
-        
-            
-
 
