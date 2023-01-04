@@ -5,6 +5,7 @@ import pytest
 import mysql.connector
 
 from twels.database.cursor import Cursor
+from twels.expr.parser import Parser
 from twels.indexer.info import Info
 from twels.utils.utils import print_in_red
 
@@ -120,6 +121,35 @@ def test_append_expr_id_if_not_registered_3(cursor):
     result = cursor.fetchone()
     result_expr_ids = json.loads(result[0])
     assert result_expr_ids == [str(expr_id)]
+
+
+def test_count_json_values_1(cursor):
+    """count_json_values()のテスト。"""
+    ids_1 = ['1', '2', '3']
+    ids_2 = ['1', '2', '4']
+    ids_3 = ['1', '2', '4']
+    ids_4 = ['1', '2', '4']
+    ids_5 = ['1', '3', '5']
+
+    ids_1.extend(ids_2)
+    ids_1.extend(ids_3)
+    ids_1.extend(ids_4)
+    ids_1.extend(ids_5)
+
+    query = """
+    SELECT count_json_values(%(j)s)
+    """
+    data = {
+        'j': json.dumps(list(ids_1))
+    }
+    cursor.execute(query, data)
+    actual = json.loads(cursor.fetchone()[0])
+    actual_sorted = sorted(actual, key=lambda x: x[1], reverse=True)
+    expected = [
+        ['1', 5], ['2', 4], ['4', 3], ['3', 2], ['5', 1]
+    ]
+
+    assert actual_sorted == expected
 
 
 def test_delete_from_inverted_index_where_expr_1(cursor):
@@ -240,42 +270,6 @@ def test_delete_from_path_dictionary_where_expr_path_1(cursor):
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
-def test_insert_into_index_values_1(cursor):
-    """Cursor.insert_into_index_values_1_2()のテスト．
-    """
-    expr = '<math>a</math>'
-    expected_expr_len = len(expr)
-    uri_id = 1
-    lang = 'ja'
-    expr_start_post_list = [
-        [50, 135, 234]
-    ]
-    info_data = {
-        "uri_id": [str(uri_id)],
-        "lang": [lang],
-        "expr_start_pos": expr_start_post_list
-    }
-    info = Info(info_data)
-
-    select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
-
-    cursor.execute(select_query, (expr,))
-    assert cursor.fetchone() is None  # insert前
-
-    Cursor.insert_into_index_values_1_2(cursor, expr, info)
-    cursor.execute(select_query, (expr,))
-    # insert後
-    result = cursor.fetchone()
-    result_expr_id = result[0]
-    result_expr = result[1]
-    result_expr_len = result[2]
-    result_info = json.loads(result[3])
-    assert type(result_expr_id) == int
-    assert result_expr == expr
-    assert result_expr_len == expected_expr_len
-    assert result_info == info_data
-
-
 def test_insert_into_uri_values_1(cursor):
     """Cursor.insert_into_page_values_1_2_3_4()のテスト．
     """
@@ -303,6 +297,41 @@ def test_insert_into_uri_values_1(cursor):
     assert result_exprs == exprs
     assert result_title == title
     assert result_snippet == snippet
+
+
+def test_merge_expr_ids_1(cursor):
+    """merge_expr_ids()のテスト。"""
+    path_set = {'path1', 'path2', 'path3', 'path4', 'path5'}
+    ids_1 = ['1', '2', '3', '4', '5']
+    ids_2 = ['1', '3', '5', '7', '9']
+    ids_3 = ['1', '2', '4', '8', '16']
+    ids_4 = ['1', '2', '3', '5', '8']
+    ids_5 = ['1', '4', '9', '16', '25']
+
+    query = 'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)'
+    cursor.execute(query, ('path1', json.dumps(ids_1)))
+    cursor.execute(query, ('path2', json.dumps(ids_2)))
+    cursor.execute(query, ('path3', json.dumps(ids_3)))
+    cursor.execute(query, ('path4', json.dumps(ids_4)))
+    cursor.execute(query, ('path5', json.dumps(ids_5)))
+
+    query = """
+    SELECT merge_expr_ids(%(path_set)s)
+    """
+    data = {
+        'path_set': json.dumps(list(path_set))
+    }
+    cursor.execute(query, data)
+    actual = json.loads(cursor.fetchone()[0])
+    actual_sorted = sorted(actual)
+
+    ids_1.extend(ids_2)
+    ids_1.extend(ids_3)
+    ids_1.extend(ids_4)
+    ids_1.extend(ids_5)
+    expected_sorted = sorted(ids_1)
+
+    assert actual_sorted == expected_sorted
 
 
 def test_remove_expr_id_from_path_dictionary_1(cursor):
@@ -418,11 +447,64 @@ def test_remove_info_from_inverted_index_1(cursor):
     assert str(actual_info) == str(expected_info)
 
 
+def test_search_1(cursor):
+    """Cursor.search()のテスト。"""
+    path_set = {'path1', 'path2', 'path3', 'path4', 'path5'}
+    info = Info({
+        "uri_id": ["1", "2", "3"],
+        "lang": ["ja", "ja", "ja"],
+        "expr_start_pos": [
+            [40, 93, 279],
+            [20, 66],
+            [77, 165, 222]
+        ]
+    })
+
+    query1 = """INSERT INTO inverted_index (expr, expr_len, expr_size, info) VALUES (
+            %s, %s, %s, %s)"""
+    for i in range(10):
+        cursor.execute(query1, (f'expr{i}', 14, 5, info.dumps()))
+
+    query2 = 'SELECT expr_id FROM inverted_index WHERE expr = %s'
+    cursor.execute(query2, ('expr0',))
+    id_0 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr1',))
+    id_1 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr2',))
+    id_2 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr3',))
+    id_3 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr4',))
+    id_4 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr5',))
+    id_5 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr6',))
+    id_6 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr7',))
+    id_7 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr8',))
+    id_8 = str(cursor.fetchone()[0])
+    cursor.execute(query2, ('expr9',))
+    id_9 = str(cursor.fetchone()[0])
+
+    query3 = 'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)'
+    cursor.execute(query3, ('path1', json.dumps([id_1, id_2, id_3, id_4, id_5])))
+    cursor.execute(query3, ('path2', json.dumps([id_1, id_3, id_5, id_6, id_8])))
+    cursor.execute(query3, ('path3', json.dumps([id_1, id_2, id_4, id_7, id_9])))
+    cursor.execute(query3, ('path4', json.dumps([id_1, id_2, id_3, id_5, id_7])))
+    cursor.execute(query3, ('path5', json.dumps([id_1, id_4, id_8, id_9, id_0])))
+
+    result = Cursor.search(cursor, path_set)
+    for item in result:
+        assert 0 <= item[1] <= 1
+
+
 def test_select_all_from_index_where_expr_id_1(cursor):
     """Cursor.select_all_from_index_where_expr_id_1()のテスト．
     """
-    expr = '<math>a</math>'
+    expr = '<math><mi>a</mi></math>'
     expr_len = len(expr)
+    path_set = Parser.parse(expr)
     expr_start_pos = [
         [76, 130],
         [27, 64, 113, 270]
@@ -434,10 +516,10 @@ def test_select_all_from_index_where_expr_id_1(cursor):
     }
     info = Info(data)
 
-    query = """INSERT INTO inverted_index (expr, expr_len, info)
-    VALUES (%s, %s, %s)
+    query = """INSERT INTO inverted_index (expr, expr_len, expr_size, info)
+    VALUES (%s, %s, %s, %s)
     """
-    cursor.execute(query, (expr, expr_len, info.dumps()))
+    cursor.execute(query, (expr, expr_len, len(path_set), info.dumps()))
 
     cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
     expr_id = cursor.fetchone()[0]
@@ -446,7 +528,7 @@ def test_select_all_from_index_where_expr_id_1(cursor):
     result_expr_id = result[0]
     result_expr = result[1]
     result_expr_len = result[2]
-    result_info = Info(json.loads(result[3]))
+    result_info = Info(json.loads(result[4]))
     assert result_expr_id == expr_id
     assert result_expr == expr
     assert result_expr_len == expr_len
@@ -511,25 +593,6 @@ def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
 
     actual = Cursor.select_expr_from_inverted_index_where_expr_id_1(cursor, expr_id)
     assert actual == expr
-
-
-def test_select_expr_id_from_inverted_index_where_expr_1(cursor):
-    """Cursor.select_expr_id_from_inverted_index_where_expr_1()のテスト．
-    """
-    expr = 'expr1'
-    expr_start_pos = [
-        [76, 130]
-    ]
-    data = {
-        "uri_id": ["1"],
-        "lang": ["ja"],
-        "expr_start_pos": expr_start_pos
-    }
-    info = Info(data)
-    Cursor.insert_into_index_values_1_2(cursor, expr, info)
-
-    result = Cursor.select_expr_id_from_inverted_index_where_expr_1(cursor, expr)
-    assert type(result) == int
 
 
 def test_select_expr_ids_from_path_dictionary_where_expr_path_1(cursor):
@@ -660,7 +723,7 @@ def test_update_index_1(cursor):
     """Cursor.update_index()のテスト。
     数式が未登録の場合。
     """
-    expr = '<math>a</math>'
+    expr = '<math><mi>a</mi></math>'
     info = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -668,7 +731,10 @@ def test_update_index_1(cursor):
             [40, 93, 279]
         ]
     })
-    actual_expr_id, was_registered = Cursor.update_index(cursor, expr, info)
+    expr_path_set = Parser.parse(expr)
+    actual_expr_id, was_registered = Cursor.update_index(
+        cursor, expr, len(expr_path_set), info
+        )
     assert type(actual_expr_id) == int
     assert was_registered is False
 
@@ -678,7 +744,7 @@ def test_update_index_2(cursor):
     数式が既に登録されていて、uri_idも登録されている場合。
     langとexpr_start_posが更新されることを確認。
     """
-    expr = '<math>a</math>'
+    expr = '<math><mi>a</mi></math>'
     info1 = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -686,7 +752,10 @@ def test_update_index_2(cursor):
             [40, 93, 279]
         ]
     })
-    expr_id_1, was_registered_1 = Cursor.update_index(cursor, expr, info1)
+    expr_path_set = Parser.parse(expr)
+    expr_id_1, was_registered_1 = Cursor.update_index(
+        cursor, expr, len(expr_path_set), info1
+        )
     assert type(expr_id_1) == int
     assert was_registered_1 is False
 
@@ -697,7 +766,9 @@ def test_update_index_2(cursor):
             [77]
         ]
     })
-    expr_id_2, was_registered_2 = Cursor.update_index(cursor, expr, info2)
+    expr_id_2, was_registered_2 = Cursor.update_index(
+        cursor, expr, len(expr_path_set), info2
+        )
     assert expr_id_1 == expr_id_2
     assert was_registered_2 is True
 
@@ -710,7 +781,7 @@ def test_update_index_3(cursor):
     数式が既に登録されていて、uri_idが未登録の場合。
     uri_id、lang、expr_start_posが追加されることを確認。
     """
-    expr = '<math>a</math>'
+    expr = '<math><mi>a</mi></math>'
     info1 = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -718,7 +789,10 @@ def test_update_index_3(cursor):
             [40, 93, 279]
         ]
     })
-    expr_id_1, was_registered_1 = Cursor.update_index(cursor, expr, info1)
+    expr_path_set = Parser.parse(expr)
+    expr_id_1, was_registered_1 = Cursor.update_index(
+        cursor, expr, len(expr_path_set), info1
+        )
     assert type(expr_id_1) == int
     assert was_registered_1 is False
 
@@ -729,7 +803,9 @@ def test_update_index_3(cursor):
             [77]
         ]
     })
-    expr_id_2, was_registered_2 = Cursor.update_index(cursor, expr, info2)
+    expr_id_2, was_registered_2 = Cursor.update_index(
+        cursor, expr, len(expr_path_set), info2
+        )
     assert expr_id_1 == expr_id_2
     assert was_registered_2 is True
 

@@ -11,7 +11,8 @@ services:
     volumes:
       # ここだけdocker-compose.ymlを上書きする．
       # mysqlディレクトリが空の場合，テーブルを作成して，データは空のままにしていたい．
-      - ./sqls/initdb:/docker-entrypoint-initdb.d
+      - ./sqls/initdb:/twels
+      - ./sqls/initdb_scrape:/docker-entrypoint-initdb.d
 
   splash:
     image: scrapinghub/splash:3.5

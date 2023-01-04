@@ -36,6 +36,7 @@ services:
       # 永続化したい場合は./db/mysql-testをvolumeする
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./tests/db/logs:/var/log/mysql
-      - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+      - ./sqls/initdb:/twels
+      - ./sqls/initdb_test:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net

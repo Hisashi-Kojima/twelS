@@ -48,6 +48,7 @@ def get_exprs(response) -> list[str]:
         soup.html.unwrap()
         soup.body.unwrap()
 
+        Snippet._remove_unnecessary_tags(soup)
         Snippet._remove_comments(soup)
         result.append(str(soup))
     return result

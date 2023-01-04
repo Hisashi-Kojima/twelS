@@ -24,9 +24,9 @@ class Snippet:
         """
         # 属性を削除したい。
         # ' '以降を削除できればよい。
-        pattern = '<([a-z]+).*?>'
+        attr_pattern = '<([a-z]+).*?>'
 
-        t1 = re.sub(pattern, '<\\1>', text)
+        t1 = re.sub(attr_pattern, '<\\1>', text)
         t2 = t1.replace(' ', '')
         t3 = t2.replace('\n', '')
         return t3.replace('\t', '')
@@ -98,6 +98,7 @@ class Snippet:
         for nav in soup.find_all('nav'):
             nav.decompose()
         __class__._remove_comments(soup)
+        __class__._remove_unnecessary_tags(soup)
 
         result = str(soup)
         return __class__.remove_spaces(result)
@@ -108,3 +109,14 @@ class Snippet:
         """
         for comment in soup(text=lambda x: isinstance(x, Comment)):
             comment.extract()
+
+    @staticmethod
+    def _remove_unnecessary_tags(soup: BeautifulSoup):
+        """MathMLの不要なタグを削除する関数。
+        """
+        for semantics in soup.find_all('semantics'):
+            semantics.unwrap()
+        for mstyle in soup.find_all('mstyle'):
+            mstyle.unwrap()
+        for annotation in soup.find_all('annotation'):
+            annotation.decompose()

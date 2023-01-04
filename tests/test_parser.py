@@ -9,6 +9,17 @@ from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
 
 
+def test_get_parsed_tree_atom_1():
+    """演算子を含まないparse。
+    a
+    """
+    mathml = '<math><mi>a</mi></math>'
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'a')
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
 def test_get_parsed_tree_add_1():
     """加算のparse
     1+2

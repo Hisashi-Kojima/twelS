@@ -95,20 +95,6 @@ class Cursor:
         return tmp[:-1]
 
     @staticmethod
-    def insert_into_index_values_1_2(cursor, expr: str, info: Info):
-        """inverted_index tableにinsertする関数。
-        """
-        query = """
-        CALL insert_into_index(%(expr)s, %(expr_len)s, %(info)s)
-        """
-        data = {
-            'expr': expr,
-            'expr_len': len(expr),
-            'info': info.dumps(),
-        }
-        cursor.execute(query, data)
-
-    @staticmethod
     def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, snippet: Snippet):
         cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, str(snippet)))
 
@@ -145,6 +131,22 @@ class Cursor:
         cursor.execute(query, data)
         info_dict: dict = json.loads(cursor.fetchone()[0])
         return Info(info_dict)
+
+    @staticmethod
+    def search(cursor, path_set: set[str]) -> list:
+        """[['expr_id', degree of similarity], ...]を返す関数。
+        e.g. [['10', 0.8], ['3', 0.7], ['23', 0.4]]
+        """
+        query = """
+        SELECT search(%(path_set)s)
+        """
+        data = {
+            'path_set': json.dumps(list(path_set))
+        }
+        cursor.execute(query, data)
+        similarity = json.loads(cursor.fetchone()[0])
+        sorted_similarity = sorted(similarity, key=lambda x: x[1], reverse=True)
+        return sorted_similarity
 
     @staticmethod
     def select_all_from_index_where_expr_id_1(cursor, expr_id: int) -> tuple | None:
@@ -197,6 +199,12 @@ class Cursor:
             return json.loads(tpl[0])
 
     @staticmethod
+    def select_info_and_len_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> tuple[Info, int]:
+        cursor.execute('SELECT info, expr_len FROM inverted_index WHERE expr_id = %s', (expr_id,))
+        info_str, expr_len = cursor.fetchone()
+        return Info(json.loads(info_str)), expr_len
+
+    @staticmethod
     def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int, set[str]]:
         cursor.execute('SELECT uri_id, exprs FROM page WHERE uri = %s', (uri,))
         # type(exprs) is bytearray.
@@ -230,7 +238,7 @@ class Cursor:
             return __class__.get_cleaned_path(json_path)
 
     @staticmethod
-    def update_index(cursor, mathml: str, info: Info) -> tuple[int, bool]:
+    def update_index(cursor, mathml: str, expr_size: int, info: Info) -> tuple[int, bool]:
         """inverted_index tableに問い合わせて，mathmlのexpr_idを取得する関数．
         数式が未登録の場合は，登録してexpr_idを取得する．
         数式が登録済みの場合は，infoを更新する．
@@ -240,12 +248,13 @@ class Cursor:
             (expr_id, was_registered): was_registeredは数式が登録済みのときにTrueを返す．
         """
         query = """
-        SELECT update_index(%(expr)s, %(expr_len)s, %(info)s)
+        SELECT update_index(%(expr)s, %(expr_len)s, %(expr_size)s, %(info)s)
         """
 
         data = {
             'expr': mathml,
             'expr_len': len(mathml),
+            'expr_size': expr_size,
             'info': info.dumps()
         }
         cursor.execute(query, data)

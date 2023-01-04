@@ -147,18 +147,18 @@ class Indexer:
                     "expr_start_pos": expr_start_pos_list
                 })
 
+            expr_path_set = Parser.parse(mathml)
             with Cursor.connect(test) as cnx:
                 with Cursor.cursor(cnx) as cursor:
-                    expr_id, was_registered = Cursor.update_index(cursor, mathml, info)
-                    cnx.commit()
-
-            if not was_registered:
-                expr_path_set = Parser.parse(mathml)
-                with Cursor.connect(test) as cnx:
-                    with Cursor.cursor(cnx) as cursor:
+                    expr_id, was_registered = Cursor.update_index(
+                        cursor, mathml, len(expr_path_set), info
+                        )
+                    if not was_registered:
                         for path in expr_path_set:
-                            Cursor.append_expr_id_if_not_registered(cursor, expr_id, path)
-                        cnx.commit()
+                            Cursor.append_expr_id_if_not_registered(
+                                cursor, expr_id, path
+                                )
+                    cnx.commit()
 
             return __class__._delete_expr_from_database_with_delete_set(uri_id, delete_set, test=test)
         except exceptions.LarkError as e:

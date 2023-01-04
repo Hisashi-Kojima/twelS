@@ -165,7 +165,7 @@ def test_update_index_and_path_table_1():
         expr_id = inverted_index_result[0]
         actual_expr = inverted_index_result[1]
         actual_expr_len = inverted_index_result[2]
-        actual_info = Info(json.loads(inverted_index_result[3]))
+        actual_info = Info(json.loads(inverted_index_result[4]))
         actual_paths = set([path_dict_result[i][0] for i in range(len(path_dict_result))])
 
         expr_start_pos_list = [
