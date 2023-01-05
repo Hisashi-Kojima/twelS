@@ -19,7 +19,7 @@ def test_search_expr_start_pos_1():
         """
     body = f'ページの説明。{mathml}は数式です。'
     snippet = Snippet(body)
-    cleaned_mathml = Snippet.remove_spaces(mathml)
+    cleaned_mathml = Snippet.clean(mathml)
     actual_pos = snippet.search_expr_start_pos(cleaned_mathml)
     expected_pos = [7]
     assert actual_pos == expected_pos
@@ -32,7 +32,7 @@ def test_search_expr_start_pos_2():
     mathml = '<math>a</math>'
     body = f'ページの説明。{mathml}は数式です。{mathml}は基本的な式です。'
     snippet = Snippet(body)
-    cleaned_mathml = Snippet.remove_spaces(mathml)
+    cleaned_mathml = Snippet.clean(mathml)
     actual_pos = snippet.search_expr_start_pos(cleaned_mathml)
     expected_pos = [7, 27]
     assert actual_pos == expected_pos
@@ -59,22 +59,22 @@ def test_search_expr_start_pos_3():
         </math>は数式です。
         """
     snippet = Snippet(body)
-    cleaned_mathml = Snippet.remove_spaces(mathml)
+    cleaned_mathml = Snippet.clean(mathml)
     actual_pos = snippet.search_expr_start_pos(cleaned_mathml)
     expected_pos = [0]
     assert actual_pos == expected_pos
 
 
-def test_remove_spaces_1():
-    """Snippet.remove_spaces()のテスト。
+def test_clean_1():
+    """Snippet.clean()のテスト。
     """
     text = '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">1</math>'
-    actual = Snippet.remove_spaces(text)
+    actual = Snippet.clean(text)
     assert actual == '<math>1</math>'
 
 
-def test_remove_spaces_2():
-    """Snippet.remove_spaces()のテスト。
+def test_clean_2():
+    """Snippet.clean()のテスト。
     """
     text = """
         <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -85,6 +85,6 @@ def test_remove_spaces_2():
             </mrow>
         </math>
         """
-    actual = Snippet.remove_spaces(text)
-    expected = '<math><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow></math>'
+    actual = Snippet.clean(text)
+    expected = '<math><mn>1</mn><mo>+</mo><mn>2</mn></math>'
     assert actual == expected

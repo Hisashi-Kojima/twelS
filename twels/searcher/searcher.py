@@ -81,9 +81,10 @@ class Searcher:
             e.g. [('1', 7), ('2', 3), ('3', 1)]
         """
         expr_ids: list[str] = []
+        expr_size = len(path_set)
         for path in path_set:
             with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
-                expr_ids_json = Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, path)
+                expr_ids_json = Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, path, expr_size)
             if expr_ids_json is None:
                 continue
             expr_ids.extend(expr_ids_json)

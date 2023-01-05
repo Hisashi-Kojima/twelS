@@ -19,17 +19,18 @@ class Snippet:
     def __str__(self):
         return self.snippet
 
-    def remove_spaces(text: str) -> str:
-        """インデントや改行、属性などを削除する関数．
-        """
-        # 属性を削除したい。
-        # ' '以降を削除できればよい。
-        attr_pattern = '<([a-z]+).*?>'
+    def clean(text: str) -> str:
+        """不要なものを削除する関数"""
+        soup = BeautifulSoup(text, 'lxml')
+        soup.html.unwrap()
+        soup.body.unwrap()
+        for p in soup.find_all('p'):
+            p.unwrap()
+        __class__._remove_comments(soup)
+        __class__._remove_unnecessary_tags(soup)
 
-        t1 = re.sub(attr_pattern, '<\\1>', text)
-        t2 = t1.replace(' ', '')
-        t3 = t2.replace('\n', '')
-        return t3.replace('\t', '')
+        result = str(soup)
+        return __class__._remove_spaces(result)
 
     def search_expr_start_pos(self, mathml: str) -> list[int]:
         """snippetに含まれているmathmlの開始位置のリストを返す関数。
@@ -97,11 +98,9 @@ class Snippet:
             footer.decompose()
         for nav in soup.find_all('nav'):
             nav.decompose()
-        __class__._remove_comments(soup)
-        __class__._remove_unnecessary_tags(soup)
 
         result = str(soup)
-        return __class__.remove_spaces(result)
+        return __class__.clean(result)
 
     @staticmethod
     def _remove_comments(soup: BeautifulSoup):
@@ -111,6 +110,19 @@ class Snippet:
             comment.extract()
 
     @staticmethod
+    def _remove_spaces(text: str) -> str:
+        """インデントや改行、属性などを削除する関数．
+        """
+        # 属性を削除したい。
+        # ' '以降を削除できればよい。
+        attr_pattern = '<([a-z]+).*?>'
+
+        t1 = re.sub(attr_pattern, '<\\1>', text)
+        t2 = t1.replace(' ', '')
+        t3 = t2.replace('\n', '')
+        return t3.replace('\t', '')
+
+    @staticmethod
     def _remove_unnecessary_tags(soup: BeautifulSoup):
         """MathMLの不要なタグを削除する関数。
         """
@@ -118,5 +130,7 @@ class Snippet:
             semantics.unwrap()
         for mstyle in soup.find_all('mstyle'):
             mstyle.unwrap()
+        for mrow in soup.find_all('mrow'):
+            mrow.unwrap()
         for annotation in soup.find_all('annotation'):
             annotation.decompose()

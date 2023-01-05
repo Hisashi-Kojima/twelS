@@ -56,15 +56,16 @@ def test_append_expr_id_if_not_registered_1(cursor):
     """
     expr_id = 1
     expr_path = 'path1'
+    expr_size = 5
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     assert cursor.fetchone() is None  # insert前
 
-    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path)
+    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path, expr_size)
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     result = cursor.fetchone()
     result_expr_ids = json.loads(result[0])
     assert result_expr_ids == [str(expr_id)]
@@ -77,21 +78,22 @@ def test_append_expr_id_if_not_registered_2(cursor):
     expr_id = 1
     other_expr_id = 2
     expr_path = 'path1'
+    expr_size = 5
 
     # expr_pathと他のexpr_idを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps([str(other_expr_id)]))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps([str(other_expr_id)]))
         )
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     assert cursor.fetchone() is not None  # expr_pathが登録されていることを確認
 
-    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path)
+    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path, expr_size)
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     result_expr_ids = json.loads(cursor.fetchone()[0])
     assert result_expr_ids == [str(other_expr_id), str(expr_id)]
 
@@ -103,21 +105,22 @@ def test_append_expr_id_if_not_registered_3(cursor):
     """
     expr_id = 1
     expr_path = 'path1'
+    expr_size = 5
 
     # expr_pathとexpr_idを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps([str(expr_id)]))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps([str(expr_id)]))
         )
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     assert cursor.fetchone() is not None  # expr_pathが登録されていることを確認
 
-    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path)
+    Cursor.append_expr_id_if_not_registered(cursor, expr_id, expr_path, expr_size)
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     result = cursor.fetchone()
     result_expr_ids = json.loads(result[0])
     assert result_expr_ids == [str(expr_id)]
@@ -252,21 +255,22 @@ def test_delete_from_path_dictionary_where_expr_path_1(cursor):
     """
     expr_ids = ['1', '2', '3']
     expr_path = 'expr_path1'
+    expr_size = 5
 
     # expr_pathとexpr_idsを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps(expr_ids))
         )
 
-    select_query = 'SELECT * FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT * FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     assert cursor.fetchone() is not None  # データが登録されていることを確認．
 
-    Cursor.delete_from_path_dictionary_where_expr_path_1(cursor, expr_path)
+    Cursor.delete_from_path_dictionary_where_expr_path_1(cursor, expr_path, expr_size)
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
@@ -307,19 +311,21 @@ def test_merge_expr_ids_1(cursor):
     ids_3 = ['1', '2', '4', '8', '16']
     ids_4 = ['1', '2', '3', '5', '8']
     ids_5 = ['1', '4', '9', '16', '25']
+    expr_size = len(path_set)
 
-    query = 'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)'
-    cursor.execute(query, ('path1', json.dumps(ids_1)))
-    cursor.execute(query, ('path2', json.dumps(ids_2)))
-    cursor.execute(query, ('path3', json.dumps(ids_3)))
-    cursor.execute(query, ('path4', json.dumps(ids_4)))
-    cursor.execute(query, ('path5', json.dumps(ids_5)))
+    query = 'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)'
+    cursor.execute(query, ('path1', expr_size, json.dumps(ids_1)))
+    cursor.execute(query, ('path2', expr_size, json.dumps(ids_2)))
+    cursor.execute(query, ('path3', expr_size, json.dumps(ids_3)))
+    cursor.execute(query, ('path4', expr_size, json.dumps(ids_4)))
+    cursor.execute(query, ('path5', expr_size, json.dumps(ids_5)))
 
     query = """
-    SELECT merge_expr_ids(%(path_set)s)
+    SELECT merge_expr_ids(%(path_set)s, %(expr_size)s)
     """
     data = {
-        'path_set': json.dumps(list(path_set))
+        'path_set': json.dumps(list(path_set)),
+        'expr_size': expr_size
     }
     cursor.execute(query, data)
     actual = json.loads(cursor.fetchone()[0])
@@ -340,21 +346,22 @@ def test_remove_expr_id_from_path_dictionary_1(cursor):
     remove_expr_id = 2
     expr_ids = ['1', str(remove_expr_id), '3']
     expr_path = 'path1'
+    expr_size = 5
 
     # expr_pathとexpr_idsを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps(expr_ids))
         )
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     tmp = cursor.fetchone()
     tmp_expr_ids = json.loads(tmp[0])
     assert tmp_expr_ids == expr_ids  # expr_pathが登録されていることを確認
 
-    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, remove_expr_id, expr_path)
+    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, remove_expr_id, expr_path, expr_size)
 
     assert result_expr_ids == ['1', '3']
 
@@ -366,21 +373,22 @@ def test_remove_expr_id_from_path_dictionary_2(cursor):
     remove_expr_id = 1
     expr_ids = [str(remove_expr_id)]
     expr_path = 'path1'
+    expr_size = 5
 
     # expr_pathとexpr_idsを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps(expr_ids))
         )
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     tmp = cursor.fetchone()
     tmp_expr_ids = json.loads(tmp[0])
     assert tmp_expr_ids == expr_ids  # expr_pathが登録されていることを確認
 
-    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, remove_expr_id, expr_path)
+    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, remove_expr_id, expr_path, expr_size)
 
     assert result_expr_ids == []
 
@@ -391,21 +399,22 @@ def test_remove_expr_id_from_path_dictionary_3(cursor):
     """
     expr_ids = ['1']
     expr_path = 'path1'
+    expr_size = 5
 
     # expr_pathとexpr_idsを登録．
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps(expr_ids))
         )
 
-    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s'
+    select_query = 'SELECT expr_ids FROM path_dictionary WHERE expr_path = %s AND expr_size = %s'
 
-    cursor.execute(select_query, (expr_path,))
+    cursor.execute(select_query, (expr_path, expr_size))
     tmp = cursor.fetchone()
     tmp_expr_ids = json.loads(tmp[0])
     assert tmp_expr_ids == expr_ids  # expr_pathが登録されていることを確認
 
-    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, 2, expr_path)
+    result_expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, 2, expr_path, expr_size)
 
     assert result_expr_ids == expr_ids
 
@@ -450,6 +459,7 @@ def test_remove_info_from_inverted_index_1(cursor):
 def test_search_1(cursor):
     """Cursor.search()のテスト。"""
     path_set = {'path1', 'path2', 'path3', 'path4', 'path5'}
+    expr_size = len(path_set)
     info = Info({
         "uri_id": ["1", "2", "3"],
         "lang": ["ja", "ja", "ja"],
@@ -463,7 +473,7 @@ def test_search_1(cursor):
     query1 = """INSERT INTO inverted_index (expr, expr_len, expr_size, info) VALUES (
             %s, %s, %s, %s)"""
     for i in range(10):
-        cursor.execute(query1, (f'expr{i}', 14, 5, info.dumps()))
+        cursor.execute(query1, (f'expr{i}', 14, expr_size, info.dumps()))
 
     query2 = 'SELECT expr_id FROM inverted_index WHERE expr = %s'
     cursor.execute(query2, ('expr0',))
@@ -487,12 +497,12 @@ def test_search_1(cursor):
     cursor.execute(query2, ('expr9',))
     id_9 = str(cursor.fetchone()[0])
 
-    query3 = 'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)'
-    cursor.execute(query3, ('path1', json.dumps([id_1, id_2, id_3, id_4, id_5])))
-    cursor.execute(query3, ('path2', json.dumps([id_1, id_3, id_5, id_6, id_8])))
-    cursor.execute(query3, ('path3', json.dumps([id_1, id_2, id_4, id_7, id_9])))
-    cursor.execute(query3, ('path4', json.dumps([id_1, id_2, id_3, id_5, id_7])))
-    cursor.execute(query3, ('path5', json.dumps([id_1, id_4, id_8, id_9, id_0])))
+    query3 = 'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)'
+    cursor.execute(query3, ('path1', expr_size, json.dumps([id_1, id_2, id_3, id_4, id_5])))
+    cursor.execute(query3, ('path2', expr_size, json.dumps([id_1, id_3, id_5, id_6, id_8])))
+    cursor.execute(query3, ('path3', expr_size, json.dumps([id_1, id_2, id_4, id_7, id_9])))
+    cursor.execute(query3, ('path4', expr_size, json.dumps([id_1, id_2, id_3, id_5, id_7])))
+    cursor.execute(query3, ('path5', expr_size, json.dumps([id_1, id_4, id_8, id_9, id_0])))
 
     result = Cursor.search(cursor, path_set)
     for item in result:
@@ -595,16 +605,17 @@ def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
     assert actual == expr
 
 
-def test_select_expr_ids_from_path_dictionary_where_expr_path_1(cursor):
-    """Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1()のテスト．
+def test_select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor):
+    """Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2()のテスト．
     """
     expr_path = 'path1'
     expr_ids = ['1', '2', '3', '5']
+    expr_size = 5
     cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_ids) VALUES (%s, %s)',
-        (expr_path, json.dumps(expr_ids))
+        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
+        (expr_path, expr_size, json.dumps(expr_ids))
         )
-    result_expr_ids = Cursor.select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path)
+    result_expr_ids = Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, expr_path, expr_size)
     assert result_expr_ids == expr_ids
 
 

@@ -72,11 +72,12 @@ class Indexer:
 
                 # その数式のpathそれぞれとexpr_idがセットでpath_dictionaryに登録されているので，削除．
                 expr_path_set = Parser.parse(mathml)
+                expr_size = len(expr_path_set)
                 for expr_path in expr_path_set:
-                    expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, expr_id, expr_path)
+                    expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, expr_id, expr_path, expr_size)
                     if not expr_ids:
                         # そのpathのexpr_idsが空になったら，そのpathのレコードを削除．
-                        Cursor.delete_from_path_dictionary_where_expr_path_1(cursor, expr_path)
+                        Cursor.delete_from_path_dictionary_where_expr_path_1(cursor, expr_path, expr_size)
             return True
         except exceptions.LarkError as e:
             print_in_red(f'error in indexer._delete_expr_from_database(). {e}')
@@ -147,18 +148,19 @@ class Indexer:
                     "expr_start_pos": expr_start_pos_list
                 })
 
-            expr_path_set = Parser.parse(mathml)
-            with Cursor.connect(test) as cnx:
-                with Cursor.cursor(cnx) as cursor:
-                    expr_id, was_registered = Cursor.update_index(
-                        cursor, mathml, len(expr_path_set), info
-                        )
-                    if not was_registered:
-                        for path in expr_path_set:
-                            Cursor.append_expr_id_if_not_registered(
-                                cursor, expr_id, path
-                                )
-                    cnx.commit()
+                expr_path_set = Parser.parse(mathml)
+                expr_size = len(expr_path_set)
+                with Cursor.connect(test) as cnx:
+                    with Cursor.cursor(cnx) as cursor:
+                        expr_id, was_registered = Cursor.update_index(
+                            cursor, mathml, len(expr_path_set), info
+                            )
+                        if not was_registered:
+                            for path in expr_path_set:
+                                Cursor.append_expr_id_if_not_registered(
+                                    cursor, expr_id, path, expr_size
+                                    )
+                        cnx.commit()
 
             return __class__._delete_expr_from_database_with_delete_set(uri_id, delete_set, test=test)
         except exceptions.LarkError as e:

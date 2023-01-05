@@ -40,17 +40,8 @@ def get_exprs(response) -> list[str]:
     """ページの式のリストを返す関数．"""
     result = []
     for mathml in response.xpath('//math').getall():
-        tmp = Snippet.remove_spaces(mathml)
+        result.append(Snippet.clean(mathml))
 
-        # Snippetの_clean_textの方と合わせるためにBeautifulSoupを使う
-        soup = BeautifulSoup(tmp, 'lxml')
-        # 補完されるhtmlタグとbodyタグを削除
-        soup.html.unwrap()
-        soup.body.unwrap()
-
-        Snippet._remove_unnecessary_tags(soup)
-        Snippet._remove_comments(soup)
-        result.append(str(soup))
     return result
 
 

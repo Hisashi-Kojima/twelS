@@ -143,7 +143,7 @@ def test_update_index_and_path_table_1():
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.remove_spaces(expr)
+        cleaned_expr = Snippet.clean(expr)
         exprs = [cleaned_expr]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
@@ -188,6 +188,82 @@ def test_update_index_and_path_table_1():
         reset_tables()
 
 
+def test_update_index_and_path_table_2():
+    """Indexer._update_index_and_path_table()のテスト．
+    数式を2種類登録する場合。
+    """
+    try:
+        uri_1 = 'uri_1'
+        title = 'title'
+        body = """
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+            <mrow>
+                <mn>1</mn>
+                <mo>+</mo>
+                <mn>2</mn>
+            </mrow>
+        </math>は数式です。
+        """
+        snippet = Snippet(body)
+        lang = 'ja'
+        expr1 =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </math>"""
+        cleaned_expr1 = Snippet.clean(expr1)
+        exprs1 = [cleaned_expr1]
+
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs1)
+        page_info_1 = ItemAdapter(page_item_1)
+
+        # page tableへの登録
+        uri_id, registered_exprs = Indexer._update_page_table(page_info_1, test=True)
+        assert registered_exprs == set()
+
+        Indexer._update_index_and_path_table(uri_id, registered_exprs, page_info_1, test=True)
+
+        uri_2 = 'uri_2'
+        expr2 =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                        <mrow>
+                            <mn>8</mn>
+                            <mo>-</mo>
+                            <mn>5</mn>
+                        </mrow>
+                    </math>"""
+        cleaned_expr2 = Snippet.clean(expr2)
+        exprs2 = [cleaned_expr2]
+        page_item_2 = Page(uri=uri_2, title=title, snippet=snippet, lang=lang, exprs=exprs2)
+        page_info_2 = ItemAdapter(page_item_2)
+
+        # page tableへの登録
+        uri_id, registered_exprs = Indexer._update_page_table(page_info_2, test=True)
+        assert registered_exprs == set()
+
+        Indexer._update_index_and_path_table(uri_id, registered_exprs, page_info_2, test=True)
+
+        with Cursor.connect(test=True) as cnx:
+            with Cursor.cursor(cnx) as cursor:
+                cursor.execute(
+                    'SELECT expr_path, expr_size FROM path_dictionary',
+                    )
+                path_dict_result = cursor.fetchall()
+
+        expected = [
+            ('1', 6), ('1/sum', 6), ('1/sum/start', 6),
+            ('2', 6), ('2/sum', 6), ('2/sum/start', 6),
+            ('5/neg', 6), ('5/neg/sum', 6), ('5/neg/sum/start', 6),
+            ('8', 6), ('8/sum', 6), ('8/sum/start', 6)
+            ]
+
+        assert path_dict_result == expected
+
+    finally:
+        reset_tables()
+
+
 def test_update_db_1():
     """Indexer.update_db()のテスト．
     inverted_index tableについて，あるexpr_idで複数のuri_idが登録されるか確認するテスト．
@@ -211,7 +287,7 @@ def test_update_db_1():
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.remove_spaces(expr)
+        cleaned_expr = Snippet.clean(expr)
         exprs = [cleaned_expr]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet1, lang=lang, exprs=exprs)
@@ -236,6 +312,9 @@ def test_update_db_1():
                 cursor.execute('SELECT info FROM inverted_index')  # どうせ1つしかないからWHEREは使わない．
                 actual_info = Info(json.loads(cursor.fetchone()[0]))
 
+                cursor.execute('SELECT * from path_dictionary')
+                actual_path_dict = cursor.fetchall()
+
         expr_start_pos_list = [
             [0],
             [3]
@@ -247,6 +326,7 @@ def test_update_db_1():
             'expr_start_pos': expr_start_pos_list
         })
         assert str(actual_info) == str(expected_info)
+        assert len(actual_path_dict) == 6
     finally:
         reset_tables()
 
@@ -275,7 +355,7 @@ def test_update_db_2():
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.remove_spaces(expr)
+        cleaned_expr = Snippet.clean(expr)
         exprs = [cleaned_expr]
 
         page_item_1 = Page(uri=uri, title=title, snippet=snippet1, lang=lang, exprs=exprs)

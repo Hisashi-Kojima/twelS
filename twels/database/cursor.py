@@ -45,17 +45,18 @@ class Cursor:
     }
 
     @staticmethod
-    def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str):
+    def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str, expr_size: int):
         """path_dictionaryのexpr_pathに対応するexpr_idsにexpr_idが未登録であれば登録する関数．
         """
         query = """
-        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s)
+        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s, %(size)s)
         """
 
         data = {
             'path': expr_path,
             'ids': json.dumps([str(expr_id)]),
-            'id': str(expr_id)
+            'id': str(expr_id),
+            'size': expr_size
         }
         cursor.execute(query, data)
 
@@ -81,11 +82,14 @@ class Cursor:
         cursor.execute('DELETE FROM page WHERE uri_id = %s LIMIT 1', (uri_id,))
 
     @staticmethod
-    def delete_from_path_dictionary_where_expr_path_1(cursor, expr_path: str):
+    def delete_from_path_dictionary_where_expr_path_1(cursor, expr_path: str, expr_size: int):
         """path_dictionary tableのexpr_pathが一致するレコードを削除する関数．
         最大1つしか一致しないので，'LIMIT 1'を付けている．
         """
-        cursor.execute('DELETE FROM path_dictionary WHERE expr_path = %s LIMIT 1', (expr_path,))
+        cursor.execute(
+            'DELETE FROM path_dictionary WHERE expr_path = %s AND expr_size = %s LIMIT 1',
+            (expr_path, expr_size)
+            )
 
     @staticmethod
     def get_cleaned_path(path: str) -> str:
@@ -99,7 +103,7 @@ class Cursor:
         cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, str(snippet)))
 
     @staticmethod
-    def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str) -> list:
+    def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str, expr_size: int) -> list:
         """expr_idsから引数のexpr_idを削除する関数．
         Returns:
             expr_ids: 削除済みのexpr_ids
@@ -108,11 +112,12 @@ class Cursor:
             expr_idsをそのまま返す。
         """
         query = """
-        SELECT remove_expr_id_from_path_dictionary(%(expr_id)s, %(expr_path)s)
+        SELECT remove_expr_id_from_path_dictionary(%(expr_id)s, %(expr_path)s, %(expr_size)s)
         """
         data = {
             'expr_id': expr_id,
-            'expr_path': expr_path
+            'expr_path': expr_path,
+            'expr_size': expr_size
         }
         cursor.execute(query, data)
         return json.loads(cursor.fetchone()[0])
@@ -181,7 +186,7 @@ class Cursor:
             return tpl[0]
 
     @staticmethod
-    def select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path: str) -> list[str] | None:
+    def select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, expr_path: str, expr_size: int) -> list[str] | None:
         cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
         tpl = cursor.fetchone()
         if tpl is None:
