@@ -186,15 +186,6 @@ class Cursor:
             return tpl[0]
 
     @staticmethod
-    def select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, expr_path: str, expr_size: int) -> list[str] | None:
-        cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
-        tpl = cursor.fetchone()
-        if tpl is None:
-            return None
-        else:
-            return json.loads(tpl[0])
-
-    @staticmethod
     def select_info_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> dict[str, list[str]] | None:
         cursor.execute('SELECT info FROM inverted_index WHERE expr_id = %s', (expr_id,))
         tpl = cursor.fetchone()

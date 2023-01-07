@@ -2,8 +2,6 @@
 """module description
 """
 
-import collections
-
 import latex2mathml.converter
 from lark import exceptions
 
@@ -34,65 +32,24 @@ class Searcher:
         try:
             mathml = latex2mathml.converter.convert(expr)
             path_set: set[str] = Parser.parse(Normalizer.normalize_subsup(mathml))
-            print('path_set:', path_set)
             with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
                 score_list = Cursor.search(cursor, path_set)
 
-            print('score_list:', score_list)
             search_result = __class__._get_search_result(score_list, start)
             result = {
                 'search_result': search_result
                 }
+            return result
         except exceptions.LarkError:
             result = {
-                'search_result': [],
-                'result_num': 0
+                'search_result': []
             }
-        return result
-
-    @staticmethod
-    def _extract_ids_from_sorted_expr_ids(sorted_expr_ids: list[tuple[str, int]], start: int) -> list[str]:
-        """sorted_expr_idsからいくつかのidだけを取得する関数．
-        Args:
-            sorted_expr_ids: ("expr_id", 出現回数)を出現回数に並べたlist．
-            e.g. [('1', 7), ('2', 3), ('3', 1)]
-            start: 検索開始位置．
-        Returns:
-            expr_idを出現回数の降順に並べたlist.
-            e.g. ['1', '2']
-        """
-        result: list[str] = []
-        try:
-            # 検索結果として表示する数と同じ数だけexpr_idがあれば十分だと仮定し，
-            # rangeのstopをstart+search_numに設定
-            for i in range(start+__class__.search_num):
-                # append expr_id
-                result.append(sorted_expr_ids[i][0])
-        except IndexError:
-            pass
-        finally:
             return result
-
-    @staticmethod
-    def _get_expr_ids(path_set: set[str]) -> list[tuple[str, int]]:
-        """path setをクエリにpath_dictionary tableからexpr_idを取得する関数．
-        Returns:
-            ("expr_id", 出現回数)を出現回数に並べたlist．
-            e.g. [('1', 7), ('2', 3), ('3', 1)]
-        """
-        expr_ids: list[str] = []
-        expr_size = len(path_set)
-        for path in path_set:
-            with (Cursor.connect() as cnx, Cursor.cursor(cnx) as cursor):
-                expr_ids_json = Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, path, expr_size)
-            if expr_ids_json is None:
-                continue
-            expr_ids.extend(expr_ids_json)
-        # expr_idsの中のexpr_idをカウント
-        expr_ids_dict = collections.Counter(expr_ids)
-        # クエリのpathを多く含むexpr_idが最初にくるようにソート
-        sorted_expr_ids = expr_ids_dict.most_common()
-        return sorted_expr_ids
+        except Exception:
+            result = {
+                'search_result': []
+            }
+            return result
 
     @staticmethod
     def _get_info(extracted_ids: list[str], start: int) -> Info:
@@ -164,9 +121,16 @@ class Searcher:
                     search_result.append({
                         'uri': page_info[0],
                         'title': page_info[3],
-                        'snippet': Formatter.format(Snippet(page_info[4]), expr_start_pos, expr_len)
+                        'snippet': Formatter.format(
+                            Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
+                            )
                     })
                     if len(search_result) >= __class__.search_num:
                         break
+                else:
+                    # this code is executed when the inner loop doesn't break.
+                    continue
+                # the outer loop breaks when the inner loop breaks.
+                break
 
         return search_result

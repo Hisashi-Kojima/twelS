@@ -25,17 +25,17 @@ class Formatter:
         """
         s = str(snippet)
         snippet_highlighted = ''
-        for start_pos in expr_start_pos:
-            try:
-                end_pos = start_pos + expr_len
-                # headから先に挿入するとtailがずれるので，tailから挿入する．
-                tmp = s[:end_pos] + '</span>' + snippet[end_pos:]
-                snippet_highlighted = tmp[:start_pos] + '<span class="hl">' + tmp[start_pos:]
+        start_pos = 0
+        for pos in expr_start_pos:
+            if pos is not None:
+                start_pos = pos
                 break
-            except Exception:
-                continue
-
-        return __class__._excerpt(snippet_highlighted, start_pos)
+        end_pos = start_pos + expr_len
+        # start_posから先に挿入するとend_posがずれるので，end_posから挿入する．
+        tmp = f'{s[:end_pos]}</span>{s[end_pos:]}'
+        snippet_highlighted = f'{tmp[:start_pos]}<span class="hl">{tmp[start_pos:]}'
+        excerpted_snippet = __class__._excerpt(snippet_highlighted, start_pos)
+        return excerpted_snippet
 
     @staticmethod
     def _excerpt(snippet: str, start_pos: int) -> str:

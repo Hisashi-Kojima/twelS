@@ -371,6 +371,27 @@ def test_get_parsed_tree_div_1():
     assert expected == Parser.get_parsed_tree(mathml)
 
 
+def test_get_parsed_tree_div_2():
+    """変数として'/'が使われている場合。
+    A/~
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                        <mi>A</mi>
+                        <mi mathvariant="normal">/</mi>
+                        <mo lspace="0em" rspace="0em">∼</mo>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'A'),
+            Token(ParserConst.token_type, ParserConst.slash_data),
+            Token(ParserConst.token_type, '∼')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
 def test_get_parsed_tree_eq_1():
     """等号を含む式のparse
     y=ax

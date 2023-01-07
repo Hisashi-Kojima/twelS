@@ -605,20 +605,6 @@ def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
     assert actual == expr
 
 
-def test_select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor):
-    """Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2()のテスト．
-    """
-    expr_path = 'path1'
-    expr_ids = ['1', '2', '3', '5']
-    expr_size = 5
-    cursor.execute(
-        'INSERT INTO path_dictionary (expr_path, expr_size, expr_ids) VALUES (%s, %s, %s)',
-        (expr_path, expr_size, json.dumps(expr_ids))
-        )
-    result_expr_ids = Cursor.select_expr_ids_from_path_dictionary_where_path_1_size_2(cursor, expr_path, expr_size)
-    assert result_expr_ids == expr_ids
-
-
 def test_select_info_from_inverted_index_where_expr_id_1(cursor):
     """Cursor.select_info_from_inverted_index_where_expr_id_1()のテスト．
     """

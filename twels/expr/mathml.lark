@@ -29,6 +29,7 @@ _more_product: (_add | subtract) product
 _more_atom: (_mul | div) atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
+     | "<mi" _attr* ">" "/" "</mi>" -> slash
      | "<mi" _attr* ">" TOKEN "</mi>"
      | "<mrow" _attr* ">" product "</mrow>"
      | _left_paren sum _right_paren -> paren

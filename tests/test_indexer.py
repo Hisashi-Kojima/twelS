@@ -6,12 +6,12 @@ import json
 
 from itemadapter import ItemAdapter
 
-from web_crawler.web_crawler.items import Page
 from twels.database.cursor import Cursor
+from twels.expr.parser import Parser
 from twels.indexer.indexer import Indexer
 from twels.indexer.info import Info
 from twels.snippet.snippet import Snippet
-from twels.expr.parser import Parser
+from web_crawler.web_crawler.items import Page
 
 # Indexerのメソッド内のCursor.connect()と競合しないように，
 # ここでは@pytest.fixtureではなくCursor.connect()を用いることで，

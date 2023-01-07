@@ -13,8 +13,12 @@ class Snippet:
     TODO:
         登録できる文字のmax lengthを設定して，それに収まっているかを確認する．
     """
-    def __init__(self, snippet: str):
-        self.snippet = __class__._clean_text(snippet)
+    def __init__(self, snippet: str, no_clean=False):
+        """登録時にはcleanする。検索時にはcleanは不要。"""
+        if no_clean:
+            self.snippet = snippet
+        else:
+            self.snippet = __class__._clean_text(snippet)
 
     def __str__(self):
         return self.snippet
@@ -50,54 +54,40 @@ class Snippet:
         """不要なタグなどを削除する関数．
         不要な情報を削除することで，登録するデータ量を小さくする．
         classなどが自作のものとかぶっても困るので，そのあたりの削除．
+        Notes:
+            use only MathML of KaTeX outputs.
+            don't use HTML of KaTeX outputs.
+            support "htmlAndMathml" and "mathml" in KaTeX output option.
+            don't support "html" in KaTeX output option, because
+            you must change data structure in inverted_index expr columns,
+            which stores MathML when support KaTeX as expr.
+            "support KaTeX as expr" means not only MathML but also
+            KaTeX are rendered in search results.
         """
+        remove_list = [
+            'button', 'br', 'footer', 'form', 'header', 'img',
+            'iframe', 'input', 'label', 'nav', 'noscript', 'script'
+            ]
+
+        save_list = [
+            'a', 'article', 'aside', 'b', 'caption', 'colgroup',
+            'dl', 'dt', 'dd', 'div', re.compile('h[1-6]'), 'i', 'ins', 'li',
+            'main', 'ol', 'p', 'span', 'section', 'table', 'tbody', 'td',
+            'tfoot', 'th', 'thread', 'tr', 'ul'
+            ]
+
         soup = BeautifulSoup(text, 'lxml')
         soup.html.unwrap()
         soup.body.unwrap()
-        for a in soup.find_all('a'):
-            a.unwrap()
-        for b in soup.find_all('b'):
-            b.unwrap()
-        for i in soup.find_all('i'):
-            i.unwrap()
-        for p in soup.find_all('p'):
-            p.unwrap()
-        for div in soup.find_all('div'):
-            div.unwrap()
-        for span in soup.find_all('span'):
-            span.unwrap()
-        for dl in soup.find_all('dl'):
-            dl.unwrap()
-        for dt in soup.find_all('dt'):
-            dt.unwrap()
-        for dd in soup.find_all('dd'):
-            dd.unwrap()
-        for table in soup.find_all('table'):
-            table.decompose()
-        for ol in soup.find_all('ol'):
-            ol.decompose()
-        for ul in soup.find_all('ul'):
-            ul.decompose()
-        for label in soup.find_all('label'):
-            label.decompose()
-        for h in soup.find_all(re.compile('h[1-6]')):
-            h.decompose()
-        for br in soup.find_all('br'):
-            br.decompose()
-        for img in soup.find_all('img'):
-            img.decompose()
-        for form in soup.find_all('form'):
-            form.decompose()
-        for input_ in soup.find_all('input'):
-            input_.decompose()
-        for button in soup.find_all('button'):
-            button.decompose()
-        for script in soup.find_all('script'):
-            script.decompose()
-        for footer in soup.find_all('footer'):
-            footer.decompose()
-        for nav in soup.find_all('nav'):
-            nav.decompose()
+
+        for item in soup.find_all(remove_list):
+            item.decompose()
+
+        for katex_html in soup.find_all('span', class_='katex-html'):
+            katex_html.decompose()
+
+        for item in soup.find_all(save_list):
+            item.unwrap()
 
         result = str(soup)
         return __class__.clean(result)
@@ -126,11 +116,10 @@ class Snippet:
     def _remove_unnecessary_tags(soup: BeautifulSoup):
         """MathMLの不要なタグを削除する関数。
         """
-        for semantics in soup.find_all('semantics'):
-            semantics.unwrap()
-        for mstyle in soup.find_all('mstyle'):
-            mstyle.unwrap()
-        for mrow in soup.find_all('mrow'):
-            mrow.unwrap()
+        save_list = [
+            'semantics', 'mstyle', 'mrow'
+        ]
+        for item in soup.find_all(save_list):
+            item.unwrap()
         for annotation in soup.find_all('annotation'):
             annotation.decompose()

@@ -29,6 +29,7 @@ class ParserConst:
     table_data = 'table'
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
+    slash_data = '\\slash'
 
     equal_data = 'equal'
     less_data = 'less'
