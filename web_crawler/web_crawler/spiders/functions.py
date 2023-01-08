@@ -42,7 +42,8 @@ def get_exprs(response) -> list[str]:
     for mathml in response.xpath('//math').getall():
         result.append(Snippet.clean(mathml))
 
-    return result
+    # 数式が重複している場合に重複している数式を削除する。
+    return list(set(result))
 
 
 def render_katex(expr_katex: str) -> str:
