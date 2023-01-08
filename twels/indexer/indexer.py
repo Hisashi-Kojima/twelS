@@ -138,9 +138,10 @@ class Indexer:
         """
         insert_set, delete_set = __class__._get_insert_and_delete_set(set(page_info['exprs']), registered_exprs)
         snippet: Snippet = page_info['snippet']
+        is_success = True
 
-        try:
-            for mathml in insert_set:
+        for mathml in insert_set:
+            try:
                 expr_start_pos_list = [snippet.search_expr_start_pos(mathml)]
                 info = Info({
                     "uri_id": [str(uri_id)],
@@ -162,15 +163,17 @@ class Indexer:
                                     )
                         cnx.commit()
 
-            return __class__._delete_expr_from_database_with_delete_set(uri_id, delete_set, test=test)
-        except exceptions.LarkError as e:
-            print_in_red(f'error in indexer._update_index_and_path_table(). {e}')
-            traceback.print_exc()
-            return False
-        except Exception as e:
-            print_in_red(f'error in indexer._update_index_and_path_table(). {e}')
-            traceback.print_exc()
-            return False
+            except exceptions.LarkError as e:
+                print_in_red(f'error in indexer._update_index_and_path_table(). {e}')
+                traceback.print_exc()
+                is_success = False
+            except Exception as e:
+                print_in_red(f'error in indexer._update_index_and_path_table(). {e}')
+                traceback.print_exc()
+                is_success = False
+
+        is_success_2 = __class__._delete_expr_from_database_with_delete_set(uri_id, delete_set, test=test)
+        return is_success and is_success_2
 
     @staticmethod
     def _update_page_table(page_info: ItemAdapter, test: bool = False) -> tuple[int, set]:
