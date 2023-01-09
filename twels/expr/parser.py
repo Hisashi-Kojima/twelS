@@ -12,7 +12,7 @@ from twels.expr.tree import MathMLTree
 from twels.utils.utils import print_in_red
 
 
-def get_lark_parser():
+def get_lark_parser() -> Lark | None:
     """Lark parserを返す関数．
     """
     base_path = os.path.abspath(__file__)  # parser.pyのpath
@@ -72,13 +72,17 @@ class Parser:
     @staticmethod
     def _make_new_trees(tree: Tree) -> list[Tree]:
         """relational operatorを複数含む式を分割して返す関数．
-        relational operatorを含まない場合は，そのまま返す．
+        relational operatorを含まない場合は，ParserConst.root_dataを削除して返す．
         TODO:
             equal以外のrelational operatorにも対応する．
             rootの孫以降にrelational operatorがある場合はどうなるのか確かめる．
+        Note:
+            ParserConst.root_dataはpath_setには入れたくないので、
+            ParserConst.root_dataを含まないTreeを返す。
         """
         if len(__class__._get_ro_index(tree)) == 0:
-            return [tree]
+            # remove ParserConst.root_data
+            return [tree.children[0]]
 
         result = []
         equal = Tree(ParserConst.equal_data, [])
@@ -89,15 +93,15 @@ class Parser:
 
             if len(index_list) == 1 and index_list[0] == 1 and len(tree_having_ro.children) == 3:
                 # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
-                new_tree = Tree(ParserConst.root_data, [
-                    Tree(ParserConst.equal_data, [
-                        tree_having_ro.children[0],
-                        tree_having_ro.children[2],
-                    ])
+                # remove ParserConst.root_data
+                new_tree = Tree(ParserConst.equal_data, [
+                    tree_having_ro.children[0],
+                    tree_having_ro.children[2],
                 ])
                 result.append(new_tree)
             else:
                 # TODO: ここの実装．
+                # TODO: remove ParserConst.root_data
                 result.append(tree_having_ro)
         return result
 

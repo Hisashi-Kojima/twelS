@@ -1316,8 +1316,7 @@ def test_parse_num_1():
     7
     """
     actual = Parser.parse(latex2mathml.converter.convert('7'))
-    root = ParserConst.root_data
-    expected = {'7', f'7/{root}'}
+    expected = {'7'}
     assert actual == expected
 
 
@@ -1327,10 +1326,9 @@ def test_parse_add_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('1+2'))
     sum_ = ParserConst.sum_data
-    root = ParserConst.root_data
     expected = {
-        '1', f'1/{sum_}', f'1/{sum_}/{root}',
-        '2', f'2/{sum_}', f'2/{sum_}/{root}'
+        '1', f'1/{sum_}',
+        '2', f'2/{sum_}'
         }
     assert actual == expected
 
@@ -1341,11 +1339,10 @@ def test_parse_subtract_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('3-2'))
     sum_ = ParserConst.sum_data
-    root = ParserConst.root_data
     neg = ParserConst.neg_data
     expected = {
-        '3', f'3/{sum_}', f'3/{sum_}/{root}',
-        f'2/{neg}', f'2/{neg}/{sum_}', f'2/{neg}/{sum_}/{root}'
+        '3', f'3/{sum_}',
+        f'2/{neg}', f'2/{neg}/{sum_}'
         }
     assert actual == expected
 
@@ -1356,10 +1353,9 @@ def test_parse_product_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('4*5'))
     product = ParserConst.product_data
-    root = ParserConst.root_data
     expected = {
-        '4', f'4/{product}', f'4/{product}/{root}',
-        '5', f'5/{product}', f'5/{product}/{root}'
+        '4', f'4/{product}',
+        '5', f'5/{product}'
         }
     assert actual == expected
 
@@ -1371,12 +1367,11 @@ def test_parse_div_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('3/2'))
     product = ParserConst.product_data
-    root = ParserConst.root_data
     frac = ParserConst.frac_data
     expected = {
-        '3', f'3/{product}', f'3/{product}/{root}',
-        '1', f'1/#0/{frac}', f'1/#0/{frac}/{product}', f'1/#0/{frac}/{product}/{root}',
-        '2', f'2/#1/{frac}', f'2/#1/{frac}/{product}', f'2/#1/{frac}/{product}/{root}'
+        '3', f'3/{product}',
+        '1', f'1/#0/{frac}', f'1/#0/{frac}/{product}',
+        '2', f'2/#1/{frac}', f'2/#1/{frac}/{product}'
     }
     assert actual == expected
 
@@ -1386,11 +1381,10 @@ def test_parse_eq_1():
     a=b
     """
     actual = Parser.parse(latex2mathml.converter.convert('a=b'))
-    root = ParserConst.root_data
     equal = ParserConst.equal_data
     expected = {
-        'a', f'a/{equal}', f'a/{equal}/{root}',
-        'b', f'b/{equal}', f'b/{equal}/{root}'
+        'a', f'a/{equal}',
+        'b', f'b/{equal}'
         }
     assert actual == expected
 
@@ -1413,11 +1407,10 @@ def test_parse_eq_2():
                     </semantics>
                 </math>"""
     actual = Parser.parse(mathml)
-    root = ParserConst.root_data
     equal = ParserConst.equal_data
     expected = {
-        'y', f'y/{equal}', f'y/{equal}/{root}',
-        '0', f'0/{equal}', f'0/{equal}/{root}'
+        'y', f'y/{equal}',
+        '0', f'0/{equal}'
     }
     assert actual == expected
 
@@ -1472,16 +1465,15 @@ def test_parse_table_1():
     table = ParserConst.table_data
     product = ParserConst.product_data
     neg = ParserConst.neg_data
-    root = ParserConst.root_data
     expected = {
-        '[', f'[/{product}', f'[/{product}/{root}',
-        '1', f'1/#0/#0/{table}', f'1/#0/#0/{table}/{product}', f'1/#0/#0/{table}/{product}/{root}',
-        '9', f'9/#1/#0/{table}', f'9/#1/#0/{table}/{product}', f'9/#1/#0/{table}/{product}/{root}',
-        f'13/{neg}', f'13/{neg}/#2/#0/{table}', f'13/{neg}/#2/#0/{table}/{product}', f'13/{neg}/#2/#0/{table}/{product}/{root}',
-        '20', f'20/#0/#1/{table}', f'20/#0/#1/{table}/{product}', f'20/#0/#1/{table}/{product}/{root}',
-        '5', f'5/#1/#1/{table}', f'5/#1/#1/{table}/{product}', f'5/#1/#1/{table}/{product}/{root}',
-        f'6/{neg}', f'6/{neg}/#2/#1/{table}', f'6/{neg}/#2/#1/{table}/{product}', f'6/{neg}/#2/#1/{table}/{product}/{root}',
-        ']', f']/{product}', f']/{product}/{root}'
+        '[', f'[/{product}',
+        '1', f'1/#0/#0/{table}', f'1/#0/#0/{table}/{product}',
+        '9', f'9/#1/#0/{table}', f'9/#1/#0/{table}/{product}',
+        f'13/{neg}', f'13/{neg}/#2/#0/{table}', f'13/{neg}/#2/#0/{table}/{product}',
+        '20', f'20/#0/#1/{table}', f'20/#0/#1/{table}/{product}',
+        '5', f'5/#1/#1/{table}', f'5/#1/#1/{table}/{product}',
+        f'6/{neg}', f'6/{neg}/#2/#1/{table}', f'6/{neg}/#2/#1/{table}/{product}',
+        ']', f']/{product}',
     }
     assert actual == expected
 
@@ -1500,14 +1492,30 @@ def test_make_new_trees_1():
     actual = Parser._make_new_trees(tree)
 
     expected = [
-        Tree(ParserConst.root_data, [
-            Tree(ParserConst.equal_data, [
-                Token(ParserConst.token_type, 'y'),
-                Tree(ParserConst.product_data, [
-                    Token(ParserConst.token_type, 'a'),
-                    Token(ParserConst.token_type, 'x')
-                ])
+        Tree(ParserConst.equal_data, [
+            Token(ParserConst.token_type, 'y'),
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'a'),
+                Token(ParserConst.token_type, 'x')
             ])
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_2():
+    """ParserConst.root_dataが削除されていることを確認するテスト。
+    """
+    tree = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
+            ])
+        ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
         ])
     ]
     assert actual == expected

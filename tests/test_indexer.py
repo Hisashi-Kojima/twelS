@@ -252,10 +252,10 @@ def test_update_index_and_path_table_2():
                 path_dict_result = cursor.fetchall()
 
         expected = [
-            ('1', 6), ('1/sum', 6), ('1/sum/start', 6),
-            ('2', 6), ('2/sum', 6), ('2/sum/start', 6),
-            ('5/neg', 6), ('5/neg/sum', 6), ('5/neg/sum/start', 6),
-            ('8', 6), ('8/sum', 6), ('8/sum/start', 6)
+            ('1', 4), ('1/sum', 4),
+            ('2', 4), ('2/sum', 4),
+            ('5/neg', 4), ('5/neg/sum', 4),
+            ('8', 4), ('8/sum', 4)
             ]
 
         assert path_dict_result == expected
@@ -326,7 +326,7 @@ def test_update_db_1():
             'expr_start_pos': expr_start_pos_list
         })
         assert str(actual_info) == str(expected_info)
-        assert len(actual_path_dict) == 6
+        assert len(actual_path_dict) == 4
     finally:
         reset_tables()
 
