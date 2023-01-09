@@ -7,6 +7,7 @@ from lark import Tree, Token
 
 from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
+from twels.snippet.snippet import Snippet
 
 
 def test_get_parsed_tree_atom_1():
@@ -219,6 +220,51 @@ def test_get_parsed_tree_frac_2():
 
 def test_get_parsed_tree_frac_3():
     """分数のparse
+    frac{d}{dx}e^{x}
+    Snippet.clean()を実行した場合。
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mfrac>
+                                <mi>d</mi>
+                                <mrow>
+                                    <mi>d</mi>
+                                    <mi>x</mi>
+                                </mrow>
+                            </mfrac>
+                        </mrow>
+                        <msup>
+                            <mi>e</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>x</mi>
+                            </mrow>
+                        </msup>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.frac_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'd')]),
+                Tree('#1', [
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, 'd'),
+                        Token(ParserConst.token_type, 'x')
+                    ])
+                ])
+            ]),
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'e')]),
+                Tree('#1', [Token(ParserConst.token_type, 'x')])
+            ])
+        ])
+    ])
+    clean_mathml = Snippet.clean(mathml)
+    assert expected == Parser.get_parsed_tree(clean_mathml)
+
+
+def test_get_parsed_tree_frac_4():
+    """分数のparse
     frac{d}{dx}e^{x}=e^{x}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
@@ -282,7 +328,7 @@ def test_get_parsed_tree_frac_3():
     assert expected == Parser.get_parsed_tree(mathml)
 
 
-def test_get_parsed_tree_frac_4():
+def test_get_parsed_tree_frac_5():
     """
     分数の入れ子。frac {frac{a}{b}}{frac{c}{d}}
     参考ページ：分数

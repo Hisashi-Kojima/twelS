@@ -115,9 +115,20 @@ class Snippet:
     @staticmethod
     def _remove_unnecessary_tags(soup: BeautifulSoup):
         """MathMLの不要なタグを削除する関数。
+        Notes:
+            mrowを削除すると、
+            <mfrac>
+                <mi>d</mi>
+                <mrow>
+                    <mi>d</mi>
+                    <mi>x</mi>
+                </mrow>
+            </mfrac>
+            などを正しくparseできなくなってしまう。
+            なので、mrowを常に削除することはできない。
         """
         save_list = [
-            'semantics', 'mstyle', 'mrow'
+            'semantics', 'mstyle'
         ]
         for item in soup.find_all(save_list):
             item.unwrap()

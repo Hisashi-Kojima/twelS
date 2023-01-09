@@ -78,13 +78,15 @@ def test_clean_2():
     """
     text = """
         <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-            <mrow>
-                <mn>1</mn>
-                <mo>+</mo>
-                <mn>2</mn>
-            </mrow>
+            <mfrac>
+                <mi>d</mi>
+                <mrow>
+                    <mi>d</mi>
+                    <mi>x</mi>
+                </mrow>
+            </mfrac>
         </math>
         """
     actual = Snippet.clean(text)
-    expected = '<math><mn>1</mn><mo>+</mo><mn>2</mn></math>'
+    expected = '<math><mfrac><mi>d</mi><mrow><mi>d</mi><mi>x</mi></mrow></mfrac></math>'
     assert actual == expected
