@@ -8,7 +8,7 @@ from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
 
 
-def test_make_new_trees_3():
+def test_make_new_trees_5():
     """等号が2つ現れている場合、複数の等式に分割されることを確認するテスト。
     a=b=c
     """

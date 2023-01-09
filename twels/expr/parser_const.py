@@ -36,4 +36,6 @@ class ParserConst:
     greater_data = 'greater'
     in_data = 'in'
 
-    relational_operators = [expr_data, less_data, greater_data, in_data]
+    relational_operators = [equal_data, less_data, greater_data, in_data]
+    ro_commutative = [equal_data]
+    ro_non_commutative = [less_data, greater_data, in_data]

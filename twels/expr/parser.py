@@ -76,44 +76,47 @@ class Parser:
         TODO:
             equal以外のrelational operatorにも対応する．
             rootの孫以降にrelational operatorがある場合はどうなるのか確かめる．
+        Returns:
+            tree_list
         Note:
             ParserConst.root_dataはpath_setには入れたくないので、
             ParserConst.root_dataを含まないTreeを返す。
         """
-        if len(__class__._get_ro_index(tree)) == 0:
+        ro_index_list = __class__._get_ro_index(tree)
+        if len(ro_index_list) == 0:
             # remove ParserConst.root_data
             return [tree.children[0]]
 
-        result = []
-        equal = Tree(ParserConst.equal_data, [])
-        # 子にequalを1つ以上持つノードそれぞれを変形．
-        for tree_having_ro in tree.find_pred(lambda t: equal in t.children):
-            # ROの位置を得る
-            index_list = __class__._get_ro_index(tree_having_ro)
+        tree_list = []
 
-            if len(index_list) == 1 and index_list[0] == 1 and len(tree_having_ro.children) == 3:
-                # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
-                # remove ParserConst.root_data
-                new_tree = Tree(ParserConst.equal_data, [
-                    tree_having_ro.children[0],
-                    tree_having_ro.children[2],
+        if len(ro_index_list) == 1 and ro_index_list[0] == 1 and len(tree.children) == 3:
+            # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
+            # remove ParserConst.root_data
+            ro_tree = tree.children[ro_index_list[0]]
+            if ro_tree.data in ParserConst.ro_commutative:
+                new_tree = Tree(ro_tree.data, [
+                    tree.children[0],
+                    tree.children[2]
                 ])
-                result.append(new_tree)
-            else:
-                # TODO: ここの実装．
-                # TODO: remove ParserConst.root_data
-                result.append(tree_having_ro)
-        return result
+                tree_list.append(new_tree)
+            elif ro_tree.data in ParserConst.ro_non_commutative:
+                new_tree = Tree(ro_tree.data, [
+                    Tree('#0', [tree.children[0]]),
+                    Tree('#1', [tree.children[2]])
+                ])
+                tree_list.append(new_tree)
+        else:
+            # TODO: ここの実装．
+            # TODO: remove ParserConst.root_data
+            tree_list.append(tree)
+        return tree_list
 
     @staticmethod
     def _get_ro_index(tree: Tree) -> list[int]:
         """tree.childrenに含まれるrelational operatorのindexのリストを返す関数．
-        TODO:
-            equalをrelational operatorに拡張．
         """
         result = []
         for i, child in enumerate(tree.children):
-            equal = Tree(ParserConst.equal_data, [])
-            if child == equal:
+            if (isinstance(child, Tree)) and (child.data in ParserConst.relational_operators):
                 result.append(i)
         return result

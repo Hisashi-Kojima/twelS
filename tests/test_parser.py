@@ -437,6 +437,48 @@ def test_get_parsed_tree_eq_2():
     assert expected == Parser.get_parsed_tree(mathml)
 
 
+def test_get_parsed_tree_lt_1():
+    """不等号（&lt; <）を含む式のparse
+    2<3
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>2</mn>
+                            <mo>&lt;</mo>
+                            <mn>3</mn>
+                        </mrow>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '2'),
+        Tree(ParserConst.less_data, []),
+        Token(ParserConst.token_type, '3'),
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_gt_1():
+    """不等号（&gt; >）を含む式のparse
+    3>2
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>3</mn>
+                            <mo>&gt;</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '3'),
+        Tree(ParserConst.greater_data, []),
+        Token(ParserConst.token_type, '2'),
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
 def test_get_parsed_tree_paren_1():
     """かっこを含む式のparse
     3*(4+5)
@@ -1415,6 +1457,32 @@ def test_parse_eq_2():
     assert actual == expected
 
 
+def test_parse_lt_1():
+    """不等式のparse
+    a<b
+    """
+    actual = Parser.parse(latex2mathml.converter.convert('a<b'))
+    less = ParserConst.less_data
+    expected = {
+        'a', f'a/#0/{less}',
+        'b', f'b/#1/{less}'
+        }
+    assert actual == expected
+
+
+def test_parse_gt_1():
+    """不等式のparse
+    a>b
+    """
+    actual = Parser.parse(latex2mathml.converter.convert('a>b'))
+    greater = ParserConst.greater_data
+    expected = {
+        'a', f'a/#0/{greater}',
+        'b', f'b/#1/{greater}'
+        }
+    assert actual == expected
+
+
 def test_parse_table_1():
     """行列のparse
     [  1 9 -13]
@@ -1516,6 +1584,46 @@ def test_make_new_trees_2():
     expected = [
         Tree(ParserConst.product_data, [
             Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_3():
+    """不等号を含む式が正しく処理されていることを確認するテスト。
+    2<3
+    """
+    tree = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '2'),
+        Tree(ParserConst.less_data, []),
+        Token(ParserConst.token_type, '3'),
+    ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.less_data, [
+            Tree('#0', [Token(ParserConst.token_type, '2')]),
+            Tree('#1', [Token(ParserConst.token_type, '3')]),
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_4():
+    """不等号を含む式が正しく処理されていることを確認するテスト。
+    3>2
+    """
+    tree = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '3'),
+        Tree(ParserConst.greater_data, []),
+        Token(ParserConst.token_type, '2'),
+    ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.greater_data, [
+            Tree('#0', [Token(ParserConst.token_type, '3')]),
+            Tree('#1', [Token(ParserConst.token_type, '2')]),
         ])
     ]
     assert actual == expected
