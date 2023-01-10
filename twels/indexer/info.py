@@ -3,7 +3,6 @@
 """
 import copy
 import json
-from typing import Self
 
 
 class Info:
@@ -54,41 +53,6 @@ class Info:
             return True
         else:
             return False
-
-    def extract(self, start: int, stop: int | None = None) -> Self:
-        """指定された範囲のinfoを返す関数。
-        Args:
-            start: 開始位置。
-            stop: 終了位置。
-        Returns:
-            startからstopまでのinfo。
-        Notes:
-            startが無効の場合、空のinfoを返す。
-            startが有効で、stopがinfo.size()を超えている場合、
-            指定されたstartから最後までのinfoを返す。
-            startが有効で、かつstopがstartよりも小さい場合、空のinfoを返す。
-            stopが省略された場合、startから最後までのinfoを返す。
-        """
-        if stop is None:
-            stop = self.size()
-        info = copy.deepcopy(self)
-        info.uri_id_list = self.uri_id_list[start:stop]
-        info.lang_list = self.lang_list[start:stop]
-        info.expr_start_pos_list = self.expr_start_pos_list[start:stop]
-        return info
-
-    def merge(self, info: Self) -> Self:
-        """このインスタンスと引数のinfoをマージした結果を返す関数。
-        引数のinfoはこのインスタンスのinfoの後ろに追加される。
-        Returns:
-            info
-        """
-        result = copy.deepcopy(self)
-        
-        result.uri_id_list.extend(info.uri_id_list)
-        result.lang_list.extend(info.lang_list)
-        result.expr_start_pos_list.extend(info.expr_start_pos_list)
-        return result
 
     def size(self) -> int:
         """このインスタンスの要素数を返す関数"""
