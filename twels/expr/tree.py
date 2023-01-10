@@ -36,6 +36,9 @@ class MathMLTree(Transformer):
     def underover(self, nodes: list):
         return Tree('underover', _insert_pseudo_num(nodes))
 
+    def slash(self, nodes: list):
+        return Token(ParserConst.token_type, ParserConst.slash_data)
+
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""

@@ -18,7 +18,6 @@ def index(request):
     """
     if request.method == 'GET':
         page_list: list[dict] = []
-        result_num = 0
 
         expr: str | None = request.GET.get('q')
         start: str | None = request.GET.get('start')
@@ -29,7 +28,6 @@ def index(request):
                 start = '0'
             result = Searcher.search(expr, int(start))
             page_list: list[dict] = result['search_result']
-            result_num: int = result['result_num']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
         # first access

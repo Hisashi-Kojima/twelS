@@ -32,15 +32,12 @@ def _visit_leaf(node: Tree | Token) -> tuple[list[str], list[str]]:
         tmp = []
         for child in node.children:
             child_fix, child_tmp = _visit_leaf(child)
-            if node.data in ParserConst.relational_operators:
-                pass
-            else:
-                fix.extend(child_fix)
-                for path in child_tmp:
-                    tmp.append(f'{path}/{node.data}')
-                    # Path rule 1.
-                    if node.data != ParserConst.neg_data:
-                        fix.append(path)
+            fix.extend(child_fix)
+            for path in child_tmp:
+                tmp.append(f'{path}/{node.data}')
+                # Path rule 1.
+                if node.data != ParserConst.neg_data:
+                    fix.append(path)
         return fix, tmp
     else:
         return [], [node.value]
