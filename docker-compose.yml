@@ -38,7 +38,7 @@ services:
       - ./db/mysql:/var/lib/mysql  # 永続化
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./db/logs:/var/log/mysql
-      - ./initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+      - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net
 

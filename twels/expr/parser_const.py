@@ -29,10 +29,13 @@ class ParserConst:
     table_data = 'table'
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
+    slash_data = '\\slash'
 
     equal_data = 'equal'
     less_data = 'less'
     greater_data = 'greater'
     in_data = 'in'
 
-    relational_operators = [expr_data, less_data, greater_data, in_data]
+    relational_operators = [equal_data, less_data, greater_data, in_data]
+    ro_commutative = [equal_data]
+    ro_non_commutative = [less_data, greater_data, in_data]

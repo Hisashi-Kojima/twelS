@@ -2,11 +2,11 @@
 """module description
 """
 
-from twels.searcher.snippet_formatter import SnippetFormatter
+from twels.snippet.formatter import Formatter
 
 
 def test_excerpt_1():
-    """SnippetFormatter._excerpt()のテスト．
+    """Formatter._excerpt()のテスト．
     ハイライトされた数式とハイライトされていない数式を含む場合．
     先頭に140文字がある．
     """
@@ -33,5 +33,5 @@ def test_excerpt_1():
 
     head = snippet.find('<span class="hl">')
     tail = snippet.find('</span>') + len('</span>')
-    result = SnippetFormatter._excerpt(snippet, head, tail)
+    result = Formatter._excerpt(snippet, head, tail)
     assert True == result  # デバッグ用
