@@ -10,24 +10,111 @@
     <link rel="stylesheet" href="{% static 'search/style.css' %}">
     <link rel="shortcut icon" href="{% static 'search/images/favicon.png' %}">
     <!-- for MathQuill -->
-    <link rel="stylesheet" href="{% static 'mathquill-0.10.1/mathquill.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="{% static 'mathquill-0.10.1/mathquill.js' %}"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 {% endblock head %}
 
 {% block body %}
     <div id="main_content">
-        <p id="main_form">
-            <span id="math-field"></span>
-            <button onclick="submit()">検索</button>
-        </p>
-        <p>LaTeX: <span id="latex"></span></p>
+        <p id="mathCanvas">数式: <span id="canvas"></span></p>
+    <p id="main_form">
+        <input type="text" id="textMath" value=""oninput="inputChange()">
+        <button onclick="submit()">検索</button>
+    </p>
+
+<div class="tab-panel">
+    <!--タブ-->
+    <ul class="tab-group">
+      <li class="tab tab-A is-active">演算子など</li>
+      <li class="tab tab-B">ギリシャ文字</li>
+      <li class="tab tab-C">その他</li>
+   </ul>
+    
+    <!--タブを切り替えて表示するコンテンツ-->
+    <div class="panel-group">
+      <div class="panel tab-A is-show">
+        <div>
+            <button class="buttonGroup" onclick="pushString('+')">\(+\)</button>
+            <button class="buttonGroup" onclick="pushString('-')">\(-\)</button>
+            <button class="buttonGroup" onclick="pushString('\\times ')">\(\times\)</button>
+            <button class="buttonGroup" onclick="pushString('\\div ')">\(\div\)</button>
+            <button class="buttonGroup" onclick="pushString('\\frac{x}{y}')">\(\frac{x}{y}\)</button>
+            <button class="buttonGroup" onclick="pushString('\\sqrt{x}')">\(\sqrt{x}\)</button>
+            <button class="buttonGroup" onclick="pushString('\\sqrt[n]{x}')">\(\sqrt[n]{x}\)</button>
+            <button class="buttonGroup" onclick="pushString('\\log_{y}{x}')">\(\log_{y}{x}\)</button>
+            <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
+        </div>
+        <div>
+            <button class="buttonGroup" onclick="pushString('=')">\(=\)</button>
+            <button class="buttonGroup" onclick="pushString('\\lt ')">\(\lt\)</button>
+            <button class="buttonGroup" onclick="pushString('\\gt ')">\(\gt\)</button>
+            <button class="buttonGroup" onclick="pushString('\\ll ')">\(\ll\)</button>
+            <button class="buttonGroup" onclick="pushString('\\gg ')">\(\gg\)</button>
+            <button class="buttonGroup" onclick="pushString('\\leqq ')">\(\leqq\)</button>
+            <button class="buttonGroup" onclick="pushString('\\geqq ')">\(\geqq\)</button>
+            <button class="buttonGroup" onclick="pushString('\\wedge ')">\(\wedge\)</button>
+            <button class="buttonGroup" onclick="pushString('\\vee ')">\(\vee\)</button>
+            <button class="buttonGroup" onclick="pushString('\\cap ')">\(\cap\)</button>
+            <button class="buttonGroup" onclick="pushString('\\cup ')">\(\cup\)</button>
+        </div>
+      </div>
+      <div class="panel tab-B">
+        <div>
+            <button class="buttonGroup" onclick="pushString('\\alpha ')">\(\alpha\)</button>
+            <button class="buttonGroup" onclick="pushString('\\beta ')">\(\beta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\gamma ')">\(\gamma\)</button>
+            <button class="buttonGroup" onclick="pushString('\\delta ')">\(\delta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\epsilon ')">\(\epsilon\)</button>
+            <button class="buttonGroup" onclick="pushString('\\zeta ')">\(\zeta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\eta ')">\(\eta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\theta ')">\(\theta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\iota ')">\(\iota\)</button>
+            <button class="buttonGroup" onclick="pushString('\\kappa ')">\(\kappa\)</button>
+            <button class="buttonGroup" onclick="pushString('\\lambda ')">\(\lambda\)</button>
+            <button class="buttonGroup" onclick="pushString('\\mu ')">\(\mu\)</button>
+        </div>
+        <div>
+            <button class="buttonGroup" onclick="pushString('\\nu ')">\(\nu\)</button>
+            <button class="buttonGroup" onclick="pushString('\\xi ')">\(\xi\)</button>
+            <button class="buttonGroup" onclick="pushString('\\o ')">\(o\)</button>
+            <button class="buttonGroup" onclick="pushString('\\pi ')">\(\pi\)</button>
+            <button class="buttonGroup" onclick="pushString('\\rho ')">\(\rho\)</button>
+            <button class="buttonGroup" onclick="pushString('\\sigma ')">\(\sigma\)</button>
+            <button class="buttonGroup" onclick="pushString('\\tau ')">\(\tau\)</button>
+            <button class="buttonGroup" onclick="pushString('\\upsilon ')">\(\upsilon\)</button>
+            <button class="buttonGroup" onclick="pushString('\\phi ')">\(\phi\)</button>
+            <button class="buttonGroup" onclick="pushString('\\chi ')">\(\chi\)</button>
+            <button class="buttonGroup" onclick="pushString('\\psi ')">\(\psi\)</button>
+            <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
+            
+        </div>
+      </div>
+      <div class="panel tab-C">
+        <div>
+            <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
+            <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
+            <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
+            <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
+            <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
+        </div>
+        <div>
+            <button class="buttonGroup" onclick="pushString('x^{n}')">\(x^{n}\)</button>
+            <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
+            <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
+            <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
+            <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
-    　　     <p>{{ query }}  の検索結果</p><br>
-        {% else %}
-            入力例：E=mc^2
+            <p>{{ query }}  の検索結果</p><br>
         {% endif %}
 
         {% for page in page_list %}
@@ -51,20 +138,6 @@
     </div>
 
     <script>
-    var mathFieldSpan = document.getElementById('math-field');
-    var latexSpan = document.getElementById('latex');
-
-    var MQ = MathQuill.getInterface(2); // for backcompat
-    var expr = '';
-    var mathField = MQ.MathField(mathFieldSpan, {
-        spaceBehavesLikeTab: true, // configurable
-        handlers: {
-            edit: function() { // useful event handlers
-                latexSpan.textContent = mathField.latex(); // simple API
-                expr = latexSpan.textContent;
-            }
-        }
-    });
 
     function submit(){
         var form = document.createElement('form');
@@ -72,7 +145,8 @@
         form.method = 'GET';
 
         var q = document.createElement('input');
-        q.value = expr;
+        const obj = document.getElementById("textMath");
+        q.value = obj.value;
         q.name = 'q';
         q.type = 'hidden';
         form.appendChild(q);
@@ -82,6 +156,82 @@
         form.submit();
     }
 
+    const canvas = document.getElementById("canvas");
+
+    window.onload = onLoad;
+
+    document.addEventListener('DOMContentLoaded', function(){
+        // タブに対してクリックイベントを適用
+        const tabs = document.getElementsByClassName('tab');
+        for(let i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener('click', tabSwitch, false);
+        }
+
+        // タブをクリックすると実行する関数
+        function tabSwitch(){
+            // タブのclassの値を変更
+            document.getElementsByClassName('is-active')[0].classList.remove('is-active');
+            this.classList.add('is-active');
+            // コンテンツのclassの値を変更
+            document.getElementsByClassName('is-show')[0].classList.remove('is-show');
+            const arrayTabs = Array.prototype.slice.call(tabs);
+            const index = arrayTabs.indexOf(this);
+            document.getElementsByClassName('panel')[index].classList.add('is-show');
+        };
+    }, false);
+
+    function onLoad() {
+      target = document.getElementById("textMath");
+      target.focus();
+      //target.setSelectionRange(0, 0);
+    }
+
+    function inputChange(){
+
+        const obj = document.getElementById("textMath");
+        canvas.innerHTML = "\\(" + obj.value + "\\)";
+        convertMath();
+    }
+
+    function convertMath(){
+        MathJax.typeset([document.getElementById("canvas")]);
+    }
+
+    function pushString(){
+        const obj = document.getElementById("textMath");
+
+        const objString = obj.value.substr(0, obj.selectionStart)
+			+ "2";
+        
+        const objCount = objString.length;
+
+        obj.value = obj.value.substr(0, obj.selectionStart)
+			+ "2"
+			+ obj.value.substr(obj.selectionStart);
+
+        obj.focus();
+        obj.setSelectionRange(objCount, objCount);
+        canvas.innerHTML = obj.value;
+        convertMath();
+    }
+
+    function pushString(msg){
+        const obj = document.getElementById("textMath");
+
+        const objString = obj.value.substr(0, obj.selectionStart)
+			+ msg;
+        
+        const objCount = objString.length;
+
+        obj.value = obj.value.substr(0, obj.selectionStart)
+			+ msg
+			+ obj.value.substr(obj.selectionStart);
+
+        obj.focus();
+        obj.setSelectionRange(objCount, objCount);
+        canvas.innerHTML = "\\(" + obj.value + "\\)";
+        convertMath();
+    }
+
     </script>
-    <script src="{% static 'search/load-mathjax.js' %}" id="MathJax-script" async></script>
 {% endblock body %}
