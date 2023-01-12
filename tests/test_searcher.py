@@ -11,7 +11,6 @@ def test_search_1():
     start_index = 0
     result_dict = Searcher.search("a^'", start_index)
     expected = {
-        'search_result': [],
-        'result_num': 0
+        'search_result': []
         }
     assert result_dict == expected

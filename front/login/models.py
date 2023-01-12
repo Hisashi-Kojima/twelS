@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
+import datetime
 
 
 def email_validater(email):
@@ -83,6 +84,37 @@ class User(AbstractBaseUser, PermissionsMixin):
         send(subject, message, from_email, [self.email], **kwargs)
 
 
+class IPAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ip_address = models.GenericIPAddressField()
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    last_access = models.DateTimeField(_('last access'), default=timezone.now)
+
+
+class PasswordResetRequest(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+
+
+class UserCreateRequest(models.Model):
+    email = models.EmailField(_('email address'), unique=True)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+
+
 class EmailUser(AbstractBaseUser):
     """メール認証ログイン用の一時的なユーザ"""
     email = models.EmailField(
@@ -107,3 +139,15 @@ class EmailUser(AbstractBaseUser):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
         send(subject, message, from_email, [self.email], **kwargs)
+
+
+class EmailLoginRequest(models.Model):
+    email = models.EmailField(_('email address'), unique=True)
+    email_request_times = models.PositiveSmallIntegerField(
+        _('email request times'),
+        default=0,
+        help_text=_(
+            'Designates how many times this user sent email-request for certification'
+        ),
+    )
+    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)

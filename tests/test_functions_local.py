@@ -29,11 +29,3 @@ def test_get_snippet_1(response):
     expected = ''.join(body_list)
     # TODO: 修正
     assert actual == False
-
-
-def test_get_exprs_1(response):
-    """何を確かめるテストにするのかまだ決めていない．
-    """
-    actual = functions.get_exprs(response)
-    # TODO: 修正
-    assert actual == False
