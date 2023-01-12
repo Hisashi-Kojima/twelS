@@ -54,10 +54,27 @@ def privacy_policy(request):
 
 
 @login_required
+def feedback(request):
+    """問い合わせのページ"""
+    context = {}
+    return render(request, 'search/feedback.html', context)
+
+
+@login_required
+def report(request):
+    """バグ報告・要望のページ"""
+    context = {}
+    return render(request, 'search/report.html', context)
+
+
+@login_required
 def robots_txt(request):
     """robots.txtを表示するための関数．
     """
     text = ''
-    with open(f'{BASE_DIR}/search/static/search/robots.txt') as f:
-        text = f.read()
+    try:
+        with open(f'{BASE_DIR}/search/static/search/robots.txt') as f:
+            text = f.read()
+    except Exception:
+        text = 'error'
     return HttpResponse(text, content_type='text/plain')
