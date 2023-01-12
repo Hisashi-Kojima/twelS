@@ -42,10 +42,11 @@
             <button class="buttonGroup" onclick="pushString('\\times ')">\(\times\)</button>
             <button class="buttonGroup" onclick="pushString('\\div ')">\(\div\)</button>
             <button class="buttonGroup" onclick="pushString('\\frac{x}{y}')">\(\frac{x}{y}\)</button>
+            <button class="buttonGroup" onclick="pushString('x^{n}')">\(x^{n}\)</button>
+            <button class="buttonGroup" onclick="pushString('x_{n}')">\(x_{n}\)</button>
             <button class="buttonGroup" onclick="pushString('\\sqrt{x}')">\(\sqrt{x}\)</button>
             <button class="buttonGroup" onclick="pushString('\\sqrt[n]{x}')">\(\sqrt[n]{x}\)</button>
             <button class="buttonGroup" onclick="pushString('\\log_{y}{x}')">\(\log_{y}{x}\)</button>
-            <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
         </div>
         <div>
             <button class="buttonGroup" onclick="pushString('=')">\(=\)</button>
@@ -98,11 +99,11 @@
             <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
             <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
             <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
+            <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
             <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
             <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
         </div>
         <div>
-            <button class="buttonGroup" onclick="pushString('x^{n}')">\(x^{n}\)</button>
             <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
             <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
             <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
@@ -129,11 +130,14 @@
             </div>
         {% endfor %}
 
-        <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
-            <div class="next_page">
-                <a href="./?q={{query}}&start={{start}}">更に表示</a>
-            </div>
+            {% if page_list %}
+                <div class="next_page">
+                    <a href="./?q={{query}}&start={{start}}">更に表示</a>
+                </div>
+            {% else %}
+                <p>検索結果は見つかりませんでした。</p>
+            {% endif %}
         {% endif %}
     </div>
 
