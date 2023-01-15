@@ -160,8 +160,6 @@ class UserCreateComplete(generic.TemplateView):
                 current_ip = get_ip(self.request)
                 IPAddress.objects.create(user=user, ip_address=current_ip)
 
-                PasswordResetRequest.objects.create(user=user)
-
                 UserCreateRequest.objects.filter(email=user.email).delete()
 
             except User.DoesNotExist:
@@ -302,7 +300,11 @@ class EmailLoginComplete(generic.TemplateView):
         else:
             try:
                 emailuser = Emailuser.objects.get(pk=user_pk)
-                EmailLoginRequest.objects.filter(email=emailuser.email).delete()
+
+                email_request = EmailLoginRequest.objects.get(email=emailuser.email)
+
+                email_request.email_request_times = 0
+                email_request.save()
 
             except Emailuser.DoesNotExist:
                 return HttpResponseBadRequest()

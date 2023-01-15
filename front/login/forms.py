@@ -18,6 +18,49 @@ User = get_user_model()
 Emailuser = EmailUser
 
 
+def check_request_times(MODEL, email):
+    user_request = MODEL.objects.get(email=email)
+
+    if user_request.email_request_times < 3:
+        user_request.email_request_times += 1
+        user_request.save()
+    
+    else:
+        raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
+
+def check_request_date(MODEL, email):
+    user_request = MODEL.objects.get(email=email)
+
+    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+
+    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
+
+    elapsed_time = abs(now - user_date)
+
+
+    if elapsed_time.days > 1:
+        user_request.first_request_date = datetime.datetime.now()
+        user_request.email_request_times = 0
+        user_request.save()
+
+def check_request(MODEL, email):
+    Emailuser.objects.filter(email=email, is_active=False).delete()
+
+    email_login_request_exist = MODEL.objects.filter(email=email)
+
+    if email_login_request_exist:
+        check_request_date(MODEL, email)
+        check_request_times(MODEL, email)
+    
+    if not email_login_request_exist:
+        MODEL.objects.create(email=email)
+        check_request_times(MODEL, email)
+
+    return email
+
+
 def _unicode_ci_compare(s1, s2):
     """
     Perform case-insensitive comparison of two identifiers, using the
@@ -53,34 +96,6 @@ class UsernameField(forms.CharField):
         }
 
 
-def check_user_create_request_times(email):
-        user_request = UserCreateRequest.objects.get(email=email)
-
-        if user_request.email_request_times < 3:
-            user_request.email_request_times += 1
-            user_request.save()
-        
-        else:
-            raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
-    
-def check_user_create_request_date(email):
-    user_request = UserCreateRequest.objects.get(email=email)
-
-    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
-
-    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
-
-    elapsed_time = abs(now - user_date)
-
-
-    if elapsed_time.days > 1:
-        user_request.first_request_date = datetime.datetime.now()
-        user_request.email_request_times = 0
-        user_request.save()
-
-
 class CustomUserCreateForm(forms.ModelForm):
     """ユーザー登録フォーム
     パスワード確認なし"""
@@ -107,16 +122,7 @@ class CustomUserCreateForm(forms.ModelForm):
         email = self.cleaned_data['email']
         User.objects.filter(email=email, is_active=False).delete()
 
-        email = self.cleaned_data['email']
-        user_request_exist = UserCreateRequest.objects.filter(email=email)
-
-        if user_request_exist:
-            check_user_create_request_date(email)
-            check_user_create_request_times(email)
-        
-        if not user_request_exist:
-            UserCreateRequest.objects.create(email=email)
-            check_user_create_request_times(email)
+        check_request(UserCreateRequest, email)
 
         return email
 
@@ -203,41 +209,11 @@ class CustomPasswordChangeForm(forms.Form):
         return self.user
 
 
-def check_password_reset_request_times(user):
-    user_request = PasswordResetRequest.objects.get(user=user)
-
-    if user_request.email_request_times <=3:
-        user_request.email_request_times += 1
-        user_request.save()
-    
-    else:
-        raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
-
-
-def check_password_reset_request_date(user):
-    user_request = PasswordResetRequest.objects.get(user=user)
-
-    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
-
-    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
-
-    elapsed_time = abs(now - user_date)
-
-    if elapsed_time.days > 1:
-        user_request.first_request_date = datetime.datetime.now()
-        user_request.email_request_times = 0
-        user_request.save()
-
-
 def check_user(email):
     user_exist = User.objects.filter(email=email, is_active=True)
 
     if user_exist:
-        user = User.objects.get(email=email, is_active=True)
-        check_password_reset_request_date(user)
-        check_password_reset_request_times(user)
+        check_request(PasswordResetRequest, email)
     if not user_exist:
         raise ValidationError("not exist")
 
@@ -370,33 +346,6 @@ class CustomSetPasswordForm(forms.Form):
         return self.user
 
 
-def check_email_login_request_times(email):
-        user_request = EmailLoginRequest.objects.get(email=email)
-
-        if user_request.email_request_times < 3:
-            user_request.email_request_times += 1
-            user_request.save()
-        
-        else:
-            raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
-    
-def check_email_login_request_date(email):
-    user_request = EmailLoginRequest.objects.get(email=email)
-
-    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
-
-    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
-
-    elapsed_time = abs(now - user_date)
-
-
-    if elapsed_time.days > 1:
-        user_request.first_request_date = datetime.datetime.now()
-        user_request.email_request_times = 0
-        user_request.save()
-
 
 class EmailLoginForm(forms.ModelForm):
     class Meta:
@@ -410,16 +359,7 @@ class EmailLoginForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        Emailuser.objects.filter(email=email, is_active=False).delete()
+        Emailuser.objects.filter(email=email).delete()
 
-        email_login_request_exist = EmailLoginRequest.objects.filter(email=email)
-
-        if email_login_request_exist:
-            check_email_login_request_date(email)
-            check_email_login_request_times(email)
-        
-        if not email_login_request_exist:
-            EmailLoginRequest.objects.create(email=email)
-            check_email_login_request_times(email)
-
+        check_request(EmailLoginRequest, email)
         return email
