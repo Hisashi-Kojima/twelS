@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
-from .models import User, EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest
+from .models import User, EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -47,3 +47,5 @@ admin.site.register(IPAddress)
 admin.site.register(PasswordResetRequest)
 
 admin.site.register(UserCreateRequest)
+
+admin.site.register(EmailLoginRequest)
