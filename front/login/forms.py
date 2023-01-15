@@ -26,7 +26,10 @@ def check_request_times(MODEL, email):
         user_request.save()
     
     else:
-        raise ValidationError("You sent request over 3 times. Please wait at least 24 hours and try again.")
+        message = """
+        3回以上認証に失敗したので，24時間以上経過してからもう一度お試しください.もしくは，22801001@edu.cc.saga-u.ac.jpにご連絡ください.
+        """
+        raise ValidationError(message)
 
 def check_request_date(MODEL, email):
     user_request = MODEL.objects.get(email=email)
@@ -46,8 +49,6 @@ def check_request_date(MODEL, email):
         user_request.save()
 
 def check_request(MODEL, email):
-    Emailuser.objects.filter(email=email, is_active=False).delete()
-
     email_login_request_exist = MODEL.objects.filter(email=email)
 
     if email_login_request_exist:
@@ -116,6 +117,11 @@ class CustomUserCreateForm(forms.ModelForm):
             self.fields[self._meta.model.USERNAME_FIELD].widget.attrs[
                 "autofocus"
             ] = True
+
+            # 下の要素にcssを適用するためにidを設定
+            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs[
+                "id"
+            ] = 'email'
         self.fields['password'].widget.attrs['id'] = 'Password'
     
     def clean_email(self):
@@ -226,6 +232,11 @@ class MyPasswordResetForm(forms.Form):
         widget=forms.EmailInput(attrs={"autocomplete": "email"}),
         validators=[check_user]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 下の要素にcssを適用するためにidを設定
+        self.fields['email'].widget.attrs['id'] = 'email'
 
     def send_mail(
         self,

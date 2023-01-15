@@ -134,6 +134,10 @@ TODO: 疑似要素のheightは200pxと固定されているが，
     background-color: gold;
 }
 
+#email{
+    width: 300px;
+}
+
 .tab-panel{
     display: inline-block;
 }
@@ -167,14 +171,17 @@ TODO: 疑似要素のheightは200pxと固定されているが，
   background:#eee;
   margin: auto;
 }
+
 .panel{
   display:none;
 }
+
 .tab.is-active{
   background:#F00;
   color:#FFF;
   transition: all 0.2s ease-out;
 }
+
 .panel.is-show{
   display:block;
 }
