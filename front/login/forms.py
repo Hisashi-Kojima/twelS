@@ -359,7 +359,7 @@ class EmailLoginForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        Emailuser.objects.filter(email=email, is_active=False).delete()
+        Emailuser.objects.filter(email=email).delete()
 
         check_request(EmailLoginRequest, email)
         return email
