@@ -44,6 +44,8 @@ class Login(LoginView):
     form_class = LoginForm
     template_name = 'htmls/login.html'
 
+    redirect_authenticated_user = True #ログインしているユーザーがアクセスしたとき数式検索ページにリダイレクト
+
     def form_valid(self, form):
 
         login(self.request, form.get_user())
