@@ -29,6 +29,7 @@ _more_product: (_add | subtract) product
 _more_atom: (_mul | div) atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
+     | "<mi" _attr* ">" "/" "</mi>" -> slash
      | "<mi" _attr* ">" TOKEN "</mi>"
      | "<mrow" _attr* ">" product "</mrow>"
      | _left_paren sum _right_paren -> paren
@@ -80,8 +81,8 @@ subtract: _open ("-" | "&#x02212;" | "&#x2212;") _close
 _mul: _open ("*" | "×" | "&#x0002A;" | "&#x22C5;") _close  // &#x22C5; is '⋅'.
 div: _open ("/" | "÷" | "&#x0002F;") _close
 equal: _open ("=" | "&#x0003D;") _close
-less: _open "<" _close
-greater: _open ">" _close
+less: _open ("<" | "&lt;" | "&#x0003C;") _close
+greater: _open (">" | "&gt;" | "&#x0003E;") _close
 in: _open ("∈" | "&#x2208;") _close
 _left_paren: _open ("&#x00028;" | "(") _close
 _right_paren: _open ("&#x00029;" | ")") _close
