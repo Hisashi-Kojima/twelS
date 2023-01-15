@@ -11,7 +11,7 @@ body{
 
 h3{
     text-align: left;
-    font-size: 1.2rem;
+    font-size: 1.2rem; /* this line is need for overwrite bootstrap */
 }
 
 footer{
