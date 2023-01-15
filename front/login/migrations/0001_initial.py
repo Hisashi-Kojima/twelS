@@ -74,9 +74,9 @@ class Migration(migrations.Migration):
             name='PasswordResetRequest',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
                 ('email_request_times', models.PositiveSmallIntegerField(default=0, help_text='Designates how many times this user sent email-request for certification', verbose_name='email request times')),
                 ('first_request_date', models.DateTimeField(blank=True, default=datetime.datetime(2022, 12, 31, 11, 19, 3, 948798), null=True, verbose_name='first request date')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(

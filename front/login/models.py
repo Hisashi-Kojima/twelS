@@ -92,7 +92,7 @@ class IPAddress(models.Model):
 
 
 class PasswordResetRequest(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(_('email address'), unique=True)
     email_request_times = models.PositiveSmallIntegerField(
         _('email request times'),
         default=0,

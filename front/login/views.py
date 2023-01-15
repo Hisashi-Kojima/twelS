@@ -44,6 +44,8 @@ class Login(LoginView):
     form_class = LoginForm
     template_name = 'htmls/login.html'
 
+    redirect_authenticated_user = True #ログインしているユーザーがアクセスしたとき数式検索ページにリダイレクト
+
     def form_valid(self, form):
 
         login(self.request, form.get_user())
@@ -226,7 +228,7 @@ class PasswordResetConfirm(PasswordResetConfirmView):
             user = User._default_manager.get(pk=uid)
             user.save()
 
-            user_request = PasswordResetRequest.objects.get(user=user)
+            user_request = PasswordResetRequest.objects.get(email=user.email)
 
             user_request.email_request_times = 0
             user_request.first_request_date = datetime.datetime.now()
