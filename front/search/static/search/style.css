@@ -113,6 +113,10 @@ TODO: 疑似要素のheightは200pxと固定されているが，
     background-color: gold;
 }
 
+#email{
+    width: 300px;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px){
     body{
