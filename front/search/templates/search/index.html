@@ -121,6 +121,13 @@
             {% else %}
                 <p>検索結果は見つかりませんでした。</p>
             {% endif %}
+        {% else %}
+            <div class="news">
+                <p>
+                    数式の入力はTeXの記法に対応しています。<br>
+                    数式の<a href="{% url 'search:input_example' %}">入力例</a>
+                </p>
+            </div>
         {% endif %}
     </div>
 
