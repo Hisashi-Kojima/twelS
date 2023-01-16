@@ -68,6 +68,13 @@ def report(request):
 
 
 @login_required
+def input_example(request):
+    """数式の入力例のページ"""
+    context = {}
+    return render(request, 'search/input_example.html', context)
+
+
+@login_required
 def robots_txt(request):
     """robots.txtを表示するための関数．
     """
