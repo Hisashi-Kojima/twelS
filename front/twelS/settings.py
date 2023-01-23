@@ -190,7 +190,6 @@ LOGGING = {
     }
 }
 
-# 追記
 AUTH_USER_MODEL = 'login.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -220,3 +219,8 @@ AUTHENTICATION_BACKENDS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://*.eagle4.fu.is.saga-u.ac.jp'
 ]
+
+# for Cookie
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'

@@ -26,9 +26,10 @@ class LocalWikiSpider(scrapy.Spider):
 
     base_path = os.path.abspath(__file__)  # local_wiki_spider.pyのpath
     norm_path = os.path.normpath(os.path.join(base_path, '../../../web_pages'))
-    # 数学と物理学のページを登録
+    # 数学と物理学、経済学のページを登録
     target_paths = glob.glob(f'{norm_path}/wiki/math/*')
     target_paths.extend(glob.glob(f'{norm_path}/wiki/physics/*'))
+    target_paths.extend(glob.glob(f'{norm_path}/wiki/economics/*'))
     start_urls = [f'file://{path}' for path in target_paths]
 
     count = 0
