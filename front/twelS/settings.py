@@ -198,6 +198,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login:login'
 LOGIN_REDIRECT_URL = 'search:index'  # ログイン後は数式検索ページにリダイレクト
 
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14 #自動ログアウトまでの時間 2週間
+SESSION_SAVE_EVERY_REQUEST = True #最後にアクセスした時から自動ログアウト期限
+
 # for mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
