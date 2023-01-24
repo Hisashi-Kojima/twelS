@@ -372,5 +372,12 @@ class EmailLoginForm(forms.ModelForm):
         email = self.cleaned_data['email']
         Emailuser.objects.filter(email=email, is_active=False).delete()
 
+        if Emailuser.objects.filter(email=email):
+            emailuser = Emailuser.objects.get(email=email)
+            
+            if emailuser.is_authenticated:
+                # active = trueということなので削除，active=falseでもいいかも
+                emailuser.delete()
+
         check_request(EmailLoginRequest, email)
         return email
