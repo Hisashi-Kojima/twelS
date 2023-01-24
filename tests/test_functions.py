@@ -36,6 +36,20 @@ def test_get_domain_from_uri_1():
     actual = functions.get_domain_from_uri(uri)
     assert expected == actual
 
+
+def test_get_snippet_1(response):
+    """snippetが返ってくることを確認するテスト。
+    """
+    actual_snippet = functions.get_snippet(response)
+
+    with open('test_data/方程式 - Wikipedia.html') as f:
+        text_list = f.readlines()
+        # extract body data
+        body_list = text_list[34:811]
+    expected = ''.join(body_list)
+    assert str(actual_snippet) is not None
+
+
 # I don't use this function now, but I maybe use this in the future.
 # def test_render_katex_1():
 #     """KaTeXで書かれた数式がMathMLに変換されているか確認するテスト。
