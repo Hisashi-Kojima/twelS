@@ -97,8 +97,9 @@
 
             <div id="lang">
                 <p>検索対象の言語</p>
-                <input type="checkbox" name="lr" value="ja" checked>日本語
-                <input type="checkbox" name="lr" value="en">English
+                <label><input type="checkbox" name="lr" value="ja" checked>日本語</label>
+                &emsp;
+                <label><input type="checkbox" name="lr" value="en">English</label>
             </div>
             
         </p>
@@ -142,6 +143,34 @@
     </div>
 
     <script>
+
+    function getUrlParam(){
+        var params = {};
+        if (1 < window.location.search.length){
+            // get string except first character: '?';
+            var paramUrl = window.location.search.substring(1);
+
+            var param_list = paramUrl.split('&');
+            for (var i = 0; i < param_list.length; i++){
+                var element = param_list[i].split('=');
+
+                var paramName = decodeURIComponent(element[0]);
+                var paramValue = decodeURIComponent(element[1]);
+
+                // 連想配列の作成。
+                // 同じparamが複数ある場合にはArrayで格納。
+                if (params[paramName] == null){
+                    params[paramName] = paramValue;
+                } else if (Array.isArray(params[paramName])){
+                    params[paramName].push(paramValue);
+                } else {
+                    // arrayに変換。
+                    params[paramName] = [params[paramName], paramValue];
+                }
+            }
+        }
+        return params;
+    }
 
     function submit(){
         var form = document.createElement('form');
@@ -188,9 +217,31 @@
     }, false);
 
     function onLoad() {
-      target = document.getElementById("textMath");
-      target.focus();
-      //target.setSelectionRange(0, 0);
+        var textMath = document.getElementById("textMath");
+        textMath.focus();
+        
+        var params = getUrlParam();
+
+        // 検索したクエリを入力欄に残す
+        if (params['q'] != null){
+            textMath.value = params['q'];
+            inputChange();
+        }
+
+        // 選択した言語を残す
+        var param_lr = params['lr'];
+        if (param_lr != null){
+            var checkbox_lr = document.getElementsByName("lr");
+            if (Array.isArray(param_lr)){
+                for (var i = 0; i < checkbox_lr.length; i++){
+                    checkbox_lr[i].checked = (param_lr.includes(checkbox_lr[i].value));
+                }
+            } else {
+                for (var i = 0; i < checkbox_lr.length; i++){
+                    checkbox_lr[i].checked = (param_lr == checkbox_lr[i].value);
+                }
+            }
+        }
     }
 
     function inputChange(){
