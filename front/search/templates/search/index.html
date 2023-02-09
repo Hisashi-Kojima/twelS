@@ -17,7 +17,7 @@
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
     <p id="main_form">
-        <input type="text" id="textMath" value=""oninput="inputChange()">
+        <input type="search" id="textMath" value=""oninput="inputChange()">
         <button onclick="submit()">検索</button>
     </p>
 
@@ -27,6 +27,7 @@
       <li class="tab tab-A is-active">演算子など</li>
       <li class="tab tab-B">ギリシャ文字</li>
       <li class="tab tab-C">その他</li>
+      <li class="tab tab-D">その他２</li>
    </ul>
     
     <!--タブを切り替えて表示するコンテンツ-->
@@ -92,6 +93,21 @@
         <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
         <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
         <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
+      </div>
+      <div class="panel tab-D">
+        <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
+        <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
+        <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
+        <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
+        <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
+        <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
+        <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
+        <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
+        <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
+        <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
+        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+            \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+        </button>
       </div>
     </div>
   </div>
@@ -189,6 +205,10 @@
 
     function convertMath(){
         MathJax.typeset([document.getElementById("canvas")]);
+    }
+
+    function xyz(){
+        console.log("ああああ");
     }
 
     function pushString(){
