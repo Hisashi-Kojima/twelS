@@ -7,10 +7,10 @@
 
 {% block body %}
 <script src="{% static 'js/mask_password.js' %}"></script>
-<div class="row">
+<link href="{% static 'js/style.css' %}" rel="stylesheet">
+<div class="cardGroup">
     <!-- 左側、ログインエリア -->
-    <div class="card col-md-6">
-        <div class="card-body">
+    <article class="forecast">
             <form action="{% url 'login:login' %}" method="POST">
                 {{ form.non_field_errors }}
                 {% for field in form %}
@@ -20,21 +20,24 @@
                 {% endfor %}
                 <!-- An element to toggle between password visibility -->
                 <input type="checkbox" onclick="mask_password()">Show Password
-                <button type="submit" class="btn btn-success btn-lg btn-block" >ログイン</button>
+                <button>ログイン</button>
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% csrf_token %}
             </form>
-        </div>
-    </div><!-- 左側、ログインエリアおわり -->
+    </article>
 
     <!-- 右側、会員登録エリア -->
-    <div class="card col-md-6">
-        <div class="card-body">
-            <a href="{% url 'login:user_create' %}" class="btn btn-success btn-lg btn-block" >会員登録</a>
-            <a href="{% url 'login:password_reset' %}" class="btn btn-success btn-lg btn-block" >パスワードを忘れた方</a>
-            <a href="{% url 'login:email_login' %}" class="btn btn-success btn-lg btn-block" >メールアドレスでのログイン</a>
+    <article class="forecast">
+        <div class="create">
+            <a href="{% url 'login:user_create' %}" >会員登録</a>
         </div>
-    </div><!-- 右側、会員登録エリアおわり -->
+        <div>
+            <a href="{% url 'login:password_reset' %}" >パスワードを忘れた方</a>
+        </div>
+        <div>
+            <a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a>
+        </div>
+    </article>
 </div>
 
 <p>
