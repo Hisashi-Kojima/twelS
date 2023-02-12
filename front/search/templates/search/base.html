@@ -43,11 +43,6 @@
             </li>
             {% endif %}
             </ul>
-            <div class="burger">
-                <div class="line1"></div>
-                <div class="line2"></div>
-                <div class="line3"></div>
-            </div>
     </nav>
 
     <div>
@@ -55,22 +50,6 @@
         replace me.
     {% endblock body %}
     </div>
-
-    <script>
-
-        const burger = document.querySelector(".burger");
-        const nav = document.querySelector(".nav-links");
-        const navLinks = document.querySelectorAll(".nav-links li");
-
-        burger.addEventListener("click", () => {
-            nav.classList.toggle("nav-active");
-
-            navLinks.forEach((link, index) => {
-                link.style.animation = 	'navLinksFade 0.5s ease forwards'; 
-            });
-        });
-
-    </script>
 
     <footer>
         <p><a href="{% url 'search:feedback' %}">フィードバック</a>&emsp;&emsp;&emsp;&emsp;<a href="{% url 'search:report' %}">バグ報告・要望</a>&emsp;&emsp;&emsp;&emsp;<a href="{% url 'search:privacy_policy' %}">プライバシーポリシー</a></p>
@@ -116,70 +95,6 @@
         text-decoration: none;
         color: white;
         font-weight: bold;
-    }
-    
-    .burger {
-        cursor: pointer;
-        display: none;
-        padding-right: 20px;
-    }
-    
-    .burger div {
-        width: 25px;
-        height: 3px;
-        background-color: white;
-        margin: 5px;
-    }
-    
-    .nav-active {
-        transform: translateX(0%) !important;
-    }
-    
-    /*
-    @media screen and (max-width:1024px) {
-        .nav-links {
-            width: 55%;
-        }
-    }
-    */
-    
-    @media screen and (max-width:768px) {
-        body {
-            overflow-x: hidden;
-        }
-        nav {
-            justify-content: space-between;
-        }
-        .nav-links {
-            position: absolute;
-            right: 0;
-            height: 10vh;
-            top: 8vh;
-            background-color: blueviolet;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            transform: translateX(100%);
-            transition: all 0.5s ease-in-out;
-        }
-    
-        .nav-links li {
-            opacity: 0;
-        }
-    
-        .burger {
-            display: block;
-            text-align:right;
-        }
-    }
-    
-    @keyframes navLinksFade {
-        0% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
-        }
     }
     
     </style>
