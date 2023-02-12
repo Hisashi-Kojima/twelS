@@ -14,6 +14,9 @@
 {% endblock head %}
 
 {% block body %}
+
+    <div id="formulas"></div>
+    
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
     <p id="main_form">
@@ -167,28 +170,47 @@
     }
 
     const canvas = document.getElementById("canvas");
+    const formula = document.getElementById("formulas");
+    const obj = document.getElementById("textMath");
+    var formulaArray = [];
 
     window.onload = onLoad;
 
     document.addEventListener('DOMContentLoaded', function(){
-        // タブに対してクリックイベントを適用
-        const tabs = document.getElementsByClassName('tab');
-        for(let i = 0; i < tabs.length; i++) {
-            tabs[i].addEventListener('click', tabSwitch, false);
-        }
+  // タブに対してクリックイベントを適用
+  const tabs = document.getElementsByClassName('tab');
+  for(let i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener('click', tabSwitch, false);
+  }
 
-        // タブをクリックすると実行する関数
-        function tabSwitch(){
-            // タブのclassの値を変更
-            document.getElementsByClassName('is-active')[0].classList.remove('is-active');
-            this.classList.add('is-active');
-            // コンテンツのclassの値を変更
-            document.getElementsByClassName('is-show')[0].classList.remove('is-show');
-            const arrayTabs = Array.prototype.slice.call(tabs);
-            const index = arrayTabs.indexOf(this);
-            document.getElementsByClassName('panel')[index].classList.add('is-show');
-        };
-    }, false);
+  window.document.onkeydown = function(event){
+        if (event.key === 'Enter') {
+            if(obj.value !==""){
+            formulaArray.push(obj.value);
+            formula.innerHTML = "";
+            for(let i = 0; i < formulaArray.length; i++) {
+            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
+                                 + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+            }
+            canvas.innerHTML = "";
+            obj.value = "";
+            convertFormula();
+        }
+    }
+    }
+
+  // タブをクリックすると実行する関数
+  function tabSwitch(){
+    // タブのclassの値を変更
+    document.getElementsByClassName('is-active')[0].classList.remove('is-active');
+    this.classList.add('is-active');
+    // コンテンツのclassの値を変更
+    document.getElementsByClassName('is-show')[0].classList.remove('is-show');
+    const arrayTabs = Array.prototype.slice.call(tabs);
+    const index = arrayTabs.indexOf(this);
+    document.getElementsByClassName('panel')[index].classList.add('is-show');
+  };
+}, false);
 
     function onLoad() {
       target = document.getElementById("textMath");
@@ -196,9 +218,32 @@
       //target.setSelectionRange(0, 0);
     }
 
-    function inputChange(){
+    function fixFormula(index) {
+        obj.value = formulaArray[index];
+        canvas.innerHTML = "\\(" + formulaArray[index] + "\\)";
+        convertMath();
+        obj.focus();
+        obj.setSelectionRange(formulaArray[index].length, formulaArray[index].length);
+        formulaArray.splice(index,1);
+        formula.innerHTML = "";
+        for(let i = 0; i < formulaArray.length; i++) {
+            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
+                                       + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+        }
+        convertFormula();
+    }
 
-        const obj = document.getElementById("textMath");
+    function deleteFormula(index) {
+        formulaArray.splice(index,1);
+        formula.innerHTML = "";
+        for(let i = 0; i < formulaArray.length; i++) {
+            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
+                                       + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+        }
+        convertFormula();
+    }
+
+    function inputChange(){
         canvas.innerHTML = "\\(" + obj.value + "\\)";
         convertMath();
     }
@@ -207,30 +252,11 @@
         MathJax.typeset([document.getElementById("canvas")]);
     }
 
-    function xyz(){
-        console.log("ああああ");
-    }
-
-    function pushString(){
-        const obj = document.getElementById("textMath");
-
-        const objString = obj.value.substr(0, obj.selectionStart)
-			+ "2";
-        
-        const objCount = objString.length;
-
-        obj.value = obj.value.substr(0, obj.selectionStart)
-			+ "2"
-			+ obj.value.substr(obj.selectionStart);
-
-        obj.focus();
-        obj.setSelectionRange(objCount, objCount);
-        canvas.innerHTML = obj.value;
-        convertMath();
+    function convertFormula(){
+        MathJax.typeset([document.getElementById("formulas")]);
     }
 
     function pushString(msg){
-        const obj = document.getElementById("textMath");
 
         const objString = obj.value.substr(0, obj.selectionStart)
 			+ msg;
