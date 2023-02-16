@@ -16,85 +16,94 @@
 {% block body %}
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
-    <p id="main_form">
-        <input type="text" id="textMath" value=""oninput="inputChange()">
-        <button onclick="submit()">検索</button>
-    </p>
+        <p id="main_form">
+            <input type="text" id="textMath" value=""oninput="inputChange()">
+            <button onclick="submit()">検索</button>
 
-<div class="tab-panel">
-    <!--タブ-->
-    <ul class="tab-group">
-      <li class="tab tab-A is-active">演算子など</li>
-      <li class="tab tab-B">ギリシャ文字</li>
-      <li class="tab tab-C">その他</li>
-   </ul>
-    
-    <!--タブを切り替えて表示するコンテンツ-->
-    <div class="panel-group">
-      <div class="panel tab-A is-show">
-        <button class="buttonGroup" onclick="pushString('+')">\(+\)</button>
-        <button class="buttonGroup" onclick="pushString('-')">\(-\)</button>
-        <button class="buttonGroup" onclick="pushString('\\times ')">\(\times\)</button>
-        <button class="buttonGroup" onclick="pushString('\\div ')">\(\div\)</button>
-        <button class="buttonGroup" onclick="pushString('\\frac{x}{y}')">\(\frac{x}{y}\)</button>
-        <button class="buttonGroup" onclick="pushString('x^{n}')">\(x^{n}\)</button>
-        <button class="buttonGroup" onclick="pushString('x_{n}')">\(x_{n}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\sqrt{x}')">\(\sqrt{x}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\sqrt[n]{x}')">\(\sqrt[n]{x}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\log_{y}{x}')">\(\log_{y}{x}\)</button>
-        <button class="buttonGroup" onclick="pushString('=')">\(=\)</button>
-        <button class="buttonGroup" onclick="pushString('\\lt ')">\(\lt\)</button>
-        <button class="buttonGroup" onclick="pushString('\\gt ')">\(\gt\)</button>
-        <button class="buttonGroup" onclick="pushString('\\ll ')">\(\ll\)</button>
-        <button class="buttonGroup" onclick="pushString('\\gg ')">\(\gg\)</button>
-        <button class="buttonGroup" onclick="pushString('\\leqq ')">\(\leqq\)</button>
-        <button class="buttonGroup" onclick="pushString('\\geqq ')">\(\geqq\)</button>
-        <button class="buttonGroup" onclick="pushString('\\wedge ')">\(\wedge\)</button>
-        <button class="buttonGroup" onclick="pushString('\\vee ')">\(\vee\)</button>
-        <button class="buttonGroup" onclick="pushString('\\cap ')">\(\cap\)</button>
-        <button class="buttonGroup" onclick="pushString('\\cup ')">\(\cup\)</button>
-      </div>
-      <div class="panel tab-B">
-        <button class="buttonGroup" onclick="pushString('\\alpha ')">\(\alpha\)</button>
-        <button class="buttonGroup" onclick="pushString('\\beta ')">\(\beta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\gamma ')">\(\gamma\)</button>
-        <button class="buttonGroup" onclick="pushString('\\delta ')">\(\delta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\epsilon ')">\(\epsilon\)</button>
-        <button class="buttonGroup" onclick="pushString('\\zeta ')">\(\zeta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\eta ')">\(\eta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\theta ')">\(\theta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\iota ')">\(\iota\)</button>
-        <button class="buttonGroup" onclick="pushString('\\kappa ')">\(\kappa\)</button>
-        <button class="buttonGroup" onclick="pushString('\\lambda ')">\(\lambda\)</button>
-        <button class="buttonGroup" onclick="pushString('\\mu ')">\(\mu\)</button>
-        <button class="buttonGroup" onclick="pushString('\\nu ')">\(\nu\)</button>
-        <button class="buttonGroup" onclick="pushString('\\xi ')">\(\xi\)</button>
-        <button class="buttonGroup" onclick="pushString('\\o ')">\(o\)</button>
-        <button class="buttonGroup" onclick="pushString('\\pi ')">\(\pi\)</button>
-        <button class="buttonGroup" onclick="pushString('\\rho ')">\(\rho\)</button>
-        <button class="buttonGroup" onclick="pushString('\\sigma ')">\(\sigma\)</button>
-        <button class="buttonGroup" onclick="pushString('\\tau ')">\(\tau\)</button>
-        <button class="buttonGroup" onclick="pushString('\\upsilon ')">\(\upsilon\)</button>
-        <button class="buttonGroup" onclick="pushString('\\phi ')">\(\phi\)</button>
-        <button class="buttonGroup" onclick="pushString('\\chi ')">\(\chi\)</button>
-        <button class="buttonGroup" onclick="pushString('\\psi ')">\(\psi\)</button>
-        <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
-      </div>
-      <div class="panel tab-C">
-        <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
-        <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
-        <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
-        <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
-        <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
-        <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
-        <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
-        <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
-      </div>
-    </div>
-  </div>
+            <div class="tab-panel">
+                <!--タブ-->
+                <ul class="tab-group">
+                    <li class="tab tab-A is-active">演算子など</li>
+                    <li class="tab tab-B">ギリシャ文字</li>
+                    <li class="tab tab-C">その他</li>
+                </ul>
+                
+                <!--タブを切り替えて表示するコンテンツ-->
+                <div class="panel-group">
+                    <div class="panel tab-A is-show">
+                        <button class="buttonGroup" onclick="pushString('+')">\(+\)</button>
+                        <button class="buttonGroup" onclick="pushString('-')">\(-\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\times ')">\(\times\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\div ')">\(\div\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\frac{x}{y}')">\(\frac{x}{y}\)</button>
+                        <button class="buttonGroup" onclick="pushString('x^{n}')">\(x^{n}\)</button>
+                        <button class="buttonGroup" onclick="pushString('x_{n}')">\(x_{n}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\sqrt{x}')">\(\sqrt{x}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\sqrt[n]{x}')">\(\sqrt[n]{x}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\log_{y}{x}')">\(\log_{y}{x}\)</button>
+                        <button class="buttonGroup" onclick="pushString('=')">\(=\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\lt ')">\(\lt\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\gt ')">\(\gt\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\ll ')">\(\ll\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\gg ')">\(\gg\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\leqq ')">\(\leqq\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\geqq ')">\(\geqq\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\wedge ')">\(\wedge\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\vee ')">\(\vee\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\cap ')">\(\cap\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\cup ')">\(\cup\)</button>
+                    </div>
+                    <div class="panel tab-B">
+                        <button class="buttonGroup" onclick="pushString('\\alpha ')">\(\alpha\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\beta ')">\(\beta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\gamma ')">\(\gamma\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\delta ')">\(\delta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\epsilon ')">\(\epsilon\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\zeta ')">\(\zeta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\eta ')">\(\eta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\theta ')">\(\theta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\iota ')">\(\iota\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\kappa ')">\(\kappa\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\lambda ')">\(\lambda\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\mu ')">\(\mu\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\nu ')">\(\nu\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\xi ')">\(\xi\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\o ')">\(o\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\pi ')">\(\pi\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\rho ')">\(\rho\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\sigma ')">\(\sigma\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\tau ')">\(\tau\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\upsilon ')">\(\upsilon\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\phi ')">\(\phi\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\chi ')">\(\chi\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\psi ')">\(\psi\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
+                    </div>
+                    <div class="panel tab-C">
+                        <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
+                        <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lang">
+                <p>検索対象の言語</p>
+                <label><input type="checkbox" name="lr" value="ja" checked>日本語</label>
+                &emsp;
+                <label><input type="checkbox" name="lr" value="en">English</label>
+            </div>
+            
+        </p>
+
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
@@ -135,6 +144,34 @@
 
     <script>
 
+    function getUrlParam(){
+        var params = {};
+        if (1 < window.location.search.length){
+            // get string except first character: '?';
+            var paramUrl = window.location.search.substring(1);
+
+            var param_list = paramUrl.split('&');
+            for (var i = 0; i < param_list.length; i++){
+                var element = param_list[i].split('=');
+
+                var paramName = decodeURIComponent(element[0]);
+                var paramValue = decodeURIComponent(element[1]);
+
+                // 連想配列の作成。
+                // 同じparamが複数ある場合にはArrayで格納。
+                if (params[paramName] == null){
+                    params[paramName] = paramValue;
+                } else if (Array.isArray(params[paramName])){
+                    params[paramName].push(paramValue);
+                } else {
+                    // arrayに変換。
+                    params[paramName] = [params[paramName], paramValue];
+                }
+            }
+        }
+        return params;
+    }
+
     function submit(){
         var form = document.createElement('form');
         form.action = '.';
@@ -146,6 +183,9 @@
         q.name = 'q';
         q.type = 'hidden';
         form.appendChild(q);
+
+        const lr = document.getElementById("lang");
+        form.appendChild(lr)
 
         document.body.appendChild(form);
 
@@ -177,9 +217,31 @@
     }, false);
 
     function onLoad() {
-      target = document.getElementById("textMath");
-      target.focus();
-      //target.setSelectionRange(0, 0);
+        var textMath = document.getElementById("textMath");
+        textMath.focus();
+        
+        var params = getUrlParam();
+
+        // 検索したクエリを入力欄に残す
+        if (params['q'] != null){
+            textMath.value = params['q'];
+            inputChange();
+        }
+
+        // 選択した言語を残す
+        var param_lr = params['lr'];
+        if (param_lr != null){
+            var checkbox_lr = document.getElementsByName("lr");
+            if (Array.isArray(param_lr)){
+                for (var i = 0; i < checkbox_lr.length; i++){
+                    checkbox_lr[i].checked = (param_lr.includes(checkbox_lr[i].value));
+                }
+            } else {
+                for (var i = 0; i < checkbox_lr.length; i++){
+                    checkbox_lr[i].checked = (param_lr == checkbox_lr[i].value);
+                }
+            }
+        }
     }
 
     function inputChange(){

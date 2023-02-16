@@ -5,7 +5,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
 
 from local_manabitimes_spider import LocalManabitimesSpider
-from local_wiki_spider import LocalWikiSpider
+from local_wiki_spider import LocalWikiSpider, LocalWikiEnSpider
 
 
 if __name__ == "__main__":
@@ -17,5 +17,6 @@ if __name__ == "__main__":
     s.set('LOG_LEVEL', 'INFO')
     process = CrawlerProcess(s)
     process.crawl(LocalWikiSpider)
+    process.crawl(LocalWikiEnSpider)
     process.crawl(LocalManabitimesSpider)
     process.start()
