@@ -7,8 +7,7 @@ import os
 from lark import Lark, exceptions, Tree
 
 from twels.expr.pathset import PathSet
-from twels.expr.parser_const import ParserConst
-from twels.expr.tree import MathMLTree
+from twels.expr.tree import MathMLTree, get_ro_index
 from twels.utils.utils import print_in_red
 
 
@@ -73,50 +72,22 @@ class Parser:
     def _make_new_trees(tree: Tree) -> list[Tree]:
         """relational operatorを複数含む式を分割して返す関数．
         relational operatorを含まない場合は，ParserConst.root_dataを削除して返す．
-        TODO:
-            equal以外のrelational operatorにも対応する．
-            rootの孫以降にrelational operatorがある場合はどうなるのか確かめる．
         Returns:
             tree_list
         Note:
             ParserConst.root_dataはpath_setには入れたくないので、
             ParserConst.root_dataを含まないTreeを返す。
+            root以外のノードに関係演算子が複数含まれる場合は分割の対象外としている。
+            Transformerでの実装が難しそうなので、これを対象にすることは難しそう。
         """
-        ro_index_list = __class__._get_ro_index(tree)
-        if len(ro_index_list) == 0:
+        ro_index_list = get_ro_index(tree.children)
+        ro_num = len(ro_index_list)
+        if ro_num < 2:
             # remove ParserConst.root_data
             return [tree.children[0]]
 
         tree_list = []
-
-        if len(ro_index_list) == 1 and ro_index_list[0] == 1 and len(tree.children) == 3:
-            # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
-            # remove ParserConst.root_data
-            ro_tree = tree.children[ro_index_list[0]]
-            if ro_tree.data in ParserConst.ro_commutative:
-                new_tree = Tree(ro_tree.data, [
-                    tree.children[0],
-                    tree.children[2]
-                ])
-                tree_list.append(new_tree)
-            elif ro_tree.data in ParserConst.ro_non_commutative:
-                new_tree = Tree(ro_tree.data, [
-                    Tree('#0', [tree.children[0]]),
-                    Tree('#1', [tree.children[2]])
-                ])
-                tree_list.append(new_tree)
-        else:
-            # TODO: ここの実装．
-            # TODO: remove ParserConst.root_data
-            tree_list.append(tree)
+        # TODO: ここの実装
+        # 関係演算子が複数含まれるので、分割する。
+        tree_list.append(tree)
         return tree_list
-
-    @staticmethod
-    def _get_ro_index(tree: Tree) -> list[int]:
-        """tree.childrenに含まれるrelational operatorのindexのリストを返す関数．
-        """
-        result = []
-        for i, child in enumerate(tree.children):
-            if (isinstance(child, Tree)) and (child.data in ParserConst.relational_operators):
-                result.append(i)
-        return result
