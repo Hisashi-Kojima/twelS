@@ -3,7 +3,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
 from django.contrib.auth import get_user_model, password_validation
-from .models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
+from login.models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 import unicodedata
 from django.core.exceptions import ValidationError
 from django.template import loader
