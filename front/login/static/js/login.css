@@ -15,8 +15,8 @@
     border-radius: 5px 5px 5px 5px;
 }
 
-a:hover {
-	background-color: black;
+.forecast a:hover {
+	background-color: white;
 }
 
 p {
@@ -30,6 +30,12 @@ button {
     margin: 5px auto;
     width: 400px;
     height: 40px;
+    border-radius:5px;
+    border: none; 
+}
+
+button:hover {
+    background-color: white;
 }
 
 .create {

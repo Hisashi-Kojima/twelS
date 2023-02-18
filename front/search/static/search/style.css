@@ -37,12 +37,12 @@ footer{
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
 }
 
-#formulas {
+#exprs {
     font-size: 100%;
     padding: 10px;
 }
 
-#formulas button {
+#exprs button {
     border-radius: 5px;
     background-color: rgb(38, 132, 255);
     color: white;

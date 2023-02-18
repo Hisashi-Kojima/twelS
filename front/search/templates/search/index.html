@@ -15,7 +15,7 @@
 
 {% block body %}
 
-    <div id="formulas"></div>
+    <div id="exprs"></div>
     
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
@@ -170,47 +170,47 @@
     }
 
     const canvas = document.getElementById("canvas");
-    const formula = document.getElementById("formulas");
+    const expr = document.getElementById("exprs");
     const obj = document.getElementById("textMath");
-    var formulaArray = [];
+    var exprArray = [];
 
     window.onload = onLoad;
 
     document.addEventListener('DOMContentLoaded', function(){
-  // タブに対してクリックイベントを適用
-  const tabs = document.getElementsByClassName('tab');
-  for(let i = 0; i < tabs.length; i++) {
-    tabs[i].addEventListener('click', tabSwitch, false);
-  }
+        const tabs = document.getElementsByClassName('tab');
+        for(let i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener('click', tabSwitch, false);
+        }
 
-  window.document.onkeydown = function(event){
+    window.document.onkeydown = function(event){
         if (event.key === 'Enter') {
             if(obj.value !==""){
-            formulaArray.push(obj.value);
-            formula.innerHTML = "";
-            for(let i = 0; i < formulaArray.length; i++) {
-            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
-                                 + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+            exprArray.push(obj.value);
+            expr.innerHTML = "";
+            for(let i = 0; i < exprArray.length; i++) {
+                expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
+                                  + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
             }
             canvas.innerHTML = "";
             obj.value = "";
-            convertFormula();
+            convertExpr();
         }
     }
     }
 
-  // タブをクリックすると実行する関数
-  function tabSwitch(){
-    // タブのclassの値を変更
-    document.getElementsByClassName('is-active')[0].classList.remove('is-active');
-    this.classList.add('is-active');
-    // コンテンツのclassの値を変更
-    document.getElementsByClassName('is-show')[0].classList.remove('is-show');
-    const arrayTabs = Array.prototype.slice.call(tabs);
-    const index = arrayTabs.indexOf(this);
-    document.getElementsByClassName('panel')[index].classList.add('is-show');
-  };
-}, false);
+    // タブをクリックすると実行する関数
+    function tabSwitch(){
+        // タブのclassの値を変更
+        document.getElementsByClassName('is-active')[0].classList.remove('is-active');
+        this.classList.add('is-active');
+        // コンテンツのclassの値を変更
+        document.getElementsByClassName('is-show')[0].classList.remove('is-show');
+        const arrayTabs = Array.prototype.slice.call(tabs);
+        const index = arrayTabs.indexOf(this);
+        document.getElementsByClassName('panel')[index].classList.add('is-show');
+    };
+
+    }, false);
 
     function onLoad() {
       target = document.getElementById("textMath");
@@ -218,29 +218,29 @@
       //target.setSelectionRange(0, 0);
     }
 
-    function fixFormula(index) {
-        obj.value = formulaArray[index];
-        canvas.innerHTML = "\\(" + formulaArray[index] + "\\)";
+    function fixExpr(index) {
+        obj.value = exprArray[index];
+        canvas.innerHTML = "\\(" + exprArray[index] + "\\)";
         convertMath();
         obj.focus();
-        obj.setSelectionRange(formulaArray[index].length, formulaArray[index].length);
-        formulaArray.splice(index,1);
-        formula.innerHTML = "";
-        for(let i = 0; i < formulaArray.length; i++) {
-            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
-                                       + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+        obj.setSelectionRange(exprArray[index].length, exprArray[index].length);
+        exprArray.splice(index,1);
+        expr.innerHTML = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
+                                       + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
         }
-        convertFormula();
+        convertExpr();
     }
 
-    function deleteFormula(index) {
-        formulaArray.splice(index,1);
-        formula.innerHTML = "";
-        for(let i = 0; i < formulaArray.length; i++) {
-            formula.innerHTML += "\\(" + formulaArray[i] + "\\)" 
-                                       + `<button onclick=\"fixFormula(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteFormula(${i})\">削除</button>`;
+    function deleteExpr(index) {
+        exprArray.splice(index,1);
+        expr.innerHTML = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
+                                       + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
         }
-        convertFormula();
+        convertExpr();
     }
 
     function inputChange(){
@@ -252,8 +252,8 @@
         MathJax.typeset([document.getElementById("canvas")]);
     }
 
-    function convertFormula(){
-        MathJax.typeset([document.getElementById("formulas")]);
+    function convertExpr(){
+        MathJax.typeset([document.getElementById("exprs")]);
     }
 
     function pushString(msg){
