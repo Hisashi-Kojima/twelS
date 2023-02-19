@@ -128,8 +128,6 @@ class CustomUserCreateForm(forms.ModelForm):
         email = self.cleaned_data['email']
         User.objects.filter(email=email, is_active=False).delete()
 
-        check_request(UserCreateRequest, email)
-
         return email
 
     def _post_clean(self):
@@ -141,6 +139,8 @@ class CustomUserCreateForm(forms.ModelForm):
         if password:
             try:
                 password_validation.validate_password(password, self.instance)
+                email = self.cleaned_data['email']
+                check_request(UserCreateRequest, email)
             except ValidationError as error:
                 self.add_error("password", error)
 
