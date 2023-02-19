@@ -99,7 +99,7 @@ class PasswordResetRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
 
 class UserCreateRequest(models.Model):
@@ -111,7 +111,7 @@ class UserCreateRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
 
 class EmailUser(AbstractBaseUser):
@@ -149,4 +149,4 @@ class EmailLoginRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
