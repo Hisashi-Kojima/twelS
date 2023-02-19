@@ -10,7 +10,7 @@
 <script src="{% static 'js/mask_password.js' %}"></script>
 <div class="cardGroup">
     <!-- 左側、ログインエリア -->
-    <article class="forecast">
+    <div class="forecast">
             <form action="{% url 'login:login' %}" method="POST">
                 {{ form.non_field_errors }}
                 {% for field in form %}
@@ -24,10 +24,10 @@
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% csrf_token %}
             </form>
-    </article>
+    </div>
 
     <!-- 右側、会員登録エリア -->
-    <article class="forecast">
+    <div class="forecast">
         <div class="create">
             <a href="{% url 'login:user_create' %}" >会員登録</a>
         </div>
@@ -37,7 +37,7 @@
         <div>
             <a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a>
         </div>
-    </article>
+    </div>
 </div>
 
 <p>
