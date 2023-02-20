@@ -10,14 +10,14 @@ from pathlib import Path
 import environ
 import mysql.connector
 
+from twels.indexer.info import Info
+from twels.snippet.snippet import Snippet
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 env = environ.Env()
-
-environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env.test'))
-test_env = environ.Env()
 
 
 class Cursor:
@@ -37,25 +37,26 @@ class Cursor:
     # テスト用
     config_for_test = {
         'user': 'hisashi',
-        'password': test_env('MY_HISASHI_PASSWORD'),
-        'host': test_env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
-        'database': test_env('MY_TEST_DB_NAME'),
+        'password': env('MY_HISASHI_PASSWORD'),
+        'host': env('DB_TEST_CONTAINER_NAME'),  # MySQLのコンテナの名前で接続
+        'database': env('MY_TEST_DB_NAME'),
         'port': 3306,  # container側のportは3306．
         'connection_timeout': 100  # second
     }
 
     @staticmethod
-    def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str):
+    def append_expr_id_if_not_registered(cursor, expr_id: int, expr_path: str, expr_size: int):
         """path_dictionaryのexpr_pathに対応するexpr_idsにexpr_idが未登録であれば登録する関数．
         """
         query = """
-        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s)
+        CALL append_expr_id_if_not_registered(%(path)s, %(ids)s, %(id)s, %(size)s)
         """
 
         data = {
             'path': expr_path,
             'ids': json.dumps([str(expr_id)]),
-            'id': str(expr_id)
+            'id': str(expr_id),
+            'size': expr_size
         }
         cursor.execute(query, data)
 
@@ -81,11 +82,14 @@ class Cursor:
         cursor.execute('DELETE FROM page WHERE uri_id = %s LIMIT 1', (uri_id,))
 
     @staticmethod
-    def delete_from_path_dictionary_where_expr_path_1(cursor, expr_path: str):
+    def delete_from_path_dictionary_where_expr_path_1(cursor, expr_path: str, expr_size: int):
         """path_dictionary tableのexpr_pathが一致するレコードを削除する関数．
         最大1つしか一致しないので，'LIMIT 1'を付けている．
         """
-        cursor.execute('DELETE FROM path_dictionary WHERE expr_path = %s LIMIT 1', (expr_path,))
+        cursor.execute(
+            'DELETE FROM path_dictionary WHERE expr_path = %s AND expr_size = %s LIMIT 1',
+            (expr_path, expr_size)
+            )
 
     @staticmethod
     def get_cleaned_path(path: str) -> str:
@@ -95,45 +99,59 @@ class Cursor:
         return tmp[:-1]
 
     @staticmethod
-    def insert_into_index_values_1_2(cursor, expr: str, uri_id: int, lang: str):
-        cursor.execute(
-            'INSERT INTO inverted_index (expr, info) VALUES (%s, JSON_OBJECT("uri_id", JSON_ARRAY(%s), "lang", JSON_ARRAY(%s)))',
-            (expr, str(uri_id), lang)
-            )
+    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, snippet: Snippet):
+        cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, str(snippet)))
 
     @staticmethod
-    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, snippet: str):
-        cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, snippet))
-
-    @staticmethod
-    def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str) -> list:
+    def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str, expr_size: int) -> list:
         """expr_idsから引数のexpr_idを削除する関数．
         Returns:
             expr_ids: 削除済みのexpr_ids
+        Notes:
+            expr_idsに登録されていないexpr_idが引数に指定された場合、
+            expr_idsをそのまま返す。
         """
-        remove_path = __class__.select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id, expr_path)
-        cursor.execute('SELECT JSON_REMOVE(expr_ids, %s) FROM path_dictionary', (remove_path,))
-        expr_ids_json = cursor.fetchone()[0]
-        __class__.update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, expr_ids_json, expr_path)
-        return json.loads(expr_ids_json)
+        query = """
+        SELECT remove_expr_id_from_path_dictionary(%(expr_id)s, %(expr_path)s, %(expr_size)s)
+        """
+        data = {
+            'expr_id': expr_id,
+            'expr_path': expr_path,
+            'expr_size': expr_size
+        }
+        cursor.execute(query, data)
+        return json.loads(cursor.fetchone()[0])
 
     @staticmethod
-    def remove_info_from_inverted_index(cursor, expr: str, uri_id: int) -> dict[str, list[str]]:
-        """削除する数式とuri_idをもとにinverted_indexのinfoの該当箇所を削除する関数"""
-        uri_id_path = __class__.select_json_search_uri_id_1_from_inverted_index_where_expr_2(cursor, uri_id, expr)
-        cursor.execute('SELECT JSON_REMOVE(info, %s) FROM inverted_index', (uri_id_path,))
-        remove_uri_id_info = json.loads(cursor.fetchone()[0])
+    def remove_info_from_inverted_index(cursor, expr: str, uri_id: int) -> Info:
+        """削除する数式とuri_idをもとにinverted_indexのinfoの該当箇所を削除する関数
+        """
+        query = """
+        SELECT remove_info(%(expr)s, %(uri_id)s)
+        """
+        data = {
+            'expr': expr,
+            'uri_id': str(uri_id)
+        }
+        cursor.execute(query, data)
+        info_dict: dict = json.loads(cursor.fetchone()[0])
+        return Info(info_dict)
 
-        lang_path = uri_id_path.replace('uri_id', 'lang')
-        cursor.execute('SELECT JSON_REMOVE(info, %s) FROM inverted_index', (lang_path,))
-        remove_lang_info = json.loads(cursor.fetchone()[0])
-
-        # merge
-        result_dict = {"uri_id": [], "lang": []}
-        result_dict['uri_id'] = remove_uri_id_info['uri_id']
-        result_dict['lang'] = remove_lang_info['lang']
-        __class__.update_inverted_index_set_info_1_where_expr_2(cursor, json.dumps(result_dict), expr)
-        return result_dict
+    @staticmethod
+    def search(cursor, path_set: set[str]) -> list:
+        """[['expr_id', degree of similarity], ...]を返す関数。
+        e.g. [['10', 0.8], ['3', 0.7], ['23', 0.4]]
+        """
+        query = """
+        SELECT search(%(path_set)s)
+        """
+        data = {
+            'path_set': json.dumps(list(path_set))
+        }
+        cursor.execute(query, data)
+        similarity = json.loads(cursor.fetchone()[0])
+        sorted_similarity = sorted(similarity, key=lambda x: x[1], reverse=True)
+        return sorted_similarity
 
     @staticmethod
     def select_all_from_index_where_expr_id_1(cursor, expr_id: int) -> tuple | None:
@@ -168,15 +186,6 @@ class Cursor:
             return tpl[0]
 
     @staticmethod
-    def select_expr_ids_from_path_dictionary_where_expr_path_1(cursor, expr_path: str) -> list[str] | None:
-        cursor.execute('SELECT expr_ids FROM path_dictionary WHERE expr_path = %s', (expr_path,))
-        tpl = cursor.fetchone()
-        if tpl is None:
-            return None
-        else:
-            return json.loads(tpl[0])
-
-    @staticmethod
     def select_info_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> dict[str, list[str]] | None:
         cursor.execute('SELECT info FROM inverted_index WHERE expr_id = %s', (expr_id,))
         tpl = cursor.fetchone()
@@ -184,6 +193,12 @@ class Cursor:
             return None
         else:
             return json.loads(tpl[0])
+
+    @staticmethod
+    def select_info_and_len_from_inverted_index_where_expr_id_1(cursor, expr_id: int) -> tuple[Info, int]:
+        cursor.execute('SELECT info, expr_len FROM inverted_index WHERE expr_id = %s', (expr_id,))
+        info_str, expr_len = cursor.fetchone()
+        return Info(json.loads(info_str)), expr_len
 
     @staticmethod
     def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int, set[str]]:
@@ -200,60 +215,6 @@ class Cursor:
             return None
         else:
             return tpl[0]
-
-    @staticmethod
-    def select_json_array_append_lang(cursor, lang: str, expr_id: int) -> dict:
-        """inverted_indexのinfoのlangの末尾に引数のlangを追加する関数．
-        """
-        cursor.execute(
-            'SELECT JSON_ARRAY_APPEND(info, "$.lang", %s) FROM inverted_index WHERE expr_id = %s',
-            (lang, expr_id)
-            )
-        # langがappendされたレコード
-        info_json = cursor.fetchone()[0]
-        __class__.update_inverted_index_set_info_1_where_expr_id_2(cursor, info_json, expr_id)
-        return json.loads(info_json)
-
-    @staticmethod
-    def select_json_array_append_uri_id(cursor, uri_id: int, expr_id: int) -> dict:
-        """inverted_indexのinfoのlangの末尾に引数のuri_idを追加する関数．
-        """
-        cursor.execute(
-            'SELECT JSON_ARRAY_APPEND(info, "$.uri_id", %s) FROM inverted_index WHERE expr_id = %s',
-            (str(uri_id), expr_id)
-            )
-        # uri_idがappendされたレコード
-        info_json = cursor.fetchone()[0]
-        __class__.update_inverted_index_set_info_1_where_expr_id_2(cursor, info_json, expr_id)
-        return json.loads(info_json)
-
-    @staticmethod
-    def select_json_replace_info(cursor, path: str, value: str, expr_id: int) -> dict:
-        """infoの要素を置換する関数．
-        Args:
-            path: 置換先のpath．
-            value: 置き換える値．uri_idかlangを想定．
-        Returns:
-            置換後のinfo．
-        """
-        cursor.execute(
-            'SELECT JSON_REPLACE(info, %s, %s) FROM inverted_index WHERE expr_id = %s',
-            (path, value, expr_id)
-            )
-        info_json = cursor.fetchone()[0]
-        __class__.update_inverted_index_set_info_1_where_expr_id_2(cursor, info_json, expr_id)
-        return json.loads(info_json)
-
-    @staticmethod
-    def select_json_search_expr_ids_1_from_path_dict_where_expr_path_2(cursor, expr_id: int, expr_path: str) -> str | None:
-        """path_dictionaryのexpr_ids内の指定されたexpr_idへのpathを返す"""
-        cursor.execute('SELECT JSON_SEARCH(expr_ids, "one", %s) FROM path_dictionary WHERE expr_path = %s', (str(expr_id), expr_path))
-        json_path = cursor.fetchone()[0]
-        if json_path is None:
-            return None
-        else:
-            # '"$[2]"'のような形になっているので，先頭と末尾の無駄なダブルクォーテーションを削除．
-            return __class__.get_cleaned_path(json_path)
 
     @staticmethod
     def select_json_search_uri_id_1_from_inverted_index_where_expr_2(cursor, uri_id: int, expr: str) -> str | None:
@@ -273,21 +234,28 @@ class Cursor:
             return __class__.get_cleaned_path(json_path)
 
     @staticmethod
-    def select_json_search_uri_id_1_from_inverted_index_where_expr_id_2(cursor, uri_id: int, expr_id: int) -> str | None:
-        """inverted_indexのinfo内の指定されたuri_idへのpathを返す．
-        TODO: inverted_index tableのinfo内にuri_id以外で数字を保存すると，この関数はそのpathを返してしまう．
-              それへの対応．
+    def update_index(cursor, mathml: str, expr_size: int, info: Info) -> tuple[int, bool]:
+        """inverted_index tableに問い合わせて，mathmlのexpr_idを取得する関数．
+        数式が未登録の場合は，登録してexpr_idを取得する．
+        数式が登録済みの場合は，infoを更新する．
+        Args:
+            info: 1ページ分のinfo。
+        Returns:
+            (expr_id, was_registered): was_registeredは数式が登録済みのときにTrueを返す．
         """
-        cursor.execute(
-                'SELECT JSON_SEARCH(info, "one", %s) FROM inverted_index WHERE expr_id = %s',
-                (uri_id, expr_id)
-                )
-        json_path = cursor.fetchone()[0]
-        if json_path is None:
-            return None
-        else:
-            # '"$.uri_id[0]"'のような形になっているので，先頭と末尾の無駄なダブルクォーテーションを削除．
-            return __class__.get_cleaned_path(json_path)
+        query = """
+        SELECT update_index(%(expr)s, %(expr_len)s, %(expr_size)s, %(info)s)
+        """
+
+        data = {
+            'expr': mathml,
+            'expr_len': len(mathml),
+            'expr_size': expr_size,
+            'info': info.dumps()
+        }
+        cursor.execute(query, data)
+        d: dict = json.loads(cursor.fetchone()[0])
+        return d['expr_id'], d['was_registered']
 
     @staticmethod
     def update_inverted_index_set_info_1_where_expr_2(cursor, info_json: str, expr: str):
@@ -298,12 +266,8 @@ class Cursor:
         cursor.execute('UPDATE inverted_index SET info = %s WHERE expr_id = %s', (info_json, expr_id))
 
     @staticmethod
-    def update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, exprs: list, title: str, snippet: str, uri_id):
-        cursor.execute('UPDATE page SET exprs = %s, title = %s, snippet = %s WHERE uri_id = %s', (json.dumps(exprs), title, snippet, uri_id))
-
-    @staticmethod
-    def update_path_dictionary_set_expr_ids_1_where_expr_path_2(cursor, expr_ids_json: str, expr_path: str):
-        cursor.execute('UPDATE path_dictionary SET expr_ids = %s WHERE expr_path = %s', (expr_ids_json, expr_path))
+    def update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, exprs: list, title: str, snippet: Snippet, uri_id):
+        cursor.execute('UPDATE page SET exprs = %s, title = %s, snippet = %s WHERE uri_id = %s', (json.dumps(exprs), title, str(snippet), uri_id))
 
     @staticmethod
     def uri_is_already_registered(cursor, uri: str) -> bool:

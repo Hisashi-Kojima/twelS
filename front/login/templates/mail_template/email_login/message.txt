@@ -1,0 +1,6 @@
+{{ user.email }} 様 メールアドレスでのログインを行っていただき、ありがとうございます。
+
+下記URLよりサイトにアクセスすることでログインできます。
+
+ログイン用URL
+{{ origin }}{% url 'login:email_login_complete' token %}

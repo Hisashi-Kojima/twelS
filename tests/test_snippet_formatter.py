@@ -2,36 +2,31 @@
 """module description
 """
 
-from twels.searcher.snippet_formatter import SnippetFormatter
+from twels.snippet.formatter import Formatter
+from twels.snippet.snippet import Snippet
 
 
-def test_excerpt_1():
-    """SnippetFormatter._excerpt()のテスト．
-    ハイライトされた数式とハイライトされていない数式を含む場合．
-    先頭に140文字がある．
+def test_format_1():
+    """Formatter.format()のテスト．
+    ハイライトのタグが挿入されていることを確認。
     """
-    snippet =   'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
-                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
-                    '<span class="hl">'\
-                    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">'\
-                    '<mrow>'\
-                    '<mn>1</mn>'\
-                    '<mo>&#x0002B;</mo>'\
-                    '<mn>2</mn>'\
-                    '</mrow>'\
-                    '</math>'\
-                    '</span>'\
-                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'\
-                    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">'\
-                    '<mrow>'\
-                    '<mn>3</mn>'\
-                    '<mo>&#x0002B;</mo>'\
-                    '<mn>4</mn>'\
-                    '</mrow>'\
-                    '</math>'\
-                'aaaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa'
+    # 2*5
+    expr = """
+    <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        <mrow>
+            <mn>2</mn>
+            <mo>&#x0002A;</mo>
+            <mn>5</mn>
+        </mrow>
+    </math>
+    """
+    cleaned_expr = Snippet.clean(expr)
 
-    head = snippet.find('<span class="hl">')
-    tail = snippet.find('</span>') + len('</span>')
-    result = SnippetFormatter._excerpt(snippet, head, tail)
-    assert True == result  # デバッグ用
+    body = f"""数式{cleaned_expr}は、乗算と呼ばれています。"""
+    snippet = Snippet(body)
+    expr_start_pos = [2]
+    expr_len = len(cleaned_expr)
+
+    actual = Formatter.format(snippet, expr_start_pos, expr_len)
+    expected = f"""数式<span class="hl">{cleaned_expr}</span>は、乗算と呼ばれています。"""
+    assert expected == actual

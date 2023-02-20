@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '.twels.jp',
+    '.eagle4.fu.is.saga-u.ac.jp',
     env('ELASTIC_IP_ADDRESS'),
     env('LB_DNS_NAME'),
 ]
@@ -54,6 +55,7 @@ except requests.exceptions.RequestException:
 # Application definition
 
 INSTALLED_APPS = [
+    'login.apps.LoginConfig', # login
     'search.apps.SearchConfig',  # my app
     'django.contrib.admin',
     'django.contrib.auth',
@@ -121,6 +123,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # 追記箇所
+    {
+        'NAME': 'utils.validations.CustomPasswordValidator',
+    },
 ]
 
 
@@ -183,3 +189,38 @@ LOGGING = {
         },
     }
 }
+
+AUTH_USER_MODEL = 'login.User'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login:login'
+LOGIN_REDIRECT_URL = 'search:index'  # ログイン後は数式検索ページにリダイレクト
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14 #自動ログアウトまでの時間 2週間
+SESSION_SAVE_EVERY_REQUEST = True #最後にアクセスした時から自動ログアウト期限
+
+# for mail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'
+SENDGRID_API_KEY = env('SENDGRID_API_KEY')
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'login.auth_backend.PasswordlessAuthBackend',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.eagle4.fu.is.saga-u.ac.jp'
+]
+
+# for Cookie
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'

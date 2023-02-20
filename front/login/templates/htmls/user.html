@@ -1,0 +1,19 @@
+{% extends "search/base.html" %}
+
+{% block head %}
+<title>ユーザー情報</title>
+{% endblock head %}
+
+{% block body %}
+<table class="table">
+    <tbody>
+        <tr>
+            <th>ユーザー名</th>
+            <td>{{ user.email }}</td>
+        </tr>
+    </tbody>
+    <a class="btn btn-primary btn-lg" href="{% url 'login:password_change' %}">パスワード変更</a>
+
+
+</table>
+{% endblock body %}

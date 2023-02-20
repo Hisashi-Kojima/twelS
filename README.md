@@ -24,8 +24,8 @@ docker compose -f docker-compose.yml -f docker-compose.scrape.yml up
 
 ```sh
 docker exec -it python_container /bin/bash
-cd wiki_crawler
-scrapy crawl local_math
+cd web_crawler/web_crawler/spiders
+python local_spider.py
 ```
 
 ## test
@@ -67,12 +67,25 @@ test_cursor.pyのみをテストする。
 
 ### crawlにかかる時間
 
-CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)，メモリ16GBのWindows PCで  
-日本語のWikipediaの数学と物理学のページ合わせて7859ページを  
-シングルプロセスのスクレイピングをしたとき，  
-17,234秒（4時間47分14秒）かかった．  
-request_bytes: 2490609 (約2.4MB)  
-response_bytes: 712761985 (約680MB)  
+CPU: Intel Core(TM) i5-8500 @ 3.00GHz (6コア)、メモリ16GBのWindows PCで  
+日本語のWikipedia  
+
+* 数学 (7,021 pages)
+* 物理学 (1,127 pages)
+* 経済学 (9,378 pages、数式を含むページは200くらい)
+
+manabitimes.jp (1,270 pages)  
+
+* 数学
+* 物理学
+
+英語のWikipedia
+* 数学 (18,310 pages)
+
+
+これらのページ合わせて37,106ページ（一部無関係のファイルを含む）を  
+スクレイピングをしたとき、数式を含むページ9,277ページが登録され、  
+38,842秒（10時間47分22秒）かかった。  
 
 ## mysqlのバックアップ
 
@@ -90,7 +103,7 @@ mysqlのバックアップのファイル名には221007_mysql_backup.sql（2022
 git pull origin REMOTE-BRANCH-NAME:LOCAL-BRANCH-NAME
 ```
 
-ex.  
+e.g.  
 
 ```sh
 git pull origin develop:develop

@@ -4,19 +4,23 @@ services:
   python:
     volumes: 
       - ./front:/code/front  # TODO: frontをvolumeする必要があるか確認．
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
     tty: true
 
   db:
     volumes:
       # ここだけdocker-compose.ymlを上書きする．
       # mysqlディレクトリが空の場合，テーブルを作成して，データは空のままにしていたい．
-      - ./sqls/initdb:/docker-entrypoint-initdb.d
+      - ./sqls/initdb:/twels
+      - ./sqls/initdb_scrape:/docker-entrypoint-initdb.d
 
   splash:
     image: scrapinghub/splash:3.5
+    command: --disable-lua-sandbox  # to use standard Lua modules (e.g. io)
     ports:
       # host port : container port
       - 8050:8050
+    volumes:
+      - ./headless_browser:/code/headless_browser
     networks:
       - app_net

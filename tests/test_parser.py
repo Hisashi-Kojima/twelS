@@ -7,6 +7,18 @@ from lark import Tree, Token
 
 from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
+from twels.snippet.snippet import Snippet
+
+
+def test_get_parsed_tree_atom_1():
+    """演算子を含まないparse。
+    a
+    """
+    mathml = '<math><mi>a</mi></math>'
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, 'a')
+        ])
+    assert expected == Parser.get_parsed_tree(mathml)
 
 
 def test_get_parsed_tree_add_1():
@@ -208,6 +220,51 @@ def test_get_parsed_tree_frac_2():
 
 def test_get_parsed_tree_frac_3():
     """分数のparse
+    frac{d}{dx}e^{x}
+    Snippet.clean()を実行した場合。
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mfrac>
+                                <mi>d</mi>
+                                <mrow>
+                                    <mi>d</mi>
+                                    <mi>x</mi>
+                                </mrow>
+                            </mfrac>
+                        </mrow>
+                        <msup>
+                            <mi>e</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>x</mi>
+                            </mrow>
+                        </msup>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.frac_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'd')]),
+                Tree('#1', [
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, 'd'),
+                        Token(ParserConst.token_type, 'x')
+                    ])
+                ])
+            ]),
+            Tree(ParserConst.sup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'e')]),
+                Tree('#1', [Token(ParserConst.token_type, 'x')])
+            ])
+        ])
+    ])
+    clean_mathml = Snippet.clean(mathml)
+    assert expected == Parser.get_parsed_tree(clean_mathml)
+
+
+def test_get_parsed_tree_frac_4():
+    """分数のparse
     frac{d}{dx}e^{x}=e^{x}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
@@ -271,6 +328,73 @@ def test_get_parsed_tree_frac_3():
     assert expected == Parser.get_parsed_tree(mathml)
 
 
+def test_get_parsed_tree_frac_5():
+    """
+    分数の入れ子。frac {frac{a}{b}}{frac{c}{d}}
+    参考ページ：分数
+    https://ja.wikipedia.org/wiki/%E5%88%86%E6%95%B0
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mrow class="MJX-TeXAtom-ORD">
+                            <mfrac>
+                                <mrow>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mstyle displaystyle="true" scriptlevel="0">
+                                    <mfrac>
+                                        <mi>a</mi>
+                                        <mi>b</mi>
+                                    </mfrac>
+                                    </mstyle>
+                                </mrow>
+                                </mrow>
+                                <mrow>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mstyle displaystyle="true" scriptlevel="0">
+                                    <mfrac>
+                                        <mi>c</mi>
+                                        <mi>d</mi>
+                                    </mfrac>
+                                    </mstyle>
+                                </mrow>
+                                </mrow>
+                            </mfrac>
+                            </mrow>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}</annotation>
+                    </semantics>
+                </math>"""
+
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.frac_data, [
+            Tree('#0', [
+                Tree(ParserConst.frac_data, [
+                    Tree('#0', [
+                        Token(ParserConst.token_type, 'a')
+                    ]),
+                    Tree('#1', [
+                        Token(ParserConst.token_type, 'b')
+                    ])
+                ])
+            ]),
+            Tree('#1', [
+                Tree(ParserConst.frac_data, [
+                    Tree('#0', [
+                        Token(ParserConst.token_type, 'c')
+                    ]),
+                    Tree('#1', [
+                        Token(ParserConst.token_type, 'd')
+                    ])
+                ])
+            ]),
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
 def test_get_parsed_tree_div_1():
     """除算のparse
     3/4
@@ -288,6 +412,27 @@ def test_get_parsed_tree_div_1():
                 Tree('#0', [Token(ParserConst.token_type, '1')]),
                 Tree('#1', [Token(ParserConst.token_type, '4')])
             ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_div_2():
+    """変数として'/'が使われている場合。
+    A/~
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                        <mi>A</mi>
+                        <mi mathvariant="normal">/</mi>
+                        <mo lspace="0em" rspace="0em">∼</mo>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'A'),
+            Token(ParserConst.token_type, ParserConst.slash_data),
+            Token(ParserConst.token_type, '∼')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -334,6 +479,48 @@ def test_get_parsed_tree_eq_2():
         Token(ParserConst.token_type, 'b'),
         Tree(ParserConst.equal_data, []),
         Token(ParserConst.token_type, 'c')
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_lt_1():
+    """不等号（&lt; <）を含む式のparse
+    2<3
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>2</mn>
+                            <mo>&lt;</mo>
+                            <mn>3</mn>
+                        </mrow>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '2'),
+        Tree(ParserConst.less_data, []),
+        Token(ParserConst.token_type, '3'),
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_gt_1():
+    """不等号（&gt; >）を含む式のparse
+    3>2
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>3</mn>
+                            <mo>&gt;</mo>
+                            <mn>2</mn>
+                        </mrow>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '3'),
+        Tree(ParserConst.greater_data, []),
+        Token(ParserConst.token_type, '2'),
     ])
     assert expected == Parser.get_parsed_tree(mathml)
 
@@ -745,23 +932,97 @@ def test_get_parsed_tree_table_1():
                         </mtr>
                     </mtable>
                 </math>"""
-    # TODO: trやtdに引数の番号を割り当てるか検討．
     expected = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, 'X'),
         Tree(ParserConst.equal_data, []),
         Tree(ParserConst.table_data, [
-            Tree(ParserConst.tr_data, [
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'A')]),
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'B')])
+            Tree('#0', [
+                Tree('#0', [Token(ParserConst.token_type, 'A')]),
+                Tree('#1', [Token(ParserConst.token_type, 'B')])
             ]),
-            Tree(ParserConst.tr_data, [
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'C')]),
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'D')])
+            Tree('#1', [
+                Tree('#0', [Token(ParserConst.token_type, 'C')]),
+                Tree('#1', [Token(ParserConst.token_type, 'D')])
             ]),
-            Tree(ParserConst.tr_data, [
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'E')]),
-                Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'F')])
+            Tree('#2', [
+                Tree('#0', [Token(ParserConst.token_type, 'E')]),
+                Tree('#1', [Token(ParserConst.token_type, 'F')])
             ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
+def test_get_parsed_tree_table_2():
+    """行列のparse
+    [  1 9 -13]
+    [ 20 5  -6]
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mrow>
+                                    <mo>[</mo>
+                                    <mtable rowspacing="4pt" columnspacing="1em">
+                                        <mtr>
+                                            <mtd>
+                                            <mn>1</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>9</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>13</mn>
+                                            </mtd>
+                                        </mtr>
+                                        <mtr>
+                                            <mtd>
+                                            <mn>20</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>5</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>6</mn>
+                                            </mtd>
+                                        </mtr>
+                                    </mtable>
+                                    <mo>]</mo>
+                                </mrow>
+                                </mrow>
+                            </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '['),
+            Tree(ParserConst.table_data, [
+                Tree('#0', [
+                    Tree('#0', [Token(ParserConst.token_type, '1')]),
+                    Tree('#1', [Token(ParserConst.token_type, '9')]),
+                    Tree('#2', [
+                        Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, '13')
+                        ])
+                    ])
+                ]),
+                Tree('#1', [
+                    Tree('#0', [Token(ParserConst.token_type, '20')]),
+                    Tree('#1', [Token(ParserConst.token_type, '5')]),
+                    Tree('#2', [
+                        Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, '6')
+                        ])
+                    ])
+                ])
+            ]),
+            Token(ParserConst.token_type, ']')
         ])
     ])
     assert expected == Parser.get_parsed_tree(mathml)
@@ -797,9 +1058,9 @@ def test_get_parsed_tree_table_3():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
             Tree(ParserConst.table_data, [
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
-                    Tree(ParserConst.td_data, [
+                Tree('#0', [
+                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -995,9 +1256,9 @@ def test_get_parsed_tree_cdots_3():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
             Tree(ParserConst.table_data, [
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
-                    Tree(ParserConst.td_data, [
+                Tree('#0', [
+                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -1005,12 +1266,12 @@ def test_get_parsed_tree_cdots_3():
                         ])
                     ])
                 ]),
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [Tree(ParserConst.product_data, [
+                Tree('#1', [
+                    Tree('#0', [Tree(ParserConst.product_data, [
                         Token(ParserConst.token_type, '10'),
                         Token(ParserConst.token_type, 'c')
                     ])]),
-                    Tree(ParserConst.td_data, [
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -1018,15 +1279,15 @@ def test_get_parsed_tree_cdots_3():
                         ])
                     ])
                 ]),
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [Tree(ParserConst.sum_data, [
+                Tree('#2', [
+                    Tree('#0', [Tree(ParserConst.sum_data, [
                         Tree(ParserConst.product_data, [
                             Token(ParserConst.token_type, '10'),
                             Token(ParserConst.token_type, 'c')
                         ]),
                         Tree(ParserConst.neg_data, [Token(ParserConst.token_type, 'c')])
                     ])]),
-                    Tree(ParserConst.td_data, [
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -1039,13 +1300,13 @@ def test_get_parsed_tree_cdots_3():
                         ])
                     ])
                 ]),
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [
+                Tree('#3', [
+                    Tree('#0', [
                         Tree(ParserConst.product_data, [
                             Token(ParserConst.token_type, '9'),
                             Token(ParserConst.token_type, 'c')
                         ])]),
-                    Tree(ParserConst.td_data, [
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -1053,9 +1314,9 @@ def test_get_parsed_tree_cdots_3():
                         ])
                     ])
                 ]),
-                Tree(ParserConst.tr_data, [
-                    Tree(ParserConst.td_data, [Token(ParserConst.token_type, 'c')]),
-                    Tree(ParserConst.td_data, [
+                Tree('#4', [
+                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
+                    Tree('#1', [
                         Tree(ParserConst.expr_data, [
                             Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.equal_data, []),
@@ -1068,13 +1329,82 @@ def test_get_parsed_tree_cdots_3():
     assert expected == Parser.get_parsed_tree(mathml)
 
 
+def test_get_parsed_tree_mspace_1():
+    """
+    mspaceを含む式。frac {frac{a}{b}}{frac{c}{d}}
+    参考ページ：分数
+    https://ja.wikipedia.org/wiki/%E5%88%86%E6%95%B0
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mrow class="MJX-TeXAtom-ORD">
+                            <mfrac>
+                                <mrow>
+                                <mspace width="thickmathspace" />
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mstyle displaystyle="true" scriptlevel="0">
+                                    <mfrac>
+                                        <mi>a</mi>
+                                        <mi>b</mi>
+                                    </mfrac>
+                                    </mstyle>
+                                </mrow>
+                                <mspace width="thickmathspace" />
+                                </mrow>
+                                <mrow>
+                                <mspace width="thickmathspace" />
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mstyle displaystyle="true" scriptlevel="0">
+                                    <mfrac>
+                                        <mi>c</mi>
+                                        <mi>d</mi>
+                                    </mfrac>
+                                    </mstyle>
+                                </mrow>
+                                <mspace width="thickmathspace" />
+                                </mrow>
+                            </mfrac>
+                            </mrow>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.frac_data, [
+            Tree('#0', [
+                Tree(ParserConst.frac_data, [
+                    Tree('#0', [
+                        Token(ParserConst.token_type, 'a')
+                    ]),
+                    Tree('#1', [
+                        Token(ParserConst.token_type, 'b')
+                    ])
+                ])
+            ]),
+            Tree('#1', [
+                Tree(ParserConst.frac_data, [
+                    Tree('#0', [
+                        Token(ParserConst.token_type, 'c')
+                    ]),
+                    Tree('#1', [
+                        Token(ParserConst.token_type, 'd')
+                    ])
+                ])
+            ]),
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(mathml)
+
+
 def test_parse_num_1():
     """数値のparse
     7
     """
     actual = Parser.parse(latex2mathml.converter.convert('7'))
-    root = ParserConst.root_data
-    expected = {'7', f'7/{root}'}
+    expected = {'7'}
     assert actual == expected
 
 
@@ -1084,10 +1414,9 @@ def test_parse_add_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('1+2'))
     sum_ = ParserConst.sum_data
-    root = ParserConst.root_data
     expected = {
-        '1', f'1/{sum_}', f'1/{sum_}/{root}',
-        '2', f'2/{sum_}', f'2/{sum_}/{root}'
+        '1', f'1/{sum_}',
+        '2', f'2/{sum_}'
         }
     assert actual == expected
 
@@ -1098,11 +1427,10 @@ def test_parse_subtract_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('3-2'))
     sum_ = ParserConst.sum_data
-    root = ParserConst.root_data
     neg = ParserConst.neg_data
     expected = {
-        '3', f'3/{sum_}', f'3/{sum_}/{root}',
-        f'2/{neg}', f'2/{neg}/{sum_}', f'2/{neg}/{sum_}/{root}'
+        '3', f'3/{sum_}',
+        f'2/{neg}', f'2/{neg}/{sum_}'
         }
     assert actual == expected
 
@@ -1113,10 +1441,9 @@ def test_parse_product_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('4*5'))
     product = ParserConst.product_data
-    root = ParserConst.root_data
     expected = {
-        '4', f'4/{product}', f'4/{product}/{root}',
-        '5', f'5/{product}', f'5/{product}/{root}'
+        '4', f'4/{product}',
+        '5', f'5/{product}'
         }
     assert actual == expected
 
@@ -1128,12 +1455,11 @@ def test_parse_div_1():
     """
     actual = Parser.parse(latex2mathml.converter.convert('3/2'))
     product = ParserConst.product_data
-    root = ParserConst.root_data
     frac = ParserConst.frac_data
     expected = {
-        '3', f'3/{product}', f'3/{product}/{root}',
-        '1', f'1/#0/{frac}', f'1/#0/{frac}/{product}', f'1/#0/{frac}/{product}/{root}',
-        '2', f'2/#1/{frac}', f'2/#1/{frac}/{product}', f'2/#1/{frac}/{product}/{root}'
+        '3', f'3/{product}',
+        '1', f'1/#0/{frac}', f'1/#0/{frac}/{product}',
+        '2', f'2/#1/{frac}', f'2/#1/{frac}/{product}'
     }
     assert actual == expected
 
@@ -1143,11 +1469,10 @@ def test_parse_eq_1():
     a=b
     """
     actual = Parser.parse(latex2mathml.converter.convert('a=b'))
-    root = ParserConst.root_data
     equal = ParserConst.equal_data
     expected = {
-        'a', f'a/{equal}', f'a/{equal}/{root}',
-        'b', f'b/{equal}', f'b/{equal}/{root}'
+        'a', f'a/{equal}',
+        'b', f'b/{equal}'
         }
     assert actual == expected
 
@@ -1170,26 +1495,106 @@ def test_parse_eq_2():
                     </semantics>
                 </math>"""
     actual = Parser.parse(mathml)
-    root = ParserConst.root_data
     equal = ParserConst.equal_data
     expected = {
-        'y', f'y/{equal}', f'y/{equal}/{root}',
-        '0', f'0/{equal}', f'0/{equal}/{root}'
+        'y', f'y/{equal}',
+        '0', f'0/{equal}'
     }
     assert actual == expected
 
 
-def test_parse_eq_3():
-    """a
+def test_parse_lt_1():
+    """不等式のparse
+    a<b
     """
-    actual = Parser.parse(latex2mathml.converter.convert('a'))
+    actual = Parser.parse(latex2mathml.converter.convert('a<b'))
+    less = ParserConst.less_data
     expected = {
-        'a', f'a/{ParserConst.root_data}'
+        'a', f'a/#0/{less}',
+        'b', f'b/#1/{less}'
+        }
+    assert actual == expected
+
+
+def test_parse_gt_1():
+    """不等式のparse
+    a>b
+    """
+    actual = Parser.parse(latex2mathml.converter.convert('a>b'))
+    greater = ParserConst.greater_data
+    expected = {
+        'a', f'a/#0/{greater}',
+        'b', f'b/#1/{greater}'
+        }
+    assert actual == expected
+
+
+def test_parse_table_1():
+    """行列のparse
+    [  1 9 -13]
+    [ 20 5  -6]
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mrow>
+                                    <mo>[</mo>
+                                    <mtable rowspacing="4pt" columnspacing="1em">
+                                        <mtr>
+                                            <mtd>
+                                            <mn>1</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>9</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>13</mn>
+                                            </mtd>
+                                        </mtr>
+                                        <mtr>
+                                            <mtd>
+                                            <mn>20</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>5</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>6</mn>
+                                            </mtd>
+                                        </mtr>
+                                    </mtable>
+                                    <mo>]</mo>
+                                </mrow>
+                                </mrow>
+                            </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
+                    </semantics>
+                </math>"""
+    actual = Parser.parse(mathml)
+    table = ParserConst.table_data
+    product = ParserConst.product_data
+    neg = ParserConst.neg_data
+    expected = {
+        '[', f'[/{product}',
+        '1', f'1/#0/#0/{table}', f'1/#0/#0/{table}/{product}',
+        '9', f'9/#1/#0/{table}', f'9/#1/#0/{table}/{product}',
+        f'13/{neg}', f'13/{neg}/#2/#0/{table}', f'13/{neg}/#2/#0/{table}/{product}',
+        '20', f'20/#0/#1/{table}', f'20/#0/#1/{table}/{product}',
+        '5', f'5/#1/#1/{table}', f'5/#1/#1/{table}/{product}',
+        f'6/{neg}', f'6/{neg}/#2/#1/{table}', f'6/{neg}/#2/#1/{table}/{product}',
+        ']', f']/{product}',
     }
     assert actual == expected
 
 
 def test_make_new_trees_1():
+    """等式が分解しやすい形に変更されていることを確認するテスト。
+    """
     tree = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, 'y'),
         Tree(ParserConst.equal_data, []),
@@ -1199,15 +1604,72 @@ def test_make_new_trees_1():
             ])
         ])
     actual = Parser._make_new_trees(tree)
+
     expected = [
-        Tree(ParserConst.root_data, [
-            Tree(ParserConst.equal_data, [
-                Token(ParserConst.token_type, 'y'),
-                Tree(ParserConst.product_data, [
-                    Token(ParserConst.token_type, 'a'),
-                    Token(ParserConst.token_type, 'x')
-                ])
+        Tree(ParserConst.equal_data, [
+            Token(ParserConst.token_type, 'y'),
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'a'),
+                Token(ParserConst.token_type, 'x')
             ])
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_2():
+    """ParserConst.root_dataが削除されていることを確認するテスト。
+    """
+    tree = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
+            ])
+        ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_3():
+    """不等号を含む式が正しく処理されていることを確認するテスト。
+    2<3
+    """
+    tree = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '2'),
+        Tree(ParserConst.less_data, []),
+        Token(ParserConst.token_type, '3'),
+    ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.less_data, [
+            Tree('#0', [Token(ParserConst.token_type, '2')]),
+            Tree('#1', [Token(ParserConst.token_type, '3')]),
+        ])
+    ]
+    assert actual == expected
+
+
+def test_make_new_trees_4():
+    """不等号を含む式が正しく処理されていることを確認するテスト。
+    3>2
+    """
+    tree = Tree(ParserConst.root_data, [
+        Token(ParserConst.token_type, '3'),
+        Tree(ParserConst.greater_data, []),
+        Token(ParserConst.token_type, '2'),
+    ])
+    actual = Parser._make_new_trees(tree)
+
+    expected = [
+        Tree(ParserConst.greater_data, [
+            Tree('#0', [Token(ParserConst.token_type, '3')]),
+            Tree('#1', [Token(ParserConst.token_type, '2')]),
         ])
     ]
     assert actual == expected

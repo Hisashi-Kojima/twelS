@@ -6,13 +6,13 @@ import os
 
 from lark import Lark, exceptions, Tree
 
-from twels.expr.collector import get_path_set
+from twels.expr.pathset import PathSet
 from twels.expr.parser_const import ParserConst
 from twels.expr.tree import MathMLTree
 from twels.utils.utils import print_in_red
 
 
-def get_lark_parser():
+def get_lark_parser() -> Lark | None:
     """Lark parserを返す関数．
     """
     base_path = os.path.abspath(__file__)  # parser.pyのpath
@@ -46,7 +46,7 @@ class Parser:
         # TODO: 1つの式を複数の式に分割したときに，それぞれにexpr_idを割り当てなくてよいのか考える．
         result = set()
         for t in tree_list:
-            result = result.union(get_path_set(t))
+            result = result.union(PathSet(t))
         return result
 
     @staticmethod
@@ -72,44 +72,51 @@ class Parser:
     @staticmethod
     def _make_new_trees(tree: Tree) -> list[Tree]:
         """relational operatorを複数含む式を分割して返す関数．
-        relational operatorを含まない場合は，そのまま返す．
+        relational operatorを含まない場合は，ParserConst.root_dataを削除して返す．
         TODO:
             equal以外のrelational operatorにも対応する．
             rootの孫以降にrelational operatorがある場合はどうなるのか確かめる．
+        Returns:
+            tree_list
+        Note:
+            ParserConst.root_dataはpath_setには入れたくないので、
+            ParserConst.root_dataを含まないTreeを返す。
         """
-        if len(__class__._get_ro_index(tree)) == 0:
-            return [tree]
+        ro_index_list = __class__._get_ro_index(tree)
+        if len(ro_index_list) == 0:
+            # remove ParserConst.root_data
+            return [tree.children[0]]
 
-        result = []
-        equal = Tree(ParserConst.equal_data, [])
-        # 子にequalを1つ以上持つノードそれぞれを変形．
-        for tree_having_ro in tree.find_pred(lambda t: equal in t.children):
-            # ROの位置を得る
-            index_list = __class__._get_ro_index(tree_having_ro)
+        tree_list = []
 
-            if len(index_list) == 1 and index_list[0] == 1 and len(tree_having_ro.children) == 3:
-                # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
-                new_tree = Tree(ParserConst.root_data, [
-                    Tree(ParserConst.equal_data, [
-                        tree_having_ro.children[0],
-                        tree_having_ro.children[2],
-                    ])
+        if len(ro_index_list) == 1 and ro_index_list[0] == 1 and len(tree.children) == 3:
+            # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
+            # remove ParserConst.root_data
+            ro_tree = tree.children[ro_index_list[0]]
+            if ro_tree.data in ParserConst.ro_commutative:
+                new_tree = Tree(ro_tree.data, [
+                    tree.children[0],
+                    tree.children[2]
                 ])
-                result.append(new_tree)
-            else:
-                # TODO: ここの実装．
-                result.append(tree_having_ro)
-        return result
+                tree_list.append(new_tree)
+            elif ro_tree.data in ParserConst.ro_non_commutative:
+                new_tree = Tree(ro_tree.data, [
+                    Tree('#0', [tree.children[0]]),
+                    Tree('#1', [tree.children[2]])
+                ])
+                tree_list.append(new_tree)
+        else:
+            # TODO: ここの実装．
+            # TODO: remove ParserConst.root_data
+            tree_list.append(tree)
+        return tree_list
 
     @staticmethod
     def _get_ro_index(tree: Tree) -> list[int]:
         """tree.childrenに含まれるrelational operatorのindexのリストを返す関数．
-        TODO:
-            equalをrelational operatorに拡張．
         """
         result = []
         for i, child in enumerate(tree.children):
-            equal = Tree(ParserConst.equal_data, [])
-            if child == equal:
+            if (isinstance(child, Tree)) and (child.data in ParserConst.relational_operators):
                 result.append(i)
         return result

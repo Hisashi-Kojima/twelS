@@ -8,7 +8,7 @@ services:
       dockerfile: ./webserver/Dockerfile
     ports:
       # host port : container port
-      - 80:80
+      - 8070:8070  # avoid to conflict with eagle4 nginx at port 80
       - 8000:8000
     volumes:
       - ./webserver/conf.d:/etc/nginx/conf.d
@@ -23,7 +23,7 @@ services:
   python:
     volumes: 
       - ./front:/code/front
-      - ./wiki_crawler:/code/wiki_crawler
+      - ./web_crawler:/code/web_crawler
       - ./uwsgi:/code/uwsgi
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     tty: true

@@ -7,6 +7,6 @@ import subprocess
 
 
 if __name__ == '__main__':
-    os.chdir('../wiki_crawler')
+    os.chdir('../web_crawler')
     command = ['scrapy', 'list']
     subprocess.run(command, check=True)
