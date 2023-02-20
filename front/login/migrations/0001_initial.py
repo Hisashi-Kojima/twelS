@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
                 ('email_request_times', models.PositiveSmallIntegerField(default=0, help_text='Designates how many times this user sent email-request for certification', verbose_name='email request times')),
-                ('first_request_date', models.DateTimeField(blank=True, default=datetime.datetime(2022, 12, 31, 11, 19, 3, 950275), null=True, verbose_name='first request date')),
+                ('first_request_date', models.DateTimeField(blank=True, null=True, verbose_name='first request date')),
             ],
         ),
         migrations.CreateModel(
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
                 ('email_request_times', models.PositiveSmallIntegerField(default=0, help_text='Designates how many times this user sent email-request for certification', verbose_name='email request times')),
-                ('first_request_date', models.DateTimeField(blank=True, default=datetime.datetime(2022, 12, 31, 11, 19, 3, 949386), null=True, verbose_name='first request date')),
+                ('first_request_date', models.DateTimeField(blank=True, null=True, verbose_name='first request date')),
             ],
         ),
         migrations.CreateModel(
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
                 ('email_request_times', models.PositiveSmallIntegerField(default=0, help_text='Designates how many times this user sent email-request for certification', verbose_name='email request times')),
-                ('first_request_date', models.DateTimeField(blank=True, default=datetime.datetime(2022, 12, 31, 11, 19, 3, 948798), null=True, verbose_name='first request date')),
+                ('first_request_date', models.DateTimeField(blank=True, null=True, verbose_name='first request date')),
             ],
         ),
         migrations.CreateModel(
