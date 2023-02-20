@@ -1,10 +1,9 @@
 from django.db import models
 from django.core.mail import send_mail as send
 from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 import datetime
 
@@ -100,7 +99,7 @@ class PasswordResetRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
 
 class UserCreateRequest(models.Model):
@@ -112,7 +111,7 @@ class UserCreateRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
 
 class EmailUser(AbstractBaseUser):
@@ -150,4 +149,4 @@ class EmailLoginRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
