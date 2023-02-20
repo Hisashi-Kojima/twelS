@@ -12,6 +12,7 @@ from front.twelS.settings import BASE_DIR
 from twels.searcher.searcher import Searcher
 from django.contrib.auth.decorators import login_required
 
+from twels.mathpix.mathpix import mathocr
 
 @login_required
 def index(request: WSGIRequest):
@@ -42,6 +43,14 @@ def index(request: WSGIRequest):
             'query': expr,
             'start': str(int(start)+10),
         }
+
+    elif request.method == 'POST':
+        if request.FILES.get('uploadImage', False):
+            uploadedImage = request.FILES['uploadImage'].read()
+            latex = mathocr(uploadedImage)
+            context = { 'latex': repr(latex), }
+        else:
+            context = {}
     else:
         print('GET以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
