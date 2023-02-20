@@ -4,6 +4,7 @@
 
 import time
 
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -13,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def index(request):
+def index(request: WSGIRequest):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
     if request.method == 'GET':
@@ -21,12 +22,13 @@ def index(request):
 
         expr: str | None = request.GET.get('q')
         start: str | None = request.GET.get('start')
+        lr_list: list[str] = request.GET.getlist('lr')
         # 検索時
         if expr is not None and expr != '':
             start_time = time.time()
             if start is None:
                 start = '0'
-            result = Searcher.search(expr, int(start))
+            result = Searcher.search(expr, int(start), lr_list)
             page_list: list[dict] = result['search_result']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
@@ -65,6 +67,13 @@ def report(request):
     """バグ報告・要望のページ"""
     context = {}
     return render(request, 'search/report.html', context)
+
+
+@login_required
+def input_example(request):
+    """数式の入力例のページ"""
+    context = {}
+    return render(request, 'search/input_example.html', context)
 
 
 @login_required
