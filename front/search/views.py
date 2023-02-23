@@ -11,8 +11,8 @@ from django.shortcuts import render
 from front.twelS.settings import BASE_DIR
 from twels.searcher.searcher import Searcher
 from django.contrib.auth.decorators import login_required
-
 from twels.mathpix.mathpix import mathocr
+
 
 @login_required
 def index(request: WSGIRequest):
@@ -42,17 +42,19 @@ def index(request: WSGIRequest):
             'page_list': page_list,
             'query': expr,
             'start': str(int(start)+10),
+            'latex': '',  # html側でのgetかpostかの判定に使う
         }
 
     elif request.method == 'POST':
         if request.FILES.get('uploadImage', False):
-            uploadedImage = request.FILES['uploadImage'].read()
-            latex = mathocr(uploadedImage)
-            context = { 'latex': repr(latex), }
+            uploadedImage: bytes = request.FILES['uploadImage'].read()
+            # repr(): For prevent misidentification expr as escape sequence
+            latex: str = repr(mathocr(uploadedImage))
+            context = {'latex': latex}
         else:
-            context = {}
+            context = {'latex': ''}
     else:
-        print('GET以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
+        print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
     return render(request, 'search/index.html', context)
 
