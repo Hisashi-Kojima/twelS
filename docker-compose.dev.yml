@@ -18,6 +18,8 @@ services:
     ports:
       # host port : container port
       - 8000:8000
+    environment:
+      - PYTHONPATH=/code:/code/front  # pytestのためにfrontのパスを追加する
 
   db-test:
     container_name: $DB_TEST_CONTAINER_NAME
