@@ -254,8 +254,7 @@
         let latex = "{{ latex | safe }}";
         if (latex !== '') {
             textMath.value = '';
-            // latexは''で囲まれた文字列として返され，数式中に半角空白を含むことがあるため
-            latex = latex.slice(1, latex.length-1).replace(/\s+/g,'')
+            latex = latex.slice(1, latex.length-1)
             textMath.value = latex;
             inputChange();
         }
