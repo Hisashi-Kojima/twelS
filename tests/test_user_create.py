@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.core import mail
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
+from django.test.utils import override_settings
+from django.core.signing import loads
 
 User = get_user_model()
 
@@ -30,6 +32,7 @@ class UserCreateTest(TestCase):
 
 class SuccessfulUserCreateTests(TestCase):
     """ユーザー登録成功時のテスト"""
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def setUp(self):
         url = reverse('login:user_create')
         data = {
@@ -47,28 +50,18 @@ class SuccessfulUserCreateTests(TestCase):
 
     def test_mail(self):
         """メールテスト"""
-
         self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
         self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
         self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
 
-        context = self.response.context
-        origin = context.get('origin')
-        token = context.get('token')
-        url = f'{origin}/login/user_create/complete/{token}/'
-        self.assertIn(url, mail.outbox[0].body)  # urlが正しく添付されていること
-
+        body_lines = mail.outbox[0].body.split('\n')
+        url = body_lines[6]  # メール本文から認証urlを取得
         redirect(url)
 
-    # def test_usercreate_complete_redirect(self):
-    #     self.assertEqual(self.response.status_code, 302)
-    #     self.assertRedirects(self.response, self.home_url)
+    def test_usercreate_complete_redirect(self):
+        """認証URLに正しくアクセスできるかテスト"""
+        self.assertEqual(self.response.status_code, 302)
 
-    # def test_usercreate_complete(self):
-    #     """登録内容のテスト"""
-    #     self.assertTrue(User.objects.count(), 1)
-    #     token = self.response.context.get('token')
-    #     user_pk = loads(token)
-
-    #     user = User.objects.get(pk=user_pk)
-    #     self.assertEqual(user.email, 'test@edu.cc.saga-u.ac.jp')
+    def test_usercreate_complete(self):
+        """登録内容のテスト"""
+        self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))
