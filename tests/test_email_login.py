@@ -19,7 +19,7 @@ class UserCreateTest(TestCase):
 
     def test_user_create_status_code(self):
         """ステータスコード200を確認"""
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_csrf(self):
         """csrfトークンを含むこと"""
