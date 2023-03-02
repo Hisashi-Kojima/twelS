@@ -12,7 +12,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 env = environ.Env()
 
 
-default_headers: dict = {
+default_headers: dict[str, str] = {
     'app_id': env('MATHPIX_ID'),
     'app_key': env('MATHPIX_KEY'),
     'Content-type': 'application/json'
@@ -29,21 +29,31 @@ def latex(args: dict, headers: dict = default_headers) -> dict:
         timeout: POSTrequestの際のtimeout時間の設定.
     Returns:
         dict型で書かれた画像データの識別結果.args次第で詳細に返す識別結果を設定できる.
+        e.g.
+        {
+            'latex_confidence': 0.9660966,
+            'mathml': '<math>...</math>',
+            'text': 'How do you multiply \( \frac { 7 x } { 5 x + 15 } \cdot \frac { x + 3 } { 8 } ?  \)',
+            'latex_styled': '\( \frac { 7 x } { 5 x + 15 } \cdot \frac { x + 3 } { 8 } ?  \)',
+            ...
+        }
     """
-    encoded_data: dict = json.dumps(args)
-    ocr_response: requests.models.Response = requests.post(
+    encoded_data = json.dumps(args)
+    ocr_response = requests.post(
         service, data=encoded_data, headers=headers, timeout=30)
     return json.loads(ocr_response.text)
 
 
-def mathocr(image: bytes) -> str:
+def mathocr(image: bytes) -> str | bool:
     """mathpixにimageのOCRをリクエストし,レスポンスとしてOCRの結果を取得する関数.
     Arg:
         image: 画像ファイルアップローダーから取得した画像のバイナリデータ.
     Return:
-        latex形式の数式．もしくは，識別できなかった旨の文字列．
+        latex形式の数式.または,数式認識が出来なかった場合はFalse.
+        e.g.
+        '\( \frac { 7 x } { 5 x + 15 } \cdot \frac { x + 3 } { 8 } ?  \)'
     """
-    image_payload: str = base64.b64encode(image).decode()
+    image_payload = base64.b64encode(image).decode()
     image_dataURL: str = f'data:image/jpg;base64,{image_payload}'
     ocr_response: dict = latex({
         'src': image_dataURL,
@@ -64,10 +74,10 @@ def mathocr(image: bytes) -> str:
         }
     })
 
-    # the formula recognized
-    if ocr_response['detection_map']['is_not_math'] == 0:
+    # the formula is recognized.
+    if 'latex_styled' in ocr_response:
         return ocr_response['latex_styled']
 
-    # the formula not recognized
+    # the formula is not recognized.
     else:
-        return "Not Recognized"
+        return False

@@ -42,17 +42,18 @@ def index(request: WSGIRequest):
             'page_list': page_list,
             'query': expr,
             'start': str(int(start)+10),
-            'latex': '',  # html側でのgetかpostかの判定に使う
+            'ocr': '',
         }
 
     elif request.method == 'POST':
         if request.FILES.get('uploadImage', False):
             uploadedImage: bytes = request.FILES['uploadImage'].read()
             # repr(): For prevent misidentification expr as escape sequence
-            latex: str = repr(mathocr(uploadedImage))
-            context = {'latex': latex}
+            math = mathocr(uploadedImage)
+            ocr: str = math.replace('\\', '\\\\')
+            context = {'ocr': ocr}
         else:
-            context = {'latex': ''}
+            context = {'ocr': ''}
     else:
         print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}

@@ -19,7 +19,7 @@
         <p id="main_form">
             <input type="text" id="textMath" value="" oninput="inputChange()">
             <button onclick="submit()">検索</button>
-            <button type="button" onclick="uploadImage()">
+            <button type="button" onclick="uploadImage()" id="camera">
                 <img src="{% static 'search/images/camera.png' %}" width="30" />
             </button>
             <!-- for camera (using mathpix) -->
@@ -230,11 +230,15 @@
         
         var params = getUrlParam();
 
-        // 検索したクエリを入力欄に残す
-        if (params['q'] != null){
+        // 入力欄にqueryを反映
+        let ocr = '{{ ocr }}';
+        if (ocr !== '') {
+            textMath.value = '';
+            textMath.value = ocr;
+        } else if (params['q'] != null) {
             textMath.value = params['q'];
-            inputChange();
         }
+        inputChange();
 
         // 選択した言語を残す
         var param_lr = params['lr'];
@@ -249,14 +253,6 @@
                     checkbox_lr[i].checked = (param_lr == checkbox_lr[i].value);
                 }
             }
-        }
-
-        let latex = "{{ latex | safe }}";
-        if (latex !== '') {
-            textMath.value = '';
-            latex = latex.slice(1, latex.length-1)
-            textMath.value = latex;
-            inputChange();
         }
     }
 
@@ -313,7 +309,7 @@
         // for camera: setting a event which a file input was changed.
         uploadImageBtn.addEventListener(
             "change",
-            (e) => {// when the file uploaded, the form is pushed py this code.
+            (e) => {// when the file uploaded, the form is posted py this code.
                 const imageForm = document.getElementById('imageForm');
                 imageForm.submit();
             }
