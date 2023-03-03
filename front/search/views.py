@@ -48,10 +48,12 @@ def index(request: WSGIRequest):
     elif request.method == 'POST':
         if request.FILES.get('uploadImage', False):
             uploadedImage: bytes = request.FILES['uploadImage'].read()
-            # repr(): For prevent misidentification expr as escape sequence
-            math = mathocr(uploadedImage)
-            ocr: str = math.replace('\\', '\\\\')
-            context = {'ocr': ocr}
+            ocr = mathocr(uploadedImage)
+            if ocr is not False:
+                ocr: str = ocr.replace('\\', '\\\\')
+                context = {'ocr': ocr}
+            else:
+                context = {'ocr': ' '}
         else:
             context = {'ocr': ''}
     else:

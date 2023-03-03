@@ -232,6 +232,9 @@
 
         // 入力欄にqueryを反映
         let ocr = '{{ ocr }}';
+        const forEncodingEscapeSeq = document.createElement('textarea');
+        forEncodingEscapeSeq.innerHTML = ocr;  // escape処理をencodeしている．
+        ocr = forEncodingEscapeSeq.value;
         if (ocr !== '') {
             textMath.value = '';
             textMath.value = ocr;
