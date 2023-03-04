@@ -203,5 +203,5 @@ mysql/
 # unix domain socket
 socket/
 
-# node_modules
+# Node.js
 node_modules

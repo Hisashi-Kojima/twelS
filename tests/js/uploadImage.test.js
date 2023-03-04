@@ -3,36 +3,23 @@
  */
 
 //Test対象のHTML
-const html = `
-    <button type="button" onclick="uploadImage()" id="camera">
-        <img src="{% static 'search/images/camera.png' %}" width="30" />
-    </button>
-    <form id="imageForm" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="uploadImage" accept="image/*" id="uploadImage" style="display: none">
-    </form>
-`
+const fs = require('fs');
+const path = require('path');
+const htmlRelativePath = '../.././front/search/templates/search/index.html';
+const htmlAbsolutePath = path.resolve(__dirname, htmlRelativePath);
+const html = fs.readFileSync(htmlAbsolutePath, { encoding: 'utf-8'});
 
 //Test対象の関数
-function uploadImage() {
-    const uploadImageBtn = document.getElementById('uploadImage');
-    // for camera: setting a event which a file input was changed.
-    uploadImageBtn.addEventListener(
-        "change",
-        (e) => {// when the file uploaded, the form is posted py this code.
-            const imageForm = document.getElementById('imageForm');
-            imageForm.submit();
-        }
-    )
-    uploadImageBtn.click();
-}
-
+const functionRelativePath = '../.././front/static/js/mathpix/uploadImage.js';
+const functionAbsolutePath = path.resolve(__dirname, functionRelativePath);
+const uploadedImageFunction = require(functionAbsolutePath);
 
 describe('uploadImage()のテスト', ()=> {
     let cameraBtn;
     let uploadImageBtn;
     let clickSpy;
     let addEventListenerSpy;
+    //全体の実行前にここの部分が実行される.
     beforeAll(() => {
         document.body.innerHTML = html;
         cameraBtn = document.getElementById('camera');
@@ -42,7 +29,7 @@ describe('uploadImage()のテスト', ()=> {
     })
     //各テスト毎にここの部分が実行される．
     beforeEach(() => {
-        uploadImage();
+        uploadedImageFunction();
     })
 
     test('cameraボタンが取得できているか', () => {
@@ -50,12 +37,10 @@ describe('uploadImage()のテスト', ()=> {
         expect(cameraBtn).not.toBeNull();
     })
 
-    //changeイベントが付与できたかを確認する．
     test('input要素にchangeイベントを付与できたか', () => {
         expect(addEventListenerSpy).toBeCalledWith('change', expect.any(Function));
     })
 
-    //clickイベントが発火したかを確認する．
     test('input要素が間接的にclickされたか', () => {
         expect(clickSpy).toBeCalled();
     })
