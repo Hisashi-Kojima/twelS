@@ -1,10 +1,3 @@
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'front.twelS.settings')
-
-django.setup()
-
 from login.models import EmailUser
 from django.test import TestCase
 from django.urls import reverse
@@ -13,13 +6,15 @@ from django.shortcuts import redirect
 from django.test.utils import override_settings
 
 
-class UserCreateTest(TestCase):
+class EmailLoginTest(TestCase):
     def setUp(self) -> None:
+        self.response = self.client.get(reverse('search:index'))
+        self.assertEqual(self.response.status_code, 302)
         self.response = self.client.get(reverse('login:email_login'))
 
     def test_user_create_status_code(self):
         """ステータスコード200を確認"""
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_csrf(self):
         """csrfトークンを含むこと"""
@@ -28,23 +23,23 @@ class UserCreateTest(TestCase):
 
 class SuccessfulEmailLoginTests(TestCase):
     """ユーザー登録成功時のテスト"""
-    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def setUp(self):
+        emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
+        self.assertQuerysetEqual(emailuser, [])
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
+    def test_email_login(self):
         url = reverse('login:email_login')
         data = {
             'email': 'test@edu.cc.saga-u.ac.jp',
         }
         # The headers sent via **extra should follow CGI specification.
-        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
-        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000/')
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する\
+        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
 
-    def test_redirection(self):
-        '''リダイレクトURLのテスト'''
         self.home_url = reverse('login:email_login_sent')
         self.assertRedirects(self.response, self.home_url)
 
-    def test_mail(self):
-        """メールテスト"""
         self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
         self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
         self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
@@ -52,14 +47,21 @@ class SuccessfulEmailLoginTests(TestCase):
         body_lines = mail.outbox[0].body.split('\n')
         url = body_lines[5]  # メール本文から認証urlを取得
 
-        redirect(url)
+        self.assertIn('http://127.0.0.1:8000/login/email_login/complete/', url)
 
-    def test_usercreate_complete_redirect(self):
-        """認証URLに正しくアクセスできるかテスト"""
-        self.assertEqual(self.response.status_code, 302)
+        self.response = self.client.get(url)
 
-    def test_login(self):
-        """数式検索ページにログインできるかテスト"""
-        reverse('search:index')
-        self.assertEqual(self.response.status_code, 302)
-        self.assertTrue(EmailUser.objects.get(email="test@edu.cc.saga-u.ac.jp").is_authenticated)
+        self.assertEqual(self.response.status_code, 200)
+
+        # redirect(url)  # ここをseleniumでアクセス
+
+        # driver = webdriver.Chrome(executable_path='/opt/chrome/chromedriver')
+        # driver.get(url)
+        # title = driver.title
+
+        # assert title == 'メール認証が完了しました'  # 正しいURL
+
+        self.response = self.client.get(reverse('search:index'))
+
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTrue(EmailUser.objects.get(email="test@edu.cc.saga-u.ac.jp").is_active)
