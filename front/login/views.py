@@ -44,19 +44,18 @@ class Login(LoginView):
     form_class = LoginForm
     template_name = 'htmls/login.html'
 
-    redirect_authenticated_user = True #ログインしているユーザーがアクセスしたとき数式検索ページにリダイレクト
+    redirect_authenticated_user = True  # ログインしているユーザーがアクセスしたとき数式検索ページにリダイレクト
 
     def form_valid(self, form):
 
         login(self.request, form.get_user())
 
-        if(self.request.user.is_authenticated):
+        if self.request.user.is_authenticated:
             try:
                 user = User.objects.get(pk=self.request.user.pk)
 
                 current_ip = get_ip(self.request)
-                print(current_ip)
-                
+
                 ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
 
                 if ip:
@@ -268,7 +267,6 @@ class EmailLogin(generic.FormView):
             'token': dumps(emailuser.pk),
             'user': emailuser,
         }
-        print(f"form_valid: {type(emailuser)}")
 
         subject = render_to_string('mail_template/email_login/subject.txt', context)
         message = render_to_string('mail_template/email_login/message.txt', context)

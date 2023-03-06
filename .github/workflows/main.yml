@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS/twelS
+      PYTHONPATH: /home/runner/work/twelS/twelS:/home/runner/work/twelS/twelS/front
       
       # incorrect values
       DJANGO_SECRET_KEY: foo
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with: 
-          python-version: '3.11.0'
+          python-version: '3.11.1'
           
       - name: Update pip
         run: pip install --upgrade pip
@@ -53,6 +53,11 @@ jobs:
           echo '################'
           cd ../
           ls
+
+      - name: create a dummy file
+        run: |
+          mkdir front/logs
+          touch front/logs/debug.log
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
