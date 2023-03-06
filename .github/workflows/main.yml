@@ -54,8 +54,8 @@ jobs:
           cd ../
           ls
 
-      - name: overwrite settings.py
-        run: python .github/workflows/overwrite.py
+      - name: create a dummy file
+        run: touch front/logs/debug.log
 
       - name: check Django DEBUG = False
         run: pytest tests/test_settings.py
