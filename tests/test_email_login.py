@@ -4,6 +4,9 @@ from django.urls import reverse
 from django.core import mail
 from django.shortcuts import redirect
 from django.test.utils import override_settings
+from create_webdriver import Create_UnConected_Driver
+from django.test import LiveServerTestCase
+
 
 
 class EmailLoginTest(TestCase):
@@ -20,15 +23,26 @@ class EmailLoginTest(TestCase):
         """csrfトークンを含むこと"""
         self.assertContains(self.response, 'csrfmiddlewaretoken')
 
-
-class SuccessfulEmailLoginTests(TestCase):
+class SuccessfulEmailLoginTests(LiveServerTestCase):
+    host = 'python'
     """ユーザー登録成功時のテスト"""
     def setUp(self):
         emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
         self.assertQuerysetEqual(emailuser, [])
+        #self.selenium = Create_UnConected_Driver("chrome", 110)
+    # ----tests----
+    # ブラウザごとにテストする
+    def test_latest_chrome(self):
+        self.email_login("chrome", 110)
 
+    def test_latest_firefox(self):
+        self.email_login("firefox", 110)
+
+    def test_latest_edge(self):
+        self.email_login("edge", 110)
+    # -------------
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
-    def test_email_login(self):
+    def email_login(self, browser, version):
         url = reverse('login:email_login')
         data = {
             'email': 'test@edu.cc.saga-u.ac.jp',
@@ -49,19 +63,18 @@ class SuccessfulEmailLoginTests(TestCase):
 
         self.assertIn('http://127.0.0.1:8000/login/email_login/complete/', url)
 
-        self.response = self.client.get(url)
+        # 一度でもアクセスすると2回目以降400エラーを返されるのでコメントアウト
+        #self.response = self.client.get(url)
+        #self.assertEqual(self.response.status_code, 200)
 
-        self.assertEqual(self.response.status_code, 200)
-
-        # redirect(url)  # ここをseleniumでアクセス
-
-        # driver = webdriver.Chrome(executable_path='/opt/chrome/chromedriver')
-        # driver.get(url)
-        # title = driver.title
-
-        # assert title == 'メール認証が完了しました'  # 正しいURL
+        # テスト用のURLに変更する
+        url = url.replace("http://127.0.0.1:8000", self.live_server_url)
+        # seleniumでアクセスし確認
+        with Create_UnConected_Driver(browser, version) as driver:
+            driver.get(url)
+            title = driver.title
+            assert title == 'メール認証が完了しました'  # 正しいURL
 
         self.response = self.client.get(reverse('search:index'))
-
-        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200) # なぜか302になる為要検証
         self.assertTrue(EmailUser.objects.get(email="test@edu.cc.saga-u.ac.jp").is_active)
