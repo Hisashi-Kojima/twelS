@@ -6,19 +6,16 @@ from selenium import webdriver
 
 def Create_Driver(options):
     '''
-    オプションを設定したwebdriverを返す
+    hubに接続したwebdriverを返す
     options: (object) webdriver option
     return: (object) webdriver
     '''
-    try:
-        driver = webdriver.Remote(
-        command_executor='http://selenium-hub:4444/wd/hub',
+    # with asで開くことで終了時に自動で閉じる
+    with webdriver.Remote(
+        command_executor=f'http://selenium-hub:4444/wd/hub',
         options=options,
-    )
-    except Exception as e:
-        driver # null
-        print(e)
-    return driver
+    ) as driver:
+        return driver
 
 def Get_BrowserOption(browser):
     '''
@@ -57,7 +54,7 @@ def Set_Browser_Version(options, version):
         str_ver = str(str_ver) + ".0"
     else:
         str_ver = str_ver + ".0"
-    options.set_capability("browserVersion", version)
+    options.set_capability("browserVersion", str_ver)
     return options
 
 def GET_TwelS(driver):
