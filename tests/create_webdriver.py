@@ -11,11 +11,11 @@ def Create_Driver(options):
     return: (object) webdriver
     '''
     # with asで開くことで終了時に自動で閉じる
-    with webdriver.Remote(
+    driver = webdriver.Remote(
         command_executor=f'http://selenium-hub:4444/wd/hub',
         options=options,
-    ) as driver:
-        return driver
+    )
+    return driver
 
 def Get_BrowserOption(browser):
     '''
