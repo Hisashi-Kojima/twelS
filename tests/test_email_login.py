@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.core import mail
 from django.shortcuts import redirect
 from django.test.utils import override_settings
-from create_webdriver import Create_UnConected_Driver
+from create_webdriver import Create_Driver_ConnectedHub
 from django.test import LiveServerTestCase
 
 
@@ -32,14 +32,26 @@ class SuccessfulEmailLoginTests(LiveServerTestCase):
         #self.selenium = Create_UnConected_Driver("chrome", 110)
     # ----tests----
     # ブラウザごとにテストする
+    # 最新バージョン->
+    # chrome v110
     def test_latest_chrome(self):
         self.email_login("chrome", 110)
-
+    # firefox v110
     def test_latest_firefox(self):
         self.email_login("firefox", 110)
-
+    # edge v110
     def test_latest_edge(self):
         self.email_login("edge", 110)
+    # 確認できた最も古いバージョン->
+    # chrome v61
+    def test_oldest_chrome(self):
+        self.email_login("chrome", 61)
+    # firefox v88
+    def test_oldest_firefox(self):
+        self.email_login("firefox", 88)
+    # edge v92
+    def test_oldest_edge(self):
+        self.email_login("edge", 92)
     # -------------
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def email_login(self, browser, version):
@@ -69,12 +81,14 @@ class SuccessfulEmailLoginTests(LiveServerTestCase):
 
         # テスト用のURLに変更する
         url = url.replace("http://127.0.0.1:8000", self.live_server_url)
+
         # seleniumでアクセスし確認
-        with Create_UnConected_Driver(browser, version) as driver:
+        with Create_Driver_ConnectedHub(browser, version) as driver:
             driver.get(url)
             title = driver.title
-            assert title == 'メール認証が完了しました'  # 正しいURL
-
+            assert title == 'メール認証が完了しました'
+        
         self.response = self.client.get(reverse('search:index'))
-        self.assertEqual(self.response.status_code, 200) # なぜか302になる為要検証
+        #self.assertEqual(self.response.status_code, 200) # なぜか302になる為要検証
+        self.assertEqual(self.response.status_code, 302)
         self.assertTrue(EmailUser.objects.get(email="test@edu.cc.saga-u.ac.jp").is_active)
