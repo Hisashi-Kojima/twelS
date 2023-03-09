@@ -10,7 +10,6 @@ def Create_Driver(options):
     options: (object) webdriver option
     return: (object) webdriver
     '''
-    # with asで開くことで終了時に自動で閉じる
     driver = webdriver.Remote(
         command_executor=f'http://selenium-hub:4444/wd/hub',
         options=options,
@@ -57,38 +56,10 @@ def Set_Browser_Version(options, version):
     options.set_capability("browserVersion", str_ver)
     return options
 
-def GET_TwelS(driver):
+def Create_Driver_ConnectedHub(browser_name, version):
     '''
-    TwelSのテストサーバ(コンテナ)にGETを飛ばす
-    driver: (object) webdriver
-    return: (object) webdriver
-    '''
-    try:
-        driver.get('http://python:8000/')
-    except Exception as e:
-        print(e)
-    return driver
-
-def Create_Conected_Driver(browser_name, version):
-    '''
-    指定したブラウザでTwelSのテストサーバ(コンテナ)に接続した
-    状態のドライバーを返す
-    <注意> versionは正の整数を入力すること
-    例: Create_Conected_Driver("chrome", 110)
-    browser_name: (string) browser name
-    version: (int or string) browser version
-    return: (object) webdriver
-    '''
-    options = Get_BrowserOption(browser_name)
-    options = Set_Browser_Version(options, version)
-    driver = Create_Driver(options)
-    driver = GET_TwelS(driver)
-    return driver
-
-def Create_UnConected_Driver(browser_name, version):
-    '''
-    指定したブラウザでhubにのみ接続した状態のドライバーを返す
-    <注意> versionは正の整数を入力すること
+    指定したブラウザでhubにのみ接続した状態のドライバーを返す\n
+    <注意> versionは正の整数を入力すること\n
     例: Create_Conected_Driver("chrome", 110)
     browser_name: (string) browser name
     version: (int or string) browser version
