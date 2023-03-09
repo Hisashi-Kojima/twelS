@@ -1,10 +1,3 @@
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'front.twelS.settings')
-
-django.setup()
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -12,7 +5,6 @@ from django.core import mail
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
-from django.core.signing import loads
 
 User = get_user_model()
 
