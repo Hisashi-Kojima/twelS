@@ -6,7 +6,7 @@
 {% endblock head %}
 
 {% block body %}
-<script src="{% static 'js/mask_password.js' %}"></script>
+<script src="{% static 'login/js/mask_password.js' %}"></script>
 <form action="" method="POST">
     {{ form.non_field_errors }}
     {% for field in form %}
