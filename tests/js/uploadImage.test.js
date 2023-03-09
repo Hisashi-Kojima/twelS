@@ -10,7 +10,7 @@ const htmlAbsolutePath = path.resolve(__dirname, htmlRelativePath);
 const html = fs.readFileSync(htmlAbsolutePath, { encoding: 'utf-8'});
 
 //Test対象の関数
-const functionRelativePath = '../.././front/static/js/mathpix/uploadImage.js';
+const functionRelativePath = '../.././front/search/static/search/js/uploadImage.js';
 const functionAbsolutePath = path.resolve(__dirname, functionRelativePath);
 const uploadedImageFunction = require(functionAbsolutePath);
 
