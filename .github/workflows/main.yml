@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS/twelS
+      PYTHONPATH: /home/runner/work/twelS/twelS:/home/runner/work/twelS/twelS/front
       
       # incorrect values
       DJANGO_SECRET_KEY: foo
