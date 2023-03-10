@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
-from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 
@@ -24,8 +23,12 @@ class UserCreateTest(TestCase):
 
 class SuccessfulUserCreateTests(TestCase):
     """ユーザー登録成功時のテスト"""
-    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def setUp(self):
+        user = User.objects.filter(email="test@edu.cc.saga-u.ac.jp")
+        self.assertQuerysetEqual(user, [])
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
+    def test_user_create(self):
         url = reverse('login:user_create')
         data = {
             'email': 'test@edu.cc.saga-u.ac.jp',
@@ -33,27 +36,23 @@ class SuccessfulUserCreateTests(TestCase):
         }
         # The headers sent via **extra should follow CGI specification.
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
-        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000/')
+        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
 
-    def test_redirection(self):
-        '''リダイレクトURLのテスト'''
+        self.assertEqual(self.response.status_code, 302)
+
         self.home_url = reverse('login:user_create_done')
         self.assertRedirects(self.response, self.home_url)
 
-    def test_mail(self):
-        """メールテスト"""
         self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
         self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
         self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
 
         body_lines = mail.outbox[0].body.split('\n')
         url = body_lines[6]  # メール本文から認証urlを取得
-        redirect(url)
 
-    def test_usercreate_complete_redirect(self):
-        """認証URLに正しくアクセスできるかテスト"""
-        self.assertEqual(self.response.status_code, 302)
+        self.assertIn('http://127.0.0.1:8000/login/user_create/complete/', url)
 
-    def test_usercreate_complete(self):
-        """登録内容のテスト"""
+        self.response = self.client.get(url)
+
+        self.assertEqual(self.response.status_code, 200)
         self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))

@@ -22,7 +22,7 @@ class EmailLoginTest(TestCase):
 
 
 class SuccessfulEmailLoginTests(TestCase):
-    """ユーザー登録成功時のテスト"""
+    """メールアドレスログイン成功時のテスト"""
     def setUp(self):
         emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
         self.assertQuerysetEqual(emailuser, [])
@@ -52,14 +52,6 @@ class SuccessfulEmailLoginTests(TestCase):
         self.response = self.client.get(url)
 
         self.assertEqual(self.response.status_code, 200)
-
-        # redirect(url)  # ここをseleniumでアクセス
-
-        # driver = webdriver.Chrome(executable_path='/opt/chrome/chromedriver')
-        # driver.get(url)
-        # title = driver.title
-
-        # assert title == 'メール認証が完了しました'  # 正しいURL
 
         self.response = self.client.get(reverse('search:index'))
 
