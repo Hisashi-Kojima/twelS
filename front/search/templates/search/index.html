@@ -11,6 +11,7 @@
         MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
     </script>
     <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script type="text/javascript" src="{% static 'search/js/uploadImage.js' %}"></script>
 {% endblock head %}
 
 {% block body %}
@@ -303,20 +304,6 @@
         obj.setSelectionRange(objCount, objCount);
         canvas.innerHTML = "\\(" + obj.value + "\\)";
         convertMath();
-    }
-
-    //for camera
-    function uploadImage() {
-        const uploadImageBtn = document.getElementById('uploadImage');
-        // for camera: setting a event which a file input was changed.
-        uploadImageBtn.addEventListener(
-            "change",
-            (e) => {// when the file uploaded, the form is posted py this code.
-                const imageForm = document.getElementById('imageForm');
-                imageForm.submit();
-            }
-        )
-        uploadImageBtn.click();
     }
 
     </script>
