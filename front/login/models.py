@@ -5,7 +5,6 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-import datetime
 
 
 def email_validater(email):
