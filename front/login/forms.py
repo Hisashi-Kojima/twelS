@@ -24,12 +24,13 @@ def check_request_times(MODEL, email):
     if user_request.email_request_times < 3:
         user_request.email_request_times += 1
         user_request.save()
-    
+
     else:
         message = """
         3回以上認証に失敗したので，24時間以上経過してからもう一度お試しください.もしくは，22801001@edu.cc.saga-u.ac.jpにご連絡ください.
         """
         raise ValidationError(message)
+
 
 def check_request_date(MODEL, email):
     user_request = MODEL.objects.get(email=email)
@@ -37,16 +38,16 @@ def check_request_date(MODEL, email):
     now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
 
-    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+    now = datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
     user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
 
     elapsed_time = abs(now - user_date)
-
 
     if elapsed_time.days > 1:
         user_request.first_request_date = datetime.datetime.now()
         user_request.email_request_times = 0
         user_request.save()
+
 
 def check_request(MODEL, email):
     email_login_request_exist = MODEL.objects.filter(email=email)
@@ -54,7 +55,7 @@ def check_request(MODEL, email):
     if email_login_request_exist:
         check_request_date(MODEL, email)
         check_request_times(MODEL, email)
-    
+
     if not email_login_request_exist:
         MODEL.objects.create(email=email)
         check_request_times(MODEL, email)

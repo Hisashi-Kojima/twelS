@@ -2,7 +2,6 @@ from login.models import EmailUser
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
-from django.shortcuts import redirect
 from django.test.utils import override_settings
 
 
@@ -37,6 +36,7 @@ class SuccessfulEmailLoginTests(TestCase):
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する\
         self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
 
+        self.assertEqual(self.response.status_code, 302)
         self.home_url = reverse('login:email_login_sent')
         self.assertRedirects(self.response, self.home_url)
 

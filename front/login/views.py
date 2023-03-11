@@ -82,6 +82,7 @@ class Login(LoginView):
                 pass
         return HttpResponseRedirect(self.get_success_url())
 
+
 class Logout(generic.View):
 
     def get(self, request):
