@@ -113,7 +113,6 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
     # chrome v110
     def test_latest_chrome(self):
         self.email_login("chrome", 110)
-    '''
     # firefox v110
     def test_latest_firefox(self):
         self.email_login("firefox", 110)
@@ -130,7 +129,6 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
     # edge v92
     def test_oldest_edge(self):
         self.email_login("edge", 92)
-    '''
     # -------------
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def email_login(self, browser, version):
