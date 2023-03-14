@@ -15,8 +15,10 @@
 {% endblock head %}
 
 {% block body %}
+    
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
+        
         <p id="main_form">
             <input type="text" id="textMath" value="" oninput="inputChange()">
             <button onclick="submit()">検索</button>
@@ -30,14 +32,13 @@
             </form>
 
             <div class="tab-panel">
-                <!--タブ-->
                 <ul class="tab-group">
                     <li class="tab tab-A is-active">演算子など</li>
                     <li class="tab tab-B">ギリシャ文字</li>
                     <li class="tab tab-C">その他</li>
+                    <li class="tab tab-D">行列</li>
                 </ul>
-                
-                <!--タブを切り替えて表示するコンテンツ-->
+ 
                 <div class="panel-group">
                     <div class="panel tab-A is-show">
                         <button class="buttonGroup" onclick="pushString('+')">\(+\)</button>
@@ -98,8 +99,13 @@
                         <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
                         <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
                         <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
-                        <button class="buttonGroup" onclick="pushString('\\sum_{i=1}^{n}x_{i}')">\(\sum_{i=1}^{n}x_{i}\)</button>
-                        <button class="buttonGroup" onclick="pushString('\\prod_{i=1}^{n}x_{i}')">\(\prod_{i=1}^{n}x_{i}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
+                        <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
+                    </div>
+                    <div class="panel tab-D">
+                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                             \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -112,7 +118,6 @@
             </div>
             
         </p>
-
 
         <!-- queryが有効なもののときのみ表示 -->
         {% if query %}
@@ -202,27 +207,35 @@
     }
 
     const canvas = document.getElementById("canvas");
+    const obj = document.getElementById("textMath");
+    var exprArray = [];
 
     window.onload = onLoad;
 
     document.addEventListener('DOMContentLoaded', function(){
-        // タブに対してクリックイベントを適用
         const tabs = document.getElementsByClassName('tab');
         for(let i = 0; i < tabs.length; i++) {
             tabs[i].addEventListener('click', tabSwitch, false);
         }
 
-        // タブをクリックすると実行する関数
-        function tabSwitch(){
-            // タブのclassの値を変更
-            document.getElementsByClassName('is-active')[0].classList.remove('is-active');
-            this.classList.add('is-active');
-            // コンテンツのclassの値を変更
-            document.getElementsByClassName('is-show')[0].classList.remove('is-show');
-            const arrayTabs = Array.prototype.slice.call(tabs);
-            const index = arrayTabs.indexOf(this);
-            document.getElementsByClassName('panel')[index].classList.add('is-show');
-        };
+    window.document.onkeydown = function(event){
+        if (event.key === 'Enter') {
+            exprCut()
+        }
+    }
+
+    // タブをクリックすると実行する関数
+    function tabSwitch(){
+        // タブのclassの値を変更
+        document.getElementsByClassName('is-active')[0].classList.remove('is-active');
+        this.classList.add('is-active');
+        // コンテンツのclassの値を変更
+        document.getElementsByClassName('is-show')[0].classList.remove('is-show');
+        const arrayTabs = Array.prototype.slice.call(tabs);
+        const index = arrayTabs.indexOf(this);
+        document.getElementsByClassName('panel')[index].classList.add('is-show');
+    };
+
     }, false);
 
     function onLoad() {
@@ -259,10 +272,28 @@
         }
     }
 
-    function inputChange(){
+    function exprCut() {
+        var exprString = obj.value;
+        var cutCount = 0;
+        exprArray = [];
+        for(let i = 1; i < exprString.length - 1; i++) {
+            if(exprString.charAt(i) === ' ') {
+                if(exprString.charAt(i + 1) === ' '  && exprString.charAt(i - 1) !== ' ' ) {
+                    exprArray.push(exprString.substr(cutCount, i + 1 - cutCount));
+                    cutCount = i + 1;
+                }
+            }
+        }
+        exprArray.push(exprString.substr(cutCount));
+        console.log(exprArray);
+    }
 
-        const obj = document.getElementById("textMath");
-        canvas.innerHTML = "\\(" + obj.value + "\\)";
+    function inputChange(){
+        exprCut();
+        canvas.innerHTML = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            canvas.innerHTML += "<span>" + "\\(" + exprArray[i] + "\\)" + "</span>";
+        }
         convertMath();
     }
 
@@ -270,26 +301,7 @@
         MathJax.typeset([document.getElementById("canvas")]);
     }
 
-    function pushString(){
-        const obj = document.getElementById("textMath");
-
-        const objString = obj.value.substr(0, obj.selectionStart)
-			+ "2";
-        
-        const objCount = objString.length;
-
-        obj.value = obj.value.substr(0, obj.selectionStart)
-			+ "2"
-			+ obj.value.substr(obj.selectionStart);
-
-        obj.focus();
-        obj.setSelectionRange(objCount, objCount);
-        canvas.innerHTML = obj.value;
-        convertMath();
-    }
-
     function pushString(msg){
-        const obj = document.getElementById("textMath");
 
         const objString = obj.value.substr(0, obj.selectionStart)
 			+ msg;
@@ -302,7 +314,8 @@
 
         obj.focus();
         obj.setSelectionRange(objCount, objCount);
-        canvas.innerHTML = "\\(" + obj.value + "\\)";
+        exprCut();
+        inputChange();
         convertMath();
     }
 
