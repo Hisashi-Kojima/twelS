@@ -37,22 +37,6 @@ footer{
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
 }
 
-#exprs {
-    font-size: 100%;
-    padding: 10px;
-}
-
-#exprs button {
-    border-radius: 5px;
-    background-color: rgb(38, 132, 255);
-    color: white;
-    border: 1px solid rgb(207, 207, 207);
-}
-
-.deletebutton {
-    margin-right: 10px;
-}
-
 footer a{
     color: gray;
     text-decoration: none;
@@ -152,6 +136,10 @@ TODO: 疑似要素のheightは200pxと固定されているが，
 
 #email{
     width: 300px;
+}
+
+span{
+    margin-right: 30px;
 }
 
 .tab-panel{

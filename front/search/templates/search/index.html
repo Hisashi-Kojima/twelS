@@ -14,8 +14,6 @@
 {% endblock head %}
 
 {% block body %}
-
-    <div id="exprs"></div>
     
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
@@ -30,7 +28,7 @@
       <li class="tab tab-A is-active">演算子など</li>
       <li class="tab tab-B">ギリシャ文字</li>
       <li class="tab tab-C">その他</li>
-      <li class="tab tab-D">その他２</li>
+      <li class="tab tab-D">行列</li>
    </ul>
     
     <!--タブを切り替えて表示するコンテンツ-->
@@ -98,16 +96,6 @@
         <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
       </div>
       <div class="panel tab-D">
-        <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
-        <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
-        <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
-        <button class="buttonGroup" onclick="pushString('\\Delta ')">\(\Delta\)</button>
-        <button class="buttonGroup" onclick="pushString('\\ln{x}')">\(\ln{x}\)</button>
-        <button class="buttonGroup" onclick="pushString('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
-        <button class="buttonGroup" onclick="pushString('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
-        <button class="buttonGroup" onclick="pushString('f\\left(x\\right)')">\(f\left(x\right)\)</button>
-        <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
-        <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
         <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
             \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
         </button>
@@ -170,7 +158,6 @@
     }
 
     const canvas = document.getElementById("canvas");
-    const expr = document.getElementById("exprs");
     const obj = document.getElementById("textMath");
     var exprArray = [];
 
@@ -184,18 +171,8 @@
 
     window.document.onkeydown = function(event){
         if (event.key === 'Enter') {
-            if(obj.value !==""){
-            exprArray.push(obj.value);
-            expr.innerHTML = "";
-            for(let i = 0; i < exprArray.length; i++) {
-                expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
-                                  + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
-            }
-            canvas.innerHTML = "";
-            obj.value = "";
-            convertExpr();
+            exprCut()
         }
-    }
     }
 
     // タブをクリックすると実行する関数
@@ -218,42 +195,33 @@
       //target.setSelectionRange(0, 0);
     }
 
-    function fixExpr(index) {
-        obj.value = exprArray[index];
-        canvas.innerHTML = "\\(" + exprArray[index] + "\\)";
-        convertMath();
-        obj.focus();
-        obj.setSelectionRange(exprArray[index].length, exprArray[index].length);
-        exprArray.splice(index,1);
-        expr.innerHTML = "";
-        for(let i = 0; i < exprArray.length; i++) {
-            expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
-                                       + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
+    function exprCut() {
+        var exprString = obj.value;
+        var cutCount = 0;
+        exprArray = [];
+        for(let i = 1; i < exprString.length - 1; i++) {
+            if(exprString.charAt(i) === ' ') {
+                if(exprString.charAt(i + 1) === ' '  && exprString.charAt(i - 1) !== ' ' ) {
+                    exprArray.push(exprString.substr(cutCount, i + 1 - cutCount));
+                    cutCount = i + 1;
+                }
+            }
         }
-        convertExpr();
-    }
-
-    function deleteExpr(index) {
-        exprArray.splice(index,1);
-        expr.innerHTML = "";
-        for(let i = 0; i < exprArray.length; i++) {
-            expr.innerHTML += "\\(" + exprArray[i] + "\\)" 
-                                       + `<button onclick=\"fixExpr(${i})\">修正</button><button class=\"deletebutton\" onclick=\"deleteExpr(${i})\">削除</button>`;
-        }
-        convertExpr();
+        exprArray.push(exprString.substr(cutCount));
+        console.log(exprArray);
     }
 
     function inputChange(){
-        canvas.innerHTML = "\\(" + obj.value + "\\)";
+        exprCut();
+        canvas.innerHTML = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            canvas.innerHTML += "<span>" + "\\(" + exprArray[i] + "\\)" + "</span>";
+        }
         convertMath();
     }
 
     function convertMath(){
         MathJax.typeset([document.getElementById("canvas")]);
-    }
-
-    function convertExpr(){
-        MathJax.typeset([document.getElementById("exprs")]);
     }
 
     function pushString(msg){
@@ -269,7 +237,8 @@
 
         obj.focus();
         obj.setSelectionRange(objCount, objCount);
-        canvas.innerHTML = "\\(" + obj.value + "\\)";
+        exprCut();
+        inputChange();
         convertMath();
     }
 
