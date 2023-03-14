@@ -1,0 +1,12 @@
+{% extends "search/base.html" %}
+
+{% block head %}
+<title>トークンエラー</title>
+{% endblock head %}
+
+{% block body %}
+<p>
+    アクセスされた認証URLのトークンは正しくないか期限が切れています<br>
+    <a class="btn btn-primary btn-lg" href="{% url 'login:login' %}">ログイン画面に戻る</a>
+</p>
+{% endblock body %}

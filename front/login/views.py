@@ -148,11 +148,12 @@ class UserCreateComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
-            return HttpResponseBadRequest()
+            return redirect('login:token_error')
 
         # tokenが間違っている
         except BadSignature:
-            return HttpResponseBadRequest()
+            return redirect('login:token_error')
+
 
         # tokenは問題なし
         else:
@@ -165,7 +166,8 @@ class UserCreateComplete(generic.TemplateView):
                 UserCreateRequest.objects.filter(email=user.email).delete()
 
             except User.DoesNotExist:
-                return HttpResponseBadRequest()
+                return redirect('login:token_error')
+
             else:
                 if not user.is_active:
                     # 問題なければ本登録とする
@@ -173,7 +175,8 @@ class UserCreateComplete(generic.TemplateView):
                     user.save()
                     return super().get(request, **kwargs)
 
-        return HttpResponseBadRequest()
+        return redirect('login:token_error')
+
 
 
 class OnlyYouMixin(UserPassesTestMixin):
@@ -291,11 +294,11 @@ class EmailLoginComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
-            return HttpResponseBadRequest()
+            return redirect('login:token_error')
 
         # tokenが間違っている
         except BadSignature:
-            return HttpResponseBadRequest()
+            return redirect('login:token_error')
 
         # tokenは問題なし
         else:
@@ -308,7 +311,7 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.save()
 
             except Emailuser.DoesNotExist:
-                return HttpResponseBadRequest()
+                return redirect('login:token_error')
             else:
                 if not emailuser.is_active:
                     # 問題なければ本登録とする
@@ -316,4 +319,8 @@ class EmailLoginComplete(generic.TemplateView):
                     emailuser.save()
                     login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
                     return super().get(request, **kwargs)
-        return HttpResponseBadRequest()
+        return redirect('login:token_error')
+
+
+class TokenErrorView(generic.TemplateView):
+    template_name = 'htmls/token_error.html'
