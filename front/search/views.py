@@ -4,16 +4,18 @@
 
 import time
 
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from front.twelS.settings import BASE_DIR
 from twels.searcher.searcher import Searcher
 from django.contrib.auth.decorators import login_required
+from twels.mathpix.mathpix import mathocr
 
 
 @login_required
-def index(request):
+def index(request: WSGIRequest):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
     if request.method == 'GET':
@@ -21,12 +23,13 @@ def index(request):
 
         expr: str | None = request.GET.get('q')
         start: str | None = request.GET.get('start')
+        lr_list: list[str] = request.GET.getlist('lr')
         # 検索時
         if expr is not None and expr != '':
             start_time = time.time()
             if start is None:
                 start = '0'
-            result = Searcher.search(expr, int(start))
+            result = Searcher.search(expr, int(start), lr_list)
             page_list: list[dict] = result['search_result']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
@@ -39,9 +42,22 @@ def index(request):
             'page_list': page_list,
             'query': expr,
             'start': str(int(start)+10),
+            'ocr': '',
         }
+
+    elif request.method == 'POST':
+        if request.FILES.get('uploadImage', False):
+            uploadedImage: bytes = request.FILES['uploadImage'].read()
+            ocr = mathocr(uploadedImage)
+            if ocr is not False:
+                ocr: str = ocr.replace('\\', '\\\\')
+                context = {'ocr': ocr}
+            else:
+                context = {'ocr': ' '}
+        else:
+            context = {'ocr': ''}
     else:
-        print('GET以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
+        print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
     return render(request, 'search/index.html', context)
 

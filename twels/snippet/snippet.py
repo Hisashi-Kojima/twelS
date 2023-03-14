@@ -65,8 +65,8 @@ class Snippet:
             KaTeX are rendered in search results.
         """
         remove_list = [
-            'button', 'br', 'footer', 'form', 'header', 'img',
-            'iframe', 'input', 'label', 'nav', 'noscript', 'script'
+            'button', 'br', 'canvas', 'footer', 'form', 'header', 'img',
+            'iframe', 'input', 'label', 'nav', 'noscript', 'script', 'svg'
             ]
 
         save_list = [
