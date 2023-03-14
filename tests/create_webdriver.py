@@ -3,19 +3,17 @@ seleniumでのセッションを開始する関数群
 '''
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from typing import Tuple, Union
 
 
-def Create_Driver(options: Options) -> webdriver:
+def Create_Driver(options: webdriver.ChromeOptions) -> webdriver.Remote:
     """hubに接続したwebdriverを返す
     Args:
-        options: (Options) webdriver option
+        options: (webdriver.[browsername]Options) webdriver option
     Return:
-        (webdriver) webdriver
+        (webdriver.Remote) webdriver
     """
     driver = webdriver.Remote(
-        command_executor=f'http://selenium-hub:4444/wd/hub',
+        command_executor='http://selenium-hub:4444/wd/hub',
         options=options,
     )
     return driver
@@ -26,7 +24,7 @@ def Get_BrowserOption(browser: str) -> webdriver.ChromeOptions:
     Args:
         browser: (string) browser name
     Return:
-        (Options) webdriver options
+        (webdriver.[browsername]Options) webdriver options
     """
     
     if browser == "firefox" :
@@ -42,15 +40,15 @@ def Get_BrowserOption(browser: str) -> webdriver.ChromeOptions:
         options = webdriver.ChromeOptions()
     return options
 
-def Set_Browser_Version(options, version):
+def Set_Browser_Version(options: webdriver.ChromeOptions, version: int) -> webdriver.ChromeOptions:
     """webdriver.Optionにバージョン情報を追加する
     Args:
-        options (webdriver.Option) webdriver option
-        version (int, string) browser version
+        options (webdriver.[browsername]Options) webdriver option
+        version (int) browser version
     Return:
         (webdriver) webdriver
     Note:
-        versionに入力する数値(文字列)は正の整数であること
+        versionに入力する数値は正の整数であること
     """
     str_ver = version
     if type(str_ver) is int:
@@ -60,19 +58,17 @@ def Set_Browser_Version(options, version):
     options.set_capability("browserVersion", str_ver)
     return options
 
-def Create_Driver_ConnectedHub(browser_name: str, version: int) -> webdriver:
+def Create_Driver_ConnectedHub(browser_name: str, version: int) -> webdriver.Remote:
     """指定したブラウザでhubにのみ接続した状態のドライバーを返す
     Args:
         browser_name (string) browser name
-        version (int, string) browser version
+        version (int) browser version
     Return:
-        (webdriver) webdriver
+        (webdriver.Remote) webdriver
     Note:
-        versionに入力する数値(文字列)は正の整数であること
+        versionに入力する数値は正の整数であること
     """
     options = Get_BrowserOption(browser_name)
     options = Set_Browser_Version(options, version)
     driver = Create_Driver(options)
     return driver
-
-print(type(Get_BrowserOption("chrome")))
