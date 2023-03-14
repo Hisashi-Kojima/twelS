@@ -20,7 +20,7 @@
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
         
         <p id="main_form">
-            <input type="text" id="textMath" value="" oninput="inputChange()">
+            <input type="search" id="textMath" value="" oninput="inputChange()">
             <button onclick="submit()">検索</button>
             <button type="button" onclick="uploadImage()" id="camera">
                 <img src="{% static 'search/images/camera.png' %}" width="30" />
@@ -35,8 +35,8 @@
                 <ul class="tab-group">
                     <li class="tab tab-A is-active">演算子など</li>
                     <li class="tab tab-B">ギリシャ文字</li>
-                    <li class="tab tab-C">その他</li>
-                    <li class="tab tab-D">行列</li>
+                    <li class="tab tab-C">行列</li>
+                    <li class="tab tab-D">その他</li>
                 </ul>
  
                 <div class="panel-group">
@@ -90,6 +90,20 @@
                         <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
                     </div>
                     <div class="panel tab-C">
+                        <button class="buttonGroup" onclick="pushString('\\begin{matrix} a & b \\\\ c & d \\\\ \\end{matrix}')">
+                            \begin{matrix} a & b \\ c & d \\ \end{matrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{pmatrix} a & b \\\\ c & d \\\\ \\end{pmatrix}')">
+                            \begin{pmatrix} a & b \\ c & d \\ \end{pmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{bmatrix} a & b \\\\ c & d \\\\ \\end{bmatrix}')">
+                            \begin{bmatrix} a & b \\ c & d \\ \end{bmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                            \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                        </button>
+                    </div>
+                    <div class="panel tab-D">
                         <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
                         <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
                         <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
@@ -101,11 +115,6 @@
                         <button class="buttonGroup" onclick="pushString('\\left| x \\right|')">\(\left| x \right|\)</button>
                         <button class="buttonGroup" onclick="pushString('\\sum^{i=1}_{n}x_{i}')">\(\sum^{i=1}_{n}x_{i}\)</button>
                         <button class="buttonGroup" onclick="pushString('\\prod^{i=1}_{n}x_{i}')">\(\prod^{i=1}_{n}x_{i}\)</button>
-                    </div>
-                    <div class="panel tab-D">
-                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
-                             \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
-                        </button>
                     </div>
                 </div>
             </div>
