@@ -62,7 +62,8 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
     # -------------
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def email_login(self, browser, version):
-
+        """e-mailでのログインテスト"""
+        # テスト用URL
         url = self.live_server_url
         # 送信先
         e_address = "test@edu.cc.saga-u.ac.jp"
