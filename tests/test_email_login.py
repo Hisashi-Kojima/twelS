@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.core import mail
 from django.shortcuts import redirect
 from django.test.utils import override_settings
-from create_webdriver import Create_Driver_ConnectedHub
+from create_webdriver import create_driver_connected_hub
 from django.test import LiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -28,8 +28,9 @@ class EmailLoginTest(TestCase):
         self.assertContains(self.response, 'csrfmiddlewaretoken')
 
 class SeleniumEmailLoginTests(LiveServerTestCase):
-    host = 'python'
     """seleniumによるログインテスト"""
+    # サービス名をホストにすること
+    host = 'python'
     def setUp(self):
         emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
         self.assertQuerysetEqual(emailuser, [])
@@ -68,7 +69,7 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
         # 送信先
         e_address = "test@edu.cc.saga-u.ac.jp"
         # seleniumでアクセス
-        with Create_Driver_ConnectedHub(browser, version) as driver:
+        with create_driver_connected_hub(browser, version) as driver:
             wait = WebDriverWait(driver=driver, timeout=30)
             # リダイレクトでログインページに飛ぶ
             driver.get(url)
@@ -102,10 +103,12 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
             driver.get(url)
             wait.until(EC.presence_of_all_elements_located)
             assert driver.title == 'メール認証が完了しました'
+            # 検索ページを確認
             element = driver.find_element(By.LINK_TEXT, "ログイン完了")
             element.click()
             wait.until(EC.presence_of_all_elements_located)
             assert driver.title == 'twelS'
+            # ログインできているか確認
             self.assertTrue(EmailUser.objects.get(email=e_address).is_active)
 
         
