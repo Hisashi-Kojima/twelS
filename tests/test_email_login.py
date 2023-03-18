@@ -1,20 +1,21 @@
-from login.models import EmailUser
-from django.test import TestCase
-from django.urls import reverse
+from django.conf import settings
 from django.core import mail
-from django.shortcuts import redirect
-from django.test.utils import override_settings
-from create_webdriver import create_driver_connected_hub
+from django.test import TestCase
 from django.test import LiveServerTestCase
+from django.test.utils import override_settings
+from django.urls import reverse
+
+from login.models import EmailUser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from django.conf import settings
 
+from create_webdriver import create_driver_connected_hub
 
 
 class EmailLoginTest(TestCase):
     def setUp(self) -> None:
+        """リダイレクトされるか確認"""
         self.response = self.client.get(reverse('search:index'))
         self.assertEqual(self.response.status_code, 302)
         self.response = self.client.get(reverse('login:email_login'))
@@ -27,10 +28,13 @@ class EmailLoginTest(TestCase):
         """csrfトークンを含むこと"""
         self.assertContains(self.response, 'csrfmiddlewaretoken')
 
+
 class SeleniumEmailLoginTests(LiveServerTestCase):
     """seleniumによるログインテスト"""
-    # サービス名をホストにすること
+    # docker-compose.dev.ymlの
+    # pythonコンテナのサービス名にすること
     host = 'python'
+
     def setUp(self):
         emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
         self.assertQuerysetEqual(emailuser, [])
@@ -41,35 +45,43 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
     # ----tests----
     # ブラウザごとにテストする
     # 最新バージョン->
-    # chrome v110
+
     def test_latest_chrome(self):
         self.email_login("chrome", 110)
-    # firefox v110
+
     def test_latest_firefox(self):
         self.email_login("firefox", 110)
-    # edge v110
+
     def test_latest_edge(self):
         self.email_login("edge", 110)
     # 確認できた最も古いバージョン->
-    # chrome v61
+
     def test_oldest_chrome(self):
         self.email_login("chrome", 61)
-    # firefox v88
+
     def test_oldest_firefox(self):
         self.email_login("firefox", 88)
-    # edge v92
+
     def test_oldest_edge(self):
         self.email_login("edge", 92)
     # -------------
+
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
-    def email_login(self, browser, version):
-        """e-mailでのログインテスト"""
+    def email_login(self, browser_name: str, browser_version: int):
+        """e-mailでのログインテスト
+        Args:
+            browser_name: browser name
+            browser_version: browser version
+        Notes:
+            browser_nameはfirefox, edge, chromeのいずれかであること,
+            browser_versionに入力する数値は正の整数であること
+        """
         # テスト用URL
         url = self.live_server_url
         # 送信先
         e_address = "test@edu.cc.saga-u.ac.jp"
         # seleniumでアクセス
-        with create_driver_connected_hub(browser, version) as driver:
+        with create_driver_connected_hub(browser_name, browser_version) as driver:
             wait = WebDriverWait(driver=driver, timeout=30)
             # リダイレクトでログインページに飛ぶ
             driver.get(url)
@@ -110,5 +122,3 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
             assert driver.title == 'twelS'
             # ログインできているか確認
             self.assertTrue(EmailUser.objects.get(email=e_address).is_active)
-
-        
