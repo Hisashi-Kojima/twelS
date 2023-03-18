@@ -36,17 +36,22 @@ def check_request_date(MODEL, email):
     user_request = MODEL.objects.get(email=email)
 
     now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
 
-    now = datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
-
-    elapsed_time = abs(now - user_date)
-
-    if elapsed_time.days > 1:
+    if user_request.first_request_date is None:
         user_request.first_request_date = datetime.datetime.now()
-        user_request.email_request_times = 0
         user_request.save()
+
+    else:
+        now = datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+        user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+        user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
+
+        elapsed_time = abs(now - user_date)
+
+        if elapsed_time.days > 1:
+            user_request.first_request_date = datetime.datetime.now()
+            user_request.email_request_times = 0
+            user_request.save()
 
 
 def check_request(MODEL, email):
@@ -124,7 +129,7 @@ class CustomUserCreateForm(forms.ModelForm):
                 "id"
             ] = 'email'
         self.fields['password'].widget.attrs['id'] = 'Password'
-    
+
     def clean_email(self):
         email = self.cleaned_data['email']
         User.objects.filter(email=email, is_active=False).delete()

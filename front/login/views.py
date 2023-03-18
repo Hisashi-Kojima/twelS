@@ -13,7 +13,7 @@ from .forms import (
     LoginForm, CustomUserCreateForm, CustomPasswordChangeForm,
     MyPasswordResetForm, CustomSetPasswordForm, EmailLoginForm
 )
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth import login, logout
 from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 from django.utils import timezone
@@ -273,7 +273,8 @@ class EmailLogin(generic.FormView):
         message = render_to_string('mail_template/email_login/message.txt', context)
 
         emailuser.send_mail(subject, message)
-        return redirect('login:email_login_sent')
+        return render(template_name='htmls/email_login_sent.html')
+        # return redirect('login:email_login_sent')
 
 
 class EmailLoginSent(generic.TemplateView):
