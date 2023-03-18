@@ -19,5 +19,4 @@ urlpatterns = [
     path('email_login/', views.EmailLogin.as_view(), name='email_login'),
     path('email_login/sent', views.EmailLoginSent.as_view(), name="email_login_sent"),
     path('email_login/complete/<token>/', views.EmailLoginComplete.as_view(), name='email_login_complete'),
-    path('token_error/', views.TokenErrorView.as_view(), name='token_error')
 ]

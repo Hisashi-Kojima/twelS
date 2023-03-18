@@ -6,8 +6,7 @@ from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 )
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
-from django.http import HttpResponseBadRequest
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views import generic
 from .forms import (
@@ -18,9 +17,9 @@ from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
 from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 from django.utils import timezone
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.utils.http import urlsafe_base64_decode
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 import datetime
 
 
@@ -78,7 +77,7 @@ class Login(LoginView):
 
                     user.send_mail(subject, message)
 
-            except :
+            except ObjectDoesNotExist:
                 pass
         return HttpResponseRedirect(self.get_success_url())
 
@@ -148,12 +147,11 @@ class UserCreateComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
-            return redirect('login:token_error')
+            return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
         except BadSignature:
-            return redirect('login:token_error')
-
+            return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
         else:
@@ -166,7 +164,7 @@ class UserCreateComplete(generic.TemplateView):
                 UserCreateRequest.objects.filter(email=user.email).delete()
 
             except User.DoesNotExist:
-                return redirect('login:token_error')
+                return HttpResponseBadRequest('user does not exist')
 
             else:
                 if not user.is_active:
@@ -175,8 +173,7 @@ class UserCreateComplete(generic.TemplateView):
                     user.save()
                     return super().get(request, **kwargs)
 
-        return redirect('login:token_error')
-
+        return render(request, 'htmls/token_error.html', status=401)
 
 
 class OnlyYouMixin(UserPassesTestMixin):
@@ -294,11 +291,11 @@ class EmailLoginComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
-            return redirect('login:token_error')
+            return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
         except BadSignature:
-            return redirect('login:token_error')
+            return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
         else:
@@ -311,7 +308,7 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.save()
 
             except Emailuser.DoesNotExist:
-                return redirect('login:token_error')
+                return HttpResponseBadRequest('emailuser does not exist')
             else:
                 if not emailuser.is_active:
                     # 問題なければ本登録とする
@@ -319,8 +316,4 @@ class EmailLoginComplete(generic.TemplateView):
                     emailuser.save()
                     login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
                     return super().get(request, **kwargs)
-        return redirect('login:token_error')
-
-
-class TokenErrorView(generic.TemplateView):
-    template_name = 'htmls/token_error.html'
+        return render(request, 'htmls/token_error.html', status=401)
