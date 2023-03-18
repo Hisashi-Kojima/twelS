@@ -2,57 +2,59 @@
 seleniumでのセッションを開始する関数群
 '''
 
-from selenium import webdriver
+from selenium.webdriver import Remote, ChromeOptions, FirefoxOptions, EdgeOptions
 from typing import Union
 
 
-def create_driver(options: Union[webdriver.ChromeOptions, webdriver.FirefoxOptions, webdriver.EdgeOptions]) -> webdriver.Remote:
+def create_driver(options: Union[ChromeOptions, FirefoxOptions, EdgeOptions]) -> Remote:
     """hubに接続したwebdriverを返す
     Args:
-        options: (webdriver.[browsername]Options) webdriver option
-    Return:
-        (webdriver.Remote) webdriver
+        options: ([browsername]Options) webdriver option
+    Returns:
+        (Remote) webdriver
     """
-    driver = webdriver.Remote(
-        # サービスのコンテナ名で繋ぐこと
+    driver = Remote(
+        # docker-compose.dev.ymlの
+        # selenium/hubイメージのサービス名で繋ぐこと
         command_executor='http://selenium-hub:4444/wd/hub',
         options=options,
     )
     return driver
 
-def get_browser_option(browser: str) -> Union[webdriver.ChromeOptions, webdriver.FirefoxOptions, webdriver.EdgeOptions]:
-    """指定したブラウザのオプションを返す
-    存在しないブラウザが入力された時はchromeのオプションになる
+
+def get_browser_option(browser_name: str) -> Union[ChromeOptions, FirefoxOptions, EdgeOptions]:
+    """指定したブラウザのオプションを返す,
+    存在しないブラウザが入力された時はchromeのオプションを返す
     Args:
-        browser: (string) browser name
-    Return:
-        (webdriver.[browsername]Options) webdriver options
-    Note: 
-        対応しているブラウザはfirefox, edge, chrome
+        browser_name: browser name
+    Returns:
+        ([browsername]Options) webdriver options
+    Notes:
+        browser_nameはfirefox, edge, chromeのいずれかであること
     """
-    
-    if browser == "firefox" :
-        options = webdriver.FirefoxOptions()
-    elif browser == "edge" :
-        options = webdriver.EdgeOptions()
-    elif browser == "chrome" :
-        options = webdriver.ChromeOptions()
+    if browser_name == "firefox":
+        options = FirefoxOptions()
+    elif browser_name == "edge":
+        options = EdgeOptions()
+    elif browser_name == "chrome":
+        options = ChromeOptions()
     else:
         print("[create_webdiver] error: Specified browser is not supported")
-        options = webdriver.ChromeOptions()
+        options = ChromeOptions()
     return options
 
-def set_browser_version(options: Union[webdriver.ChromeOptions, webdriver.FirefoxOptions, webdriver.EdgeOptions], version: int) -> Union[webdriver.ChromeOptions, webdriver.FirefoxOptions, webdriver.EdgeOptions]:
+
+def set_browser_version(options: Union[ChromeOptions, FirefoxOptions, EdgeOptions], browser_version: int) -> Union[ChromeOptions, FirefoxOptions, EdgeOptions]:
     """webdriver.Optionにバージョン情報を追加する
     Args:
-        options (webdriver.[browsername]Options) webdriver option
-        version (int) browser version
-    Return:
-        (webdriver.[browsername]Options) webdriver option
-    Note:
-        versionに入力する数値は正の整数であること
+        options: ([browsername]Options) webdriver option
+        browser_version: browser version
+    Returns:
+        ([browsername]Options) webdriver option
+    Notes:
+        browser_versionに入力する数値は正の整数であること
     """
-    str_ver = version
+    str_ver = browser_version
     if type(str_ver) is int:
         str_ver = str(str_ver) + ".0"
     else:
@@ -60,18 +62,19 @@ def set_browser_version(options: Union[webdriver.ChromeOptions, webdriver.Firefo
     options.set_capability("browserVersion", str_ver)
     return options
 
-def create_driver_connected_hub(browser_name: str, version: int) -> webdriver.Remote:
+
+def create_driver_connected_hub(browser_name: str, browser_version: int) -> Remote:
     """指定したブラウザでselenium-hubに接続した状態のwebドライバーを返す
     Args:
-        browser_name (string) browser name
-        version (int) browser version
-    Return:
-        (webdriver.Remote) webdriver
-    Note:
-        versionに入力する数値は正の整数であること, 
-        browser_nameはfirefox, edge, chromeのいずれかであること
+        browser_name: browser name
+        version: browser version
+    Returns:
+        (Remote) webdriver
+    Notes:
+        browser_nameはfirefox, edge, chromeのいずれかであること,
+        browser_versionに入力する数値は正の整数であること
     """
     options = get_browser_option(browser_name)
-    options = set_browser_version(options, version)
+    options = set_browser_version(options, browser_version)
     driver = create_driver(options)
     return driver
