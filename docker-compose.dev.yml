@@ -43,8 +43,8 @@ services:
     networks:
       - app_net
 
-# use browser tests
-# hub
+  # use browser tests
+  # hub
   selenium-hub:
     container_name: selenium-hub
     image: selenium/hub:4.8.1-20230221
@@ -55,7 +55,7 @@ services:
     networks:
       - app_net
 
-# node
+  # node
   selenium-node:
     container_name: selenium-docker-node
     image: selenium/node-docker:4.8.1-20230221
