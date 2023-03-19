@@ -363,7 +363,6 @@ class CustomSetPasswordForm(forms.Form):
         return self.user
 
 
-
 class EmailLoginForm(forms.ModelForm):
     class Meta:
         model = EmailUser
