@@ -126,12 +126,7 @@ class UserCreate(generic.CreateView):
         message = render_to_string('mail_template/user_create/message.txt', context)
 
         user.send_mail(subject, message)
-        return redirect('login:user_create_done')
-
-
-class UserCreateDone(generic.TemplateView):
-    """ユーザー仮登録したよ"""
-    template_name = 'htmls/user_create_done.html'
+        return render(request=self.request, template_name='htmls/email_sent.html', context={'user': user})
 
 
 class UserCreateComplete(generic.TemplateView):
@@ -209,6 +204,24 @@ class PasswordReset(PasswordResetView):
     form_class = MyPasswordResetForm
     success_url = reverse_lazy('login:password_reset_done')
 
+    def form_valid(self, form):
+        opts = {
+            "use_https": self.request.is_secure(),
+            "token_generator": self.token_generator,
+            "from_email": self.from_email,
+            "email_template_name": self.email_template_name,
+            "subject_template_name": self.subject_template_name,
+            "request": self.request,
+            "html_email_template_name": self.html_email_template_name,
+            "extra_email_context": self.extra_email_context,
+        }
+        form.save(**opts)
+        # return super().form_valid(form)
+        user = form.cleaned_data['email']
+        print('#######################################')
+        print(user)
+        return render(request=self.request, template_name='htmls/email_sent.html', context={'user': user})
+
 
 class PasswordResetDone(PasswordResetDoneView):
     """パスワード変更用URLを送りましたページ"""
@@ -273,12 +286,7 @@ class EmailLogin(generic.FormView):
         message = render_to_string('mail_template/email_login/message.txt', context)
 
         emailuser.send_mail(subject, message)
-        return render(template_name='htmls/email_login_sent.html')
-        # return redirect('login:email_login_sent')
-
-
-class EmailLoginSent(generic.TemplateView):
-    template_name = 'htmls/email_login_sent.html'
+        return render(request=self.request, template_name='htmls/email_sent.html', context={'user': emailuser})
 
 
 class EmailLoginComplete(generic.TemplateView):
