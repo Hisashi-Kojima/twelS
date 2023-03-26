@@ -139,11 +139,6 @@ TODO: 疑似要素のheightは200pxと固定されているが，
     width: 300px;
 }
 
-/* 数式を分けて表示するため */
-#canvas {
-    margin-right: 30px;
-}
-
 .tab-panel{
     display: inline-block;
 }
