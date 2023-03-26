@@ -34,7 +34,8 @@
                 <ul class="tab-group">
                     <li class="tab tab-A is-active">演算子など</li>
                     <li class="tab tab-B">ギリシャ文字</li>
-                    <li class="tab tab-C">その他</li>
+                    <li class="tab tab-C">行列</li>
+                    <li class="tab tab-D">その他</li>
                 </ul>
                 
                 <!--タブを切り替えて表示するコンテンツ-->
@@ -89,6 +90,20 @@
                         <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
                     </div>
                     <div class="panel tab-C">
+                        <button class="buttonGroup" onclick="pushString('\\begin{matrix} a & b \\\\ c & d \\\\ \\end{matrix}')">
+                            \begin{matrix} a & b \\ c & d \\ \end{matrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{pmatrix} a & b \\\\ c & d \\\\ \\end{pmatrix}')">
+                            \begin{pmatrix} a & b \\ c & d \\ \end{pmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{bmatrix} a & b \\\\ c & d \\\\ \\end{bmatrix}')">
+                            \begin{bmatrix} a & b \\ c & d \\ \end{bmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                            \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                        </button>
+                    </div>
+                    <div class="panel tab-D">
                         <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
                         <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
                         <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
