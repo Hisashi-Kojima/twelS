@@ -145,6 +145,7 @@ span{
 
 .tab-panel{
     display: inline-block;
+    margin-top: 20px;
 }
 
 .tab-group{
