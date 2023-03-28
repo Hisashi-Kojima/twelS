@@ -202,3 +202,6 @@ mysql/
 
 # unix domain socket
 socket/
+
+# selenium server log
+/tests/selenium_node/assets/*
