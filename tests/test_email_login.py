@@ -35,6 +35,7 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
     host = 'python'
 
     def setUp(self):
+        # テスト用のeメールがすでに登録されていないか確認する
         emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
         self.assertQuerysetEqual(emailuser, [])
         # テスト中はCSRFの検証を切っておく
