@@ -3,10 +3,9 @@ seleniumでのセッションを開始する関数群
 '''
 
 from selenium.webdriver import Remote, ChromeOptions, FirefoxOptions, EdgeOptions
-from typing import Union
 
 
-def create_driver(options: Union[ChromeOptions, FirefoxOptions, EdgeOptions]) -> Remote:
+def create_driver(options: ChromeOptions | FirefoxOptions | EdgeOptions) -> Remote:
     """hubに接続したwebdriverを返す
     Args:
         options: ([browsername]Options) webdriver option
@@ -22,7 +21,7 @@ def create_driver(options: Union[ChromeOptions, FirefoxOptions, EdgeOptions]) ->
     return driver
 
 
-def get_browser_option(browser_name: str) -> Union[ChromeOptions, FirefoxOptions, EdgeOptions]:
+def get_browser_option(browser_name: str) -> ChromeOptions | FirefoxOptions | EdgeOptions:
     """指定したブラウザのオプションを返す,
     存在しないブラウザが入力された時はchromeのオプションを返す
     Args:
@@ -44,7 +43,7 @@ def get_browser_option(browser_name: str) -> Union[ChromeOptions, FirefoxOptions
     return options
 
 
-def set_browser_version(options: Union[ChromeOptions, FirefoxOptions, EdgeOptions], browser_version: int) -> Union[ChromeOptions, FirefoxOptions, EdgeOptions]:
+def set_browser_version(options: ChromeOptions | FirefoxOptions | EdgeOptions, browser_version: int) -> ChromeOptions | FirefoxOptions | EdgeOptions:
     """webdriver.Optionにバージョン情報を追加する
     Args:
         options: ([browsername]Options) webdriver option
