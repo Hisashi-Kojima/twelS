@@ -11,6 +11,7 @@
         MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
     </script>
     <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script type="text/javascript" src="{% static 'search/js/uploadImage.js' %}"></script>
 {% endblock head %}
 
 {% block body %}
@@ -33,7 +34,8 @@
                 <ul class="tab-group">
                     <li class="tab tab-A is-active">演算子など</li>
                     <li class="tab tab-B">ギリシャ文字</li>
-                    <li class="tab tab-C">その他</li>
+                    <li class="tab tab-C">行列</li>
+                    <li class="tab tab-D">その他</li>
                 </ul>
                 
                 <!--タブを切り替えて表示するコンテンツ-->
@@ -88,6 +90,20 @@
                         <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
                     </div>
                     <div class="panel tab-C">
+                        <button class="buttonGroup" onclick="pushString('\\begin{matrix} a & b \\\\ c & d \\\\ \\end{matrix}')">
+                            \begin{matrix} a & b \\ c & d \\ \end{matrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{pmatrix} a & b \\\\ c & d \\\\ \\end{pmatrix}')">
+                            \begin{pmatrix} a & b \\ c & d \\ \end{pmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{bmatrix} a & b \\\\ c & d \\\\ \\end{bmatrix}')">
+                            \begin{bmatrix} a & b \\ c & d \\ \end{bmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                            \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                        </button>
+                    </div>
+                    <div class="panel tab-D">
                         <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
                         <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
                         <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
@@ -303,20 +319,6 @@
         obj.setSelectionRange(objCount, objCount);
         canvas.innerHTML = "\\(" + obj.value + "\\)";
         convertMath();
-    }
-
-    //for camera
-    function uploadImage() {
-        const uploadImageBtn = document.getElementById('uploadImage');
-        // for camera: setting a event which a file input was changed.
-        uploadImageBtn.addEventListener(
-            "change",
-            (e) => {// when the file uploaded, the form is posted py this code.
-                const imageForm = document.getElementById('imageForm');
-                imageForm.submit();
-            }
-        )
-        uploadImageBtn.click();
     }
 
     </script>
