@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core import mail
-from django.test import TestCase
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from selenium.webdriver.common.by import By
@@ -43,8 +42,8 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
 
     # ----tests----
     # ブラウザごとにテストする
-    # 最新バージョン->
 
+    # 最新バージョン->
     def test_latest_chrome(self):
         self.email_login("chrome", 110)
 
@@ -53,8 +52,8 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
 
     def test_latest_edge(self):
         self.email_login("edge", 110)
-    # 確認できた最も古いバージョン->
 
+    # 確認できた最も古いバージョン->
     def test_oldest_chrome(self):
         self.email_login("chrome", 61)
 
