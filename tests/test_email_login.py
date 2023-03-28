@@ -95,11 +95,8 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
             # inputにメールアドレスを入力してボタンをクリック
             element = driver.find_element(By.NAME, "email")
             element.send_keys(e_address)
-            button = driver.find_elements(By.TAG_NAME, "button")
-            for b in button:
-                if b.text == 'ログイン':
-                    b.click()
-                    break
+            button = driver.find_element(By.XPATH, "/html/body/div/div/div/form/button")
+            button.click()
             wait.until(EC.presence_of_all_elements_located)
             assert driver.title == 'メールを送信しました'
             # メールの確認
