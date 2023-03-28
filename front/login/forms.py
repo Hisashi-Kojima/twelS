@@ -1,17 +1,19 @@
+from datetime import datetime
+import unicodedata
+
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.mail import EmailMultiAlternatives
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
-from django.contrib.auth import get_user_model, password_validation
-from login.models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
-import unicodedata
-from django.core.exceptions import ValidationError
-from django.template import loader
-from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
+from django.template import loader
 from django.utils.encoding import force_bytes
-import datetime
+from django.utils.http import urlsafe_base64_encode
+
+from login.models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 
 
 User = get_user_model()
@@ -34,38 +36,25 @@ def check_request_times(MODEL, email):
 
 def check_request_date(MODEL, email):
     user_request = MODEL.objects.get(email=email)
+    print('user_request: ', type(user_request))
 
-    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    now = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
     if user_request.first_request_date is None:
-        user_request.first_request_date = datetime.datetime.now()
+        user_request.first_request_date = datetime.now()
         user_request.save()
 
     else:
-        now = datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-        user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
-        user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
+        now = datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+        user_date_str: str = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+        user_date: datetime = datetime.strptime(user_date_str, '%Y/%m/%d %H:%M:%S')
 
         elapsed_time = abs(now - user_date)
 
         if elapsed_time.days > 1:
-            user_request.first_request_date = datetime.datetime.now()
+            user_request.first_request_date = datetime.now()
             user_request.email_request_times = 0
             user_request.save()
-
-
-def check_request(MODEL, email):
-    email_login_request_exist = MODEL.objects.filter(email=email)
-
-    if email_login_request_exist:
-        check_request_date(MODEL, email)
-        check_request_times(MODEL, email)
-
-    if not email_login_request_exist:
-        MODEL.objects.create(email=email)
-        check_request_times(MODEL, email)
-
-    return email
 
 
 def _unicode_ci_compare(s1, s2):

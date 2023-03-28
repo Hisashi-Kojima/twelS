@@ -1,4 +1,7 @@
+import datetime
+
 from django.conf import settings
+from django.contrib.auth import login, logout
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import (
@@ -6,21 +9,20 @@ from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 )
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.http import urlsafe_base64_decode
 from django.views import generic
+
 from .forms import (
     LoginForm, CustomUserCreateForm, CustomPasswordChangeForm,
     MyPasswordResetForm, CustomSetPasswordForm, EmailLoginForm
 )
-from django.urls import reverse_lazy, reverse
-from django.contrib.auth import login, logout
 from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
-from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.utils.http import urlsafe_base64_decode
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-import datetime
 
 
 User = get_user_model()
@@ -61,7 +63,7 @@ class Login(LoginView):
                     ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
                     ip_address.last_access = timezone.now()
                     ip_address.save()
-                    pass
+
                 else:
                     IPAddress.objects.create(user=user, ip_address=current_ip)
 
@@ -78,6 +80,7 @@ class Login(LoginView):
                     user.send_mail(subject, message)
 
             except ObjectDoesNotExist:
+                # userが存在しない場合でも正常に動作するように用意している
                 pass
         return HttpResponseRedirect(self.get_success_url())
 
@@ -216,10 +219,7 @@ class PasswordReset(PasswordResetView):
             "extra_email_context": self.extra_email_context,
         }
         form.save(**opts)
-        # return super().form_valid(form)
         user = form.cleaned_data['email']
-        print('#######################################')
-        print(user)
         return render(request=self.request, template_name='htmls/email_sent.html', context={'user': user})
 
 
