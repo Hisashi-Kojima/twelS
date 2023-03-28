@@ -57,6 +57,20 @@ def check_request_date(MODEL, email):
             user_request.save()
 
 
+def check_request(MODEL, email):
+    email_login_request_exist = MODEL.objects.filter(email=email)
+
+    if email_login_request_exist:
+        check_request_date(MODEL, email)
+        check_request_times(MODEL, email)
+
+    if not email_login_request_exist:
+        MODEL.objects.create(email=email)
+        check_request_times(MODEL, email)
+
+    return email
+
+
 def _unicode_ci_compare(s1, s2):
     """
     Perform case-insensitive comparison of two identifiers, using the
