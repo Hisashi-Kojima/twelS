@@ -4,13 +4,12 @@ from django.test import TestCase
 from django.test import LiveServerTestCase
 from django.test.utils import override_settings
 from django.urls import reverse
-
-from login.models import EmailUser
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from create_webdriver import create_driver_connected_hub
+from login.models import EmailUser
 
 
 class EmailLoginTest(TestCase):
