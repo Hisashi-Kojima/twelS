@@ -1,7 +1,7 @@
 selenium_nodeディレクトリ
-設定ファイルやログが配置されます
-assetsの中身は追跡(gitにステージング)されません
-assetsディレクトリが存在しない時は自動生成されます
+設定ファイルやログが配置されます。
+assetsの中身は追跡(gitにステージング)されません。
+assetsディレクトリが存在しない時は自動生成されます。
 
 selenium_node directory
 Configuration files and logs are placed.
