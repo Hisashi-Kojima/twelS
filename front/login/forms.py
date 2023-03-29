@@ -21,6 +21,9 @@ Emailuser = EmailUser
 
 
 def check_request_times(MODEL, email):
+    """リクエストの回数をチェックする関数
+    リクエストの回数が3回のときにValidationErrorが発生する
+    """
     user_request = MODEL.objects.get(email=email)
 
     if user_request.email_request_times < 3:
@@ -35,8 +38,10 @@ def check_request_times(MODEL, email):
 
 
 def check_request_date(MODEL, email):
+    """リクエスト回数が1になった時間をチェックする
+    24時間以上経過していた場合リクエストの回数を0にする
+    """
     user_request = MODEL.objects.get(email=email)
-    print('user_request: ', type(user_request))
 
     now = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
@@ -58,13 +63,16 @@ def check_request_date(MODEL, email):
 
 
 def check_request(MODEL, email):
-    email_login_request_exist = MODEL.objects.filter(email=email)
+    """リクエストのチェックをする関数
+    リクエストが存在しない場合は作成する
+    """
+    request_exist = MODEL.objects.filter(email=email)
 
-    if email_login_request_exist:
+    if request_exist:
         check_request_date(MODEL, email)
         check_request_times(MODEL, email)
 
-    if not email_login_request_exist:
+    if not request_exist:
         MODEL.objects.create(email=email)
         check_request_times(MODEL, email)
 
@@ -225,6 +233,9 @@ class CustomPasswordChangeForm(forms.Form):
 
 
 def check_user(email):
+    """パスワードリセット時にユーザーの存在するか確認する関数
+    ユーザーが存在しない場合にValidationErrorが発生する
+    """
     user_exist = User.objects.filter(email=email, is_active=True)
 
     if user_exist:

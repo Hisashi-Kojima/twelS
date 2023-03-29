@@ -162,7 +162,7 @@ class UserCreateComplete(generic.TemplateView):
                 UserCreateRequest.objects.filter(email=user.email).delete()
 
             except User.DoesNotExist:
-                return HttpResponseBadRequest('user does not exist')
+                return render(request, 'htmls/token_error.html', status=401)
 
             else:
                 if not user.is_active:
@@ -317,7 +317,7 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.save()
 
             except Emailuser.DoesNotExist:
-                return HttpResponseBadRequest('emailuser does not exist')
+                return render(request, 'htmls/token_error.html', status=401)
             else:
                 if not emailuser.is_active:
                     # 問題なければ本登録とする
