@@ -10,5 +10,3 @@ function uploadImage() {
     )
     uploadImageBtn.click();
 }
-
-module.exports = uploadImage;
