@@ -10,6 +10,14 @@ from scrapy.spiders import CrawlSpider, Rule
 from ..items import DownloadItem
 
 
+# Read the entire file as a list
+def _load_script(path: str) -> str:
+    script = 'scriptが読み込まれていません．'
+    with open(path) as f:
+        script = f.readlines()
+    return script
+
+
 class WikiEnSpider(CrawlSpider):
     """Wikipediaの英語の数学のページをダウンロードするためのクラス．
     TODO:
@@ -30,10 +38,8 @@ class WikiEnSpider(CrawlSpider):
     }
 
     count = 0
-    start_urls = [
-        # 数学に関する記事の一覧
-        'https://en.wikipedia.org/wiki/Category:Mathematics',
-    ]
+    category_urls = _load_script('wiki_crawler/spiders/category.txt')
+    start_urls = category_urls
 
     category_path = 'wiki/Category:'
     next_page = '/w/index'
@@ -43,17 +49,17 @@ class WikiEnSpider(CrawlSpider):
             LinkExtractor(
                 allow=(category_path, next_page),
                 restrict_xpaths=([
-                    '//div[@id="mw-subcategories"]',
                     '//a[contains(text(), "next page")]',  # for 'next page' links
                 ]),
             )
         ),
-
         # extract page links to download.
         Rule(
             LinkExtractor(
                 allow=('wiki/',),
-                restrict_xpaths=(['//div[@id="mw-pages"]']),
+                restrict_xpaths=([
+                    '//*[@id="mw-pages"]'
+                ]),
             ),
             callback='parse_item'
         ),
