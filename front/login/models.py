@@ -88,6 +88,9 @@ class IPAddress(models.Model):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
+    def __str__(self):
+        return self.user
+
 
 class PasswordResetRequest(models.Model):
     email = models.EmailField(_('email address'), unique=True)
@@ -100,6 +103,9 @@ class PasswordResetRequest(models.Model):
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
+    def __str__(self):
+        return self.email
+
 
 class UserCreateRequest(models.Model):
     email = models.EmailField(_('email address'), unique=True)
@@ -111,6 +117,9 @@ class UserCreateRequest(models.Model):
         ),
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
 
 
 class EmailUser(AbstractBaseUser):
@@ -149,3 +158,6 @@ class EmailLoginRequest(models.Model):
         ),
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
