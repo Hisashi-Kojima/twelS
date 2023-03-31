@@ -26,14 +26,12 @@ class WikiEconomicsSpider(CrawlSpider):
         'ROBOTSTXT_OBEY': False,
         'FILES_STORE': 'wiki_pages/economics',
         'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
-        # 'DEPTH_LIMIT': 2,
     }
 
     count = 0
     category_urls = _load_script('wiki_crawler/spiders/category.txt')
     start_urls = category_urls
-    # start_urls = ['https://ja.wikipedia.org/wiki/Category:%E7%B5%8C%E6%B8%88%E5%AD%A6']
-
+    
     category_path = 'wiki/Category:'
     next_page = '/w/index'
     rules = (
