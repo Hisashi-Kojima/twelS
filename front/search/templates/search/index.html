@@ -200,9 +200,23 @@
         form.action = '.';
         form.method = 'GET';
 
+        for(let i = 0; i < exprArray.length; i++) {
+            exprArray[i] = exprArray[i].replace(/ /g, encodeURI(" "));
+            console.log(exprArray[i]);
+        }
+
+        var searchExprs = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            searchExprs += exprArray[i];
+            if(i + 1 < exprArray.length) {
+                searchExprs += " ";
+            }
+        }
+
         var q = document.createElement('input');
-        const obj = document.getElementById("textMath");
-        q.value = obj.value;
+        //const obj = document.getElementById("textMath");
+        //q.value = encodeURI(obj.value);
+        q.value = searchExprs;
         q.name = 'q';
         q.type = 'hidden';
         form.appendChild(q);
