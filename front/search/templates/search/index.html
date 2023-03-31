@@ -21,7 +21,8 @@
             <input type="text" id="textMath" value="" oninput="inputChange()">
             <button onclick="submit()">検索</button>
             <button type="button" onclick="uploadImage()" id="camera">
-                <img src="{% static 'search/images/camera.png' %}" width="30" />
+                <img src="{% static 'search/images/camera-outline.png' %}" width="30px"
+                style="filter: invert(88%) sepia(61%) saturate(0%) hue-rotate(229deg) brightness(107%) contrast(101%);"/>
             </button>
             <!-- for camera (using mathpix) -->
             <form id="imageForm" method="post" enctype="multipart/form-data">
