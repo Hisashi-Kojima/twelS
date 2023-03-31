@@ -10,7 +10,7 @@ from django.contrib.auth.views import (
 )
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -23,6 +23,9 @@ from .forms import (
     MyPasswordResetForm, CustomSetPasswordForm, EmailLoginForm
 )
 from .models import EmailUser, IPAddress, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
+import logging
+
+logger = logging.getLogger('django')
 
 
 User = get_user_model()
@@ -145,10 +148,12 @@ class UserCreateComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
+            logger.error('expired token in user_create')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
         except BadSignature:
+            logger.error('wrong token in user_create')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
@@ -162,6 +167,7 @@ class UserCreateComplete(generic.TemplateView):
                 UserCreateRequest.objects.filter(email=user.email).delete()
 
             except User.DoesNotExist:
+                logger.error('user not exist in user_create')
                 return render(request, 'htmls/token_error.html', status=401)
 
             else:
@@ -300,10 +306,12 @@ class EmailLoginComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired:
+            logger.error('expired token in email_login')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
         except BadSignature:
+            logger.error('wrong token in email_login')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
@@ -317,6 +325,7 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.save()
 
             except Emailuser.DoesNotExist:
+                logger.error('email_user not exist in email_login')
                 return render(request, 'htmls/token_error.html', status=401)
             else:
                 if not emailuser.is_active:

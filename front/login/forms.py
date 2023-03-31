@@ -72,7 +72,7 @@ def check_request(MODEL, email):
         check_request_date(MODEL, email)
         check_request_times(MODEL, email)
 
-    if not request_exist:
+    else:
         MODEL.objects.create(email=email)
         check_request_times(MODEL, email)
 
