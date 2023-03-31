@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 
+from django.utils.translation import gettext_lazy as _
 import environ
 import requests
 
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # translation
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -225,3 +227,14 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+# for translation
+# localeフォルダの位置を指定する
+# LOCALE_PATHSはtapleである必要があるのでカンマが必要です
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
+
+# 選択できる言語を設定する
+LANGUAGES = [
+    ('en', _('English')),
+    ('ja', _('Japanese'))
+]
