@@ -199,39 +199,23 @@
         var form = document.createElement('form');
         form.action = '.';
         form.method = 'GET';
+        // form.enctype = 'text/plain';
 
-        for(let i = 0; i < exprArray.length; i++) {
-            exprArray[i] = exprArray[i].replace(/ /g, encodeURI(" "));
-            console.log(exprArray[i]);
-        }
-
-        var searchExprs = "";
-        for(let i = 0; i < exprArray.length; i++) {
-            searchExprs += exprArray[i];
-            if(i + 1 < exprArray.length) {
-                searchExprs += " ";
-            }
-        }
-
+        var searchExprs = createSearchExprs();
         var q = document.createElement('input');
-        //const obj = document.getElementById("textMath");
-        //q.value = encodeURI(obj.value);
         q.value = searchExprs;
         q.name = 'q';
         q.type = 'hidden';
+        q.formenctype = 'text/plain';
         form.appendChild(q);
 
         const lr = document.getElementById("lang");
-        form.appendChild(lr)
+        form.appendChild(lr);
 
         document.body.appendChild(form);
 
         form.submit();
     }
-
-    const canvas = document.getElementById("canvas");
-    const obj = document.getElementById("textMath");
-    var exprArray = [];
 
     window.onload = onLoad;
 
@@ -243,7 +227,7 @@
 
     window.document.onkeydown = function(event){
         if (event.key === 'Enter') {
-            exprCut()
+            submit();
         }
     }
 
@@ -295,23 +279,33 @@
         }
     }
 
-    function exprCut() {
-        var exprString = obj.value;
-        var cutCount = 0;
-        exprArray = [];
-        for(let i = 1; i < exprString.length - 1; i++) {
-            if(exprString.charAt(i) === ' ') {
-                if(exprString.charAt(i + 1) === ' '  && exprString.charAt(i - 1) !== ' ' ) {
-                    exprArray.push(exprString.substr(cutCount, i + 1 - cutCount));
-                    cutCount = i + 1;
-                }
+    function createSearchExprs() {
+        var exprArray = splitExpers();
+
+        for(let i = 0; i < exprArray.length; i++) {
+            exprArray[i] = exprArray[i].replace(/ /g, encodeURI(" "));
+        }
+
+        var searchExprs = "";
+        for(let i = 0; i < exprArray.length; i++) {
+            searchExprs += exprArray[i];
+            if(i + 1 < exprArray.length) {
+                searchExprs += " ";
             }
         }
-        exprArray.push(exprString.substr(cutCount));
+
+        return searchExprs;
+    }
+
+    function splitExpers() {
+        const textMath = document.getElementById("textMath");
+        var exprString = textMath.value;
+        return exprString.split(/ {2}/);
     }
 
     function inputChange(){
-        exprCut();
+        var exprArray = splitExpers();
+        const canvas = document.getElementById("canvas");
         canvas.innerHTML = "";
         for(let i = 0; i < exprArray.length; i++) {
             canvas.innerHTML += "<span>" + "\\(" + exprArray[i] + "\\)" + "</span>";
@@ -324,21 +318,19 @@
     }
 
     function pushString(msg){
-
-        const objString = obj.value.substr(0, obj.selectionStart)
+        const textMath = document.getElementById("textMath");
+        const textMathString = textMath.value.substr(0, textMath.selectionStart)
 			+ msg;
         
-        const objCount = objString.length;
+        const textMathCount = textMathString.length;
 
-        obj.value = obj.value.substr(0, obj.selectionStart)
+        textMath.value = textMath.value.substr(0, textMath.selectionStart)
 			+ msg
-			+ obj.value.substr(obj.selectionStart);
+			+ textMath.value.substr(textMath.selectionStart);
 
-        obj.focus();
-        obj.setSelectionRange(objCount, objCount);
-        exprCut();
+        textMath.focus();
+        textMath.setSelectionRange(textMathCount, textMathCount);
         inputChange();
-        convertMath();
     }
 
     </script>
