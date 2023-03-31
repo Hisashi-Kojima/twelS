@@ -38,7 +38,7 @@ class WikiEnSpider(CrawlSpider):
     }
 
     count = 0
-    category_urls = _load_script('wiki_crawler/spiders/category.txt')
+    category_urls = _load_script('web_crawler/spiders/category.txt')
     start_urls = category_urls
 
     category_path = 'wiki/Category:'

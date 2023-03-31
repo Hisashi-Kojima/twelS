@@ -57,7 +57,7 @@ class WikiEconomicsCategorySpider(CrawlSpider):
 
     # Get wiki category links
     def parse(self, response: TextResponse) -> scrapy.Item:
-        with open("wiki_crawler/spiders/category.txt", "a", encoding='utf-8',newline="\n") as file:
+        with open("web_crawler/spiders/category.txt", "a", encoding='utf-8',newline="\n") as file:
             file.write(response.url),
             file.write("\n"),
 

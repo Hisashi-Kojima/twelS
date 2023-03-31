@@ -27,12 +27,12 @@ class WikiPhysicsSpider(CrawlSpider):
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
-        'FILES_STORE': 'wiki_pages/en/physics',
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
+        'FILES_STORE': 'web_pages/en/physics',
+        'ITEM_PIPELINES': {'web_crawler.pipelines.DownloadPipeline': 300},
     }
 
     count = 0
-    category_urls = _load_script('wiki_crawler/spiders/category.txt')
+    category_urls = _load_script('web_crawler/spiders/category.txt')
     start_urls = category_urls
 
     category_path = 'wiki/Category:'
