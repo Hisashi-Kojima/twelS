@@ -87,15 +87,15 @@ msgstr ""
 
 #: templates/404.html:9
 msgid "このページは利用できません"
-msgstr ""
+msgstr "このページは利用できません"
 
 #: templates/404.html:10
 msgid "アクセスできないURLか、ページが削除されています。"
-msgstr ""
+msgstr "アクセスできないURLか、ページが削除されています。"
 
 #: templates/404.html:11
 msgid "トップページに戻る"
-msgstr ""
+msgstr "トップページに戻る"
 
 #: twelS/settings.py:238
 msgid "English"
