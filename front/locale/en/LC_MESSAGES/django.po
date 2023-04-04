@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 05:54+0000\n"
+"POT-Creation-Date: 2023-04-04 08:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: login/admin.py:23
 msgid "Permissions"
 msgstr ""
@@ -85,6 +86,8 @@ msgstr ""
 msgid "last login"
 msgstr ""
 
+# 404エラーページ ->
+
 #: templates/404.html:9
 msgid "このページは利用できません"
 msgstr "This page is unavailable"
@@ -93,9 +96,26 @@ msgstr "This page is unavailable"
 msgid "アクセスできないURLか、ページが削除されています。"
 msgstr "Either the URL is inaccessible or the page has been deleted."
 
-#: templates/404.html:11
+#: templates/404.html:11 templates/413.html:12
 msgid "トップページに戻る"
 msgstr "back to the top page"
+
+# <-
+# 413エラーページ ->
+
+#: templates/413.html:9
+msgid "ファイルアップロードエラー"
+msgstr "File upload failed."
+
+#: templates/413.html:10
+msgid "アップロードされているファイルサイズが20MBを超えています。"
+msgstr "The file size you are trying to upload exceeds 20MB."
+
+#: templates/413.html:11
+msgid "お手数ですが、ファイルをアップロードし直してください。"
+msgstr "Please re-upload the file."
+
+# <-
 
 #: twelS/settings.py:238
 msgid "English"
