@@ -37,9 +37,11 @@ def get_ip(request):
     if forwarded_addresses:
         # 'HTTP_X_FORWARDED_FOR'ヘッダがある場合: 転送経路の先頭要素を取得する。
         current_ip = forwarded_addresses.split(',')[0]
+        logger.info('get IP from HTTP_X_FORWARDED_FOR')
     else:
         # 'HTTP_X_FORWARDED_FOR'ヘッダがない場合: 直接接続なので'REMOTE_ADDR'ヘッダを参照する。
         current_ip = request.META.get('REMOTE_ADDR')
+        logger.info('get IP from REMOTE_ADDR')
     return current_ip
 
 
