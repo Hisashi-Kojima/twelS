@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """module description
 """
-
 import html
 
 import latex2mathml.converter
 from lark import Tree, Token
 
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
-from twels.snippet.snippet import Snippet
 
 
 def test_get_parsed_tree_atom_1():
@@ -20,7 +19,7 @@ def test_get_parsed_tree_atom_1():
     expected = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, 'a')
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_add_1():
@@ -39,7 +38,7 @@ def test_get_parsed_tree_add_1():
             Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2')
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_add_2():
@@ -60,7 +59,7 @@ def test_get_parsed_tree_add_2():
             Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, 'a')
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_add_3():
@@ -76,7 +75,7 @@ def test_get_parsed_tree_add_3():
     expected = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, '7')
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_subtract_1():
@@ -95,7 +94,7 @@ def test_get_parsed_tree_subtract_1():
             Token(ParserConst.token_type, '3'), Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '2')])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_subtract_2():
@@ -111,7 +110,7 @@ def test_get_parsed_tree_subtract_2():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '5')])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_mul_1():
@@ -130,7 +129,7 @@ def test_get_parsed_tree_mul_1():
             Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_mul_2():
@@ -149,7 +148,7 @@ def test_get_parsed_tree_mul_2():
             Token(ParserConst.token_type, 'a'), Token(ParserConst.token_type, 'b'), Token(ParserConst.token_type, 'c')
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_frac_1():
@@ -174,7 +173,7 @@ def test_get_parsed_tree_frac_1():
             Tree('#1', [Token(ParserConst.token_type, '3')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_frac_2():
@@ -217,55 +216,10 @@ def test_get_parsed_tree_frac_2():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_frac_3():
-    """分数のparse
-    frac{d}{dx}e^{x}
-    Snippet.clean()を実行した場合。
-    """
-    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
-                    <mrow class="MJX-TeXAtom-ORD">
-                        <mrow class="MJX-TeXAtom-ORD">
-                            <mfrac>
-                                <mi>d</mi>
-                                <mrow>
-                                    <mi>d</mi>
-                                    <mi>x</mi>
-                                </mrow>
-                            </mfrac>
-                        </mrow>
-                        <msup>
-                            <mi>e</mi>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mi>x</mi>
-                            </mrow>
-                        </msup>
-                    </mrow>
-                </math>"""
-    expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.product_data, [
-            Tree(ParserConst.frac_data, [
-                Tree('#0', [Token(ParserConst.token_type, 'd')]),
-                Tree('#1', [
-                    Tree(ParserConst.product_data, [
-                        Token(ParserConst.token_type, 'd'),
-                        Token(ParserConst.token_type, 'x')
-                    ])
-                ])
-            ]),
-            Tree(ParserConst.sup_data, [
-                Tree('#0', [Token(ParserConst.token_type, 'e')]),
-                Tree('#1', [Token(ParserConst.token_type, 'x')])
-            ])
-        ])
-    ])
-    clean_mathml = Snippet.clean(mathml)
-    assert expected == Parser.get_parsed_tree(clean_mathml)
-
-
-def test_get_parsed_tree_frac_4():
     """分数のparse
     frac{d}{dx}e^{x}=e^{x}
     """
@@ -328,10 +282,10 @@ def test_get_parsed_tree_frac_4():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
-def test_get_parsed_tree_frac_5():
+def test_get_parsed_tree_frac_4():
     """
     分数の入れ子。frac {frac{a}{b}}{frac{c}{d}}
     参考ページ：分数
@@ -395,7 +349,7 @@ def test_get_parsed_tree_frac_5():
             ]),
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_div_1():
@@ -417,7 +371,7 @@ def test_get_parsed_tree_div_1():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_div_2():
@@ -438,7 +392,7 @@ def test_get_parsed_tree_div_2():
             Token(ParserConst.token_type, '∼')
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_eq_1():
@@ -461,7 +415,7 @@ def test_get_parsed_tree_eq_1():
                 ])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_eq_2():
@@ -484,7 +438,7 @@ def test_get_parsed_tree_eq_2():
         Tree(ParserConst.equal_data, []),
         Token(ParserConst.token_type, 'c')
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_lt_1():
@@ -506,7 +460,7 @@ def test_get_parsed_tree_lt_1():
             Tree('#1', [Token(ParserConst.token_type, '3')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_gt_1():
@@ -528,7 +482,7 @@ def test_get_parsed_tree_gt_1():
             Tree('#1', [Token(ParserConst.token_type, '2')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_paren_1():
@@ -555,7 +509,7 @@ def test_get_parsed_tree_paren_1():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_sup_1():
@@ -578,7 +532,7 @@ def test_get_parsed_tree_sup_1():
             Tree('#1', [Token(ParserConst.token_type, 'x')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_sub_1():
@@ -601,7 +555,7 @@ def test_get_parsed_tree_sub_1():
             Tree('#1', [Token(ParserConst.token_type, 'i')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_subsup_1():
@@ -628,7 +582,7 @@ def test_get_parsed_tree_subsup_1():
             Tree('#2', [Token(ParserConst.token_type, '2')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_sqrt_1():
@@ -649,7 +603,7 @@ def test_get_parsed_tree_sqrt_1():
             Token(ParserConst.token_type, '3')
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_root_1():
@@ -674,7 +628,7 @@ def test_get_parsed_tree_root_1():
             Tree('#1', [Token(ParserConst.token_type, '3')])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_over_1():
@@ -700,10 +654,10 @@ def test_get_parsed_tree_over_1():
                     Token(ParserConst.token_type, 'x'), Token(ParserConst.token_type, 'y'), Token(ParserConst.token_type, 'z')
                 ])
             ]),
-            Tree('#1', [Token(ParserConst.token_type, '&#x23DE;')])
+            Tree('#1', [Token(ParserConst.token_type, html.unescape('&#x23DE;'))])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_under_1():
@@ -729,10 +683,10 @@ def test_get_parsed_tree_under_1():
                     Token(ParserConst.token_type, 'x'), Token(ParserConst.token_type, 'y'), Token(ParserConst.token_type, 'z')
                 ])
             ]),
-            Tree('#1', [Token(ParserConst.token_type, '&#x23DF;')])
+            Tree('#1', [Token(ParserConst.token_type, html.unescape('&#x23DF;'))])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_underover_1():
@@ -748,12 +702,12 @@ def test_get_parsed_tree_underover_1():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.underover_data, [
-            Tree('#0', [Token(ParserConst.token_type, '&#x222B;')]),
+            Tree('#0', [Token(ParserConst.token_type, html.unescape('&#x222B;'))]),
             Tree('#1', [Token(ParserConst.token_type, '0')]),
-            Tree('#2', [Token(ParserConst.token_type, '&#x221E;')])
+            Tree('#2', [Token(ParserConst.token_type, html.unescape('&#x221E;'))])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_summation_1():
@@ -782,7 +736,7 @@ def test_get_parsed_tree_summation_1():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
             Tree(ParserConst.underover_data, [
-                Tree('#0', [Token(ParserConst.token_type, '&#x2211;')]),
+                Tree('#0', [Token(ParserConst.token_type, html.unescape('&#x2211;'))]),
                 Tree('#1', [Tree(ParserConst.equal_data, [
                     Token(ParserConst.token_type, 'i'),
                     Token(ParserConst.token_type, '1')
@@ -795,7 +749,7 @@ def test_get_parsed_tree_summation_1():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_summation_2():
@@ -808,11 +762,11 @@ def test_get_parsed_tree_summation_2():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
-            Token(ParserConst.token_type, '&#x2211;'),
+            Token(ParserConst.token_type, html.unescape('&#x2211;')),
             Token(ParserConst.token_type, 'R')
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_summation_3():
@@ -833,7 +787,7 @@ def test_get_parsed_tree_summation_3():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
             Tree(ParserConst.under_data, [
-                Tree('#0', [Token(ParserConst.token_type, '&#x2211;')]),
+                Tree('#0', [Token(ParserConst.token_type, html.unescape('&#x2211;'))]),
                 Tree('#1', [
                     Tree(ParserConst.in_data, [
                         Tree('#0', [Token(ParserConst.token_type, 'x')]),
@@ -844,7 +798,7 @@ def test_get_parsed_tree_summation_3():
             Token(ParserConst.token_type, 'x')
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_annotation_1():
@@ -912,7 +866,7 @@ def test_get_parsed_tree_annotation_1():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_table_1():
@@ -956,7 +910,7 @@ def test_get_parsed_tree_table_1():
             ])
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_table_2():
@@ -1031,7 +985,7 @@ def test_get_parsed_tree_table_2():
             Token(ParserConst.token_type, ']')
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_table_3():
@@ -1075,7 +1029,7 @@ def test_get_parsed_tree_table_3():
                 ])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_mtext_1():
@@ -1105,7 +1059,7 @@ def test_get_parsed_tree_mtext_1():
                 ])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_cdots_1():
@@ -1125,7 +1079,7 @@ def test_get_parsed_tree_cdots_1():
     expected = Tree(ParserConst.root_data, [
             Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')]),
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_cdots_2():
@@ -1148,11 +1102,11 @@ def test_get_parsed_tree_cdots_2():
                             <mn>9</mn>
                             <mo>&#x22C5;<!-- ⋅ --></mo>
                             <msup>
-                            <mn>10</mn>
-                            <mrow class="MJX-TeXAtom-ORD">
-                                <mo>&#x2212;<!-- − --></mo>
-                                <mi>n</mi>
-                            </mrow>
+                                <mn>10</mn>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                    <mo>&#x2212;<!-- − --></mo>
+                                    <mi>n</mi>
+                                </mrow>
                             </msup>
                             <mo>+</mo>
                             <mo>&#x22EF;<!-- ⋯ --></mo>
@@ -1179,7 +1133,7 @@ def test_get_parsed_tree_cdots_2():
                 ])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_cdots_3():
@@ -1327,7 +1281,7 @@ def test_get_parsed_tree_cdots_3():
                 ])
             ])
         ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_mspace_1():
@@ -1397,14 +1351,15 @@ def test_get_parsed_tree_mspace_1():
             ]),
         ])
     ])
-    assert expected == Parser.get_parsed_tree(mathml)
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_parse_num_1():
     """数値のparse
     7
     """
-    actual = Parser.parse(latex2mathml.converter.convert('7'))
+    mathml = latex2mathml.converter.convert('7')
+    actual = Parser.parse(Expression(mathml))
     expected = {'7'}
     assert actual == expected
 
@@ -1413,7 +1368,8 @@ def test_parse_add_1():
     """加算のparse
     1+2
     """
-    actual = Parser.parse(latex2mathml.converter.convert('1+2'))
+    mathml = latex2mathml.converter.convert('1+2')
+    actual = Parser.parse(Expression(mathml))
     sum_ = ParserConst.sum_data
     expected = {
         '1', f'1/{sum_}',
@@ -1426,7 +1382,8 @@ def test_parse_subtract_1():
     """減算のparse
     3-2
     """
-    actual = Parser.parse(latex2mathml.converter.convert('3-2'))
+    mathml = latex2mathml.converter.convert('3-2')
+    actual = Parser.parse(Expression(mathml))
     sum_ = ParserConst.sum_data
     neg = ParserConst.neg_data
     expected = {
@@ -1440,7 +1397,8 @@ def test_parse_product_1():
     """乗算のparse
     4*5
     """
-    actual = Parser.parse(latex2mathml.converter.convert('4*5'))
+    mathml = latex2mathml.converter.convert('4*5')
+    actual = Parser.parse(Expression(mathml))
     product = ParserConst.product_data
     expected = {
         '4', f'4/{product}',
@@ -1454,7 +1412,8 @@ def test_parse_div_1():
     3/2
     これは3*(1/2)として処理する．
     """
-    actual = Parser.parse(latex2mathml.converter.convert('3/2'))
+    mathml = latex2mathml.converter.convert('3/2')
+    actual = Parser.parse(Expression(mathml))
     product = ParserConst.product_data
     frac = ParserConst.frac_data
     expected = {
@@ -1469,7 +1428,8 @@ def test_parse_eq_1():
     """等式のparse
     a=b
     """
-    actual = Parser.parse(latex2mathml.converter.convert('a=b'))
+    mathml = latex2mathml.converter.convert('a=b')
+    actual = Parser.parse(Expression(mathml))
     equal = ParserConst.equal_data
     expected = {
         'a', f'a/{equal}',
@@ -1495,7 +1455,7 @@ def test_parse_eq_2():
                         <annotation encoding="application/x-tex">{\displaystyle y=0}</annotation>
                     </semantics>
                 </math>"""
-    actual = Parser.parse(mathml)
+    actual = Parser.parse(Expression(mathml))
     equal = ParserConst.equal_data
     expected = {
         'y', f'y/{equal}',
@@ -1508,7 +1468,8 @@ def test_parse_lt_1():
     """不等式のparse
     a<b
     """
-    actual = Parser.parse(latex2mathml.converter.convert('a<b'))
+    mathml = latex2mathml.converter.convert('a<b')
+    actual = Parser.parse(Expression(mathml))
     less = ParserConst.less_data
     expected = {
         'a', f'a/#0/{less}',
@@ -1521,7 +1482,8 @@ def test_parse_gt_1():
     """不等式のparse
     a>b
     """
-    actual = Parser.parse(latex2mathml.converter.convert('a>b'))
+    mathml = latex2mathml.converter.convert('a>b')
+    actual = Parser.parse(Expression(mathml))
     greater = ParserConst.greater_data
     expected = {
         'a', f'a/#0/{greater}',
@@ -1534,8 +1496,8 @@ def test_parse_sum_1():
     """総和のparse
     \sum_{i=1}^{n} x_{i}
     """
-    expr = latex2mathml.converter.convert('\sum_{i=1}^{n} x_{i}')
-    actual = Parser.parse(html.unescape(expr))
+    mathml = latex2mathml.converter.convert('\sum_{i=1}^{n} x_{i}')
+    actual = Parser.parse(Expression(mathml))
     equal = ParserConst.equal_data
     sub = ParserConst.sub_data
     subsup = ParserConst.subsup_data
@@ -1597,7 +1559,7 @@ def test_parse_table_1():
                         <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
                     </semantics>
                 </math>"""
-    actual = Parser.parse(mathml)
+    actual = Parser.parse(Expression(mathml))
     table = ParserConst.table_data
     product = ParserConst.product_data
     neg = ParserConst.neg_data

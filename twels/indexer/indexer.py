@@ -8,6 +8,7 @@ from itemadapter import ItemAdapter
 from lark import exceptions
 
 from twels.database.cursor import Cursor
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.indexer.info import Info
 from twels.snippet.snippet import Snippet
@@ -53,7 +54,7 @@ class Indexer:
             return False
 
     @staticmethod
-    def _delete_expr_from_database(cursor, mathml: str, uri_id: int, test: bool = False) -> bool:
+    def _delete_expr_from_database(cursor, expr: Expression, uri_id: int, test: bool = False) -> bool:
         """数式(MathML)をデータベースから削除する関数．
         tableはinverted_index, path_dictionaryを操作する．
         Returns:
@@ -61,17 +62,17 @@ class Indexer:
         """
         try:
             # 削除対象の数式とuri_idをもとにinverted_indexのinfoの該当箇所を削除．
-            info = Cursor.remove_info_from_inverted_index(cursor, mathml, uri_id)
+            info = Cursor.remove_info_from_inverted_index(cursor, expr, uri_id)
 
             if info.is_empty():
                 # path_dictionaryの操作時にexpr_idが必要なので，ここで取得．
-                expr_id = Cursor.select_expr_id_from_inverted_index_where_expr_1(cursor, mathml)
+                expr_id = Cursor.select_expr_id_from_inverted_index_where_expr_1(cursor, expr)
 
                 # infoが空になった場合，そのexpr_idのレコードをinverted_index tableから削除．
                 Cursor.delete_from_inverted_index_where_expr_id_1(cursor, expr_id)
 
                 # その数式のpathそれぞれとexpr_idがセットでpath_dictionaryに登録されているので，削除．
-                expr_path_set = Parser.parse(mathml)
+                expr_path_set = Parser.parse(expr)
                 expr_size = len(expr_path_set)
                 for expr_path in expr_path_set:
                     expr_ids = Cursor.remove_expr_id_from_path_dictionary(cursor, expr_id, expr_path, expr_size)
@@ -89,7 +90,7 @@ class Indexer:
             return False
 
     @staticmethod
-    def _delete_expr_from_database_with_delete_set(uri_id: int, delete_set: set[str], test: bool = False) -> bool:
+    def _delete_expr_from_database_with_delete_set(uri_id: int, delete_set: set[Expression], test: bool = False) -> bool:
         """Indexer._delete_expr_from_database()をwrapしたmethod．
         tableはinverted_index, path_dictionaryを操作する．
         Returns:
@@ -99,10 +100,10 @@ class Indexer:
         # TODO: delete_successがTrueとFalse何度も切り替わる場合が考えられるので、
         #       それの対応を決める。
         try:
-            for mathml in delete_set:
+            for expr in delete_set:
                 with Cursor.connect(test) as cnx:
                     with Cursor.cursor(cnx) as cursor:
-                        delete_success = __class__._delete_expr_from_database(cursor, mathml, uri_id, test=test)
+                        delete_success = __class__._delete_expr_from_database(cursor, expr, uri_id, test=test)
                         cnx.commit()
             return delete_success
         except Exception as e:
@@ -111,7 +112,7 @@ class Indexer:
             return False
 
     @staticmethod
-    def _get_insert_and_delete_set(new_exprs: set, registered_exprs: set) -> tuple[set[str], set[str]]:
+    def _get_insert_and_delete_set(new_exprs: set[Expression], registered_exprs: set[Expression]) -> tuple[set[Expression], set[Expression]]:
         """登録する数式と削除する数式それぞれの集合を返す関数．
         そのページに登録されていたexpressionsと今回取得したexpressionsを比較することで，
         新たに登録するexprと削除するexprがわかる．
@@ -126,7 +127,7 @@ class Indexer:
         return insert_set, delete_set
 
     @staticmethod
-    def _update_index_and_path_table(uri_id: int, registered_exprs: set, page_info: ItemAdapter, test: bool = False) -> bool:
+    def _update_index_and_path_table(uri_id: int, registered_exprs: set[Expression], page_info: ItemAdapter, test: bool = False) -> bool:
         """inverted_index table, path_dictionary tableを更新する関数．
         最初に新たな式を追加して，その後に古い式を削除する．
         Args:
@@ -140,21 +141,21 @@ class Indexer:
         snippet: Snippet = page_info['snippet']
         is_success = True
 
-        for mathml in insert_set:
+        for expr in insert_set:
             try:
-                expr_start_pos_list = [snippet.search_expr_start_pos(mathml)]
+                expr_start_pos_list = [snippet.search_expr_start_pos(expr)]
                 info = Info({
                     "uri_id": [str(uri_id)],
                     "lang": [page_info['lang']],
                     "expr_start_pos": expr_start_pos_list
                 })
 
-                expr_path_set = Parser.parse(mathml)
+                expr_path_set = Parser.parse(expr)
                 expr_size = len(expr_path_set)
                 with Cursor.connect(test) as cnx:
                     with Cursor.cursor(cnx) as cursor:
                         expr_id, was_registered = Cursor.update_index(
-                            cursor, mathml, len(expr_path_set), info
+                            cursor, expr, len(expr_path_set), info
                             )
                         if not was_registered:
                             for path in expr_path_set:
@@ -176,7 +177,7 @@ class Indexer:
         return is_success and is_success_2
 
     @staticmethod
-    def _update_page_table(page_info: ItemAdapter, test: bool = False) -> tuple[int, set]:
+    def _update_page_table(page_info: ItemAdapter, test: bool = False) -> tuple[int, set[Expression]]:
         """page tableを更新する関数．
         そのページのuri_idと登録されているexprsを返す．
         Returns:

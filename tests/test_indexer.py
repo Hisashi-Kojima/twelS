@@ -7,6 +7,7 @@ import json
 from itemadapter import ItemAdapter
 
 from twels.database.cursor import Cursor
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.indexer.indexer import Indexer
 from twels.indexer.info import Info
@@ -37,16 +38,16 @@ def test_update_page_table_1():
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        snippet = 'snippet'
+        snippet = Snippet('snippet')
         lang = 'ja'
-        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
                             <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        exprs = [expr]
+        exprs = [Expression(mathml)]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
@@ -73,15 +74,15 @@ def test_update_page_table_2():
         # register old page info
         uri = 'uri'
         old_title = 'title'
-        old_snippet = 'snippet'
-        old_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>1</mn>
-                            <mo>+</mo>
-                            <mn>2</mn>
-                        </mrow>
-                    </math>"""
-        old_exprs = [old_expr]
+        old_snippet = Snippet('snippet')
+        old_mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                            <mrow>
+                                <mn>1</mn>
+                                <mo>+</mo>
+                                <mn>2</mn>
+                            </mrow>
+                        </math>"""
+        old_exprs = [Expression(old_mathml)]
 
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
@@ -90,16 +91,16 @@ def test_update_page_table_2():
 
         # new page info
         new_title = 'new title'
-        new_snippet = 'new snippet'
+        new_snippet = Snippet('new snippet')
         new_lang = 'en'  # lang is unnecessary for page table.
-        new_expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
-                        <mrow>
-                            <mn>5</mn>
-                            <mo>+</mo>
-                            <mn>8</mn>
-                        </mrow>
-                    </math>"""
-        new_exprs = [new_expr]
+        new_mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                            <mrow>
+                                <mn>5</mn>
+                                <mo>+</mo>
+                                <mn>8</mn>
+                            </mrow>
+                        </math>"""
+        new_exprs = [Expression(new_mathml)]
 
         page_new_item = Page(uri=uri, title=new_title, snippet=new_snippet, lang=new_lang, exprs=new_exprs)
         page_new_info = ItemAdapter(page_new_item)
@@ -113,7 +114,7 @@ def test_update_page_table_2():
         actual_snippet = actual[4]
         assert registered_exprs == set(old_exprs)
         assert actual_title == new_title
-        assert actual_snippet == new_snippet
+        assert actual_snippet == new_snippet.text
 
     finally:
         reset_tables()
@@ -136,15 +137,15 @@ def test_update_index_and_path_table_1():
         """
         snippet = Snippet(body)
         lang = 'ja'
-        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
                             <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.clean(expr)
-        exprs = [cleaned_expr]
+        expr = Expression(mathml)
+        exprs = [expr]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
@@ -157,7 +158,7 @@ def test_update_index_and_path_table_1():
 
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
-                cursor.execute('SELECT * FROM inverted_index WHERE expr = %s', (cleaned_expr,))
+                cursor.execute('SELECT * FROM inverted_index WHERE expr = %s', (expr.mathml,))
                 inverted_index_result = cursor.fetchone()
                 cursor.execute('SELECT expr_path FROM path_dictionary')
                 path_dict_result = cursor.fetchall()
@@ -176,11 +177,11 @@ def test_update_index_and_path_table_1():
             'lang': [lang],
             'expr_start_pos': expr_start_pos_list
         })
-        expected_paths = Parser.parse(cleaned_expr)
+        expected_paths = Parser.parse(expr)
 
         assert type(expr_id) == int
-        assert actual_expr == cleaned_expr
-        assert actual_expr_len == len(cleaned_expr)
+        assert actual_expr == expr.mathml
+        assert actual_expr_len == len(expr.mathml)
         assert str(actual_info) == str(expected_info)
         assert actual_paths == expected_paths
 
@@ -206,15 +207,15 @@ def test_update_index_and_path_table_2():
         """
         snippet = Snippet(body)
         lang = 'ja'
-        expr1 =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml1 = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
                             <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr1 = Snippet.clean(expr1)
-        exprs1 = [cleaned_expr1]
+        expr1 = Expression(mathml1)
+        exprs1 = [expr1]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs1)
         page_info_1 = ItemAdapter(page_item_1)
@@ -226,15 +227,15 @@ def test_update_index_and_path_table_2():
         Indexer._update_index_and_path_table(uri_id, registered_exprs, page_info_1, test=True)
 
         uri_2 = 'uri_2'
-        expr2 =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml2 = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>8</mn>
                             <mo>-</mo>
                             <mn>5</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr2 = Snippet.clean(expr2)
-        exprs2 = [cleaned_expr2]
+        expr2 = Expression(mathml2)
+        exprs2 = [expr2]
         page_item_2 = Page(uri=uri_2, title=title, snippet=snippet, lang=lang, exprs=exprs2)
         page_info_2 = ItemAdapter(page_item_2)
 
@@ -280,25 +281,25 @@ def test_update_db_1():
                     </math>は数式です。"""
         snippet1 = Snippet(body)
         lang = 'ja'
-        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
                             <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.clean(expr)
-        exprs = [cleaned_expr]
+        expr = Expression(mathml)
+        exprs = [expr]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet1, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
-        assert Indexer.update_db(page_info_1, test=True) == True
+        assert Indexer.update_db(page_info_1, test=True)
 
         uri_2 = 'uri_2'
         snippet2 = Snippet(f'文章。{body}')
         page_item_2 = Page(uri=uri_2, title=title, snippet=snippet2, lang=lang, exprs=exprs)
         page_info_2 = ItemAdapter(page_item_2)
-        assert Indexer.update_db(page_info_2, test=True) == True
+        assert Indexer.update_db(page_info_2, test=True)
 
         with Cursor.connect(test=True) as cnx:
             with Cursor.cursor(cnx) as cursor:
@@ -348,15 +349,15 @@ def test_update_db_2():
                     </math>は数式です。"""
         snippet1 = Snippet(body)
         lang = 'ja'
-        expr =   """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                         <mrow>
                             <mn>1</mn>
                             <mo>+</mo>
                             <mn>2</mn>
                         </mrow>
                     </math>"""
-        cleaned_expr = Snippet.clean(expr)
-        exprs = [cleaned_expr]
+        expr = Expression(mathml)
+        exprs = [expr]
 
         page_item_1 = Page(uri=uri, title=title, snippet=snippet1, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)

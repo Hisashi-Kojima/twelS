@@ -6,6 +6,7 @@ import os
 
 from lark import Lark, exceptions, Tree
 
+from twels.expr.expression import Expression
 from twels.expr.pathset import PathSet
 from twels.expr.tree import MathMLTree, get_ro_index
 from twels.utils.utils import print_in_red
@@ -30,12 +31,12 @@ class Parser:
     _lark = get_lark_parser()
 
     @staticmethod
-    def parse(mathml: str) -> set[str]:
+    def parse(expr: Expression) -> set[str]:
         """MathMLを解析する関数．
         Returns:
             PathSet: mathmlを解析して得られたPath Set.
         """
-        tree = __class__.get_parsed_tree(mathml)
+        tree = __class__.get_parsed_tree(expr)
         if tree.data == 'error':
             # 他のexceptionにしたほうがいいかも．
             raise exceptions.LarkError('parse中にエラーが発生しました．')
@@ -49,12 +50,12 @@ class Parser:
         return result
 
     @staticmethod
-    def get_parsed_tree(mathml: str) -> Tree:
+    def get_parsed_tree(expr: Expression) -> Tree:
         """MathMLを分析してTreeを作成する関数．
         例外が発生した場合はTree('error', [])を返す．
         """
         try:
-            parsed_tree = __class__._lark.parse(mathml)
+            parsed_tree = __class__._lark.parse(expr.mathml)
             cleaned_tree = MathMLTree().transform(parsed_tree)
             return cleaned_tree
         except AttributeError as e:
