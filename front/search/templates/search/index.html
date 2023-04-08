@@ -11,21 +11,31 @@
         MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
     </script>
     <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script type="text/javascript" src="{% static 'search/js/uploadImage.js' %}"></script>
 {% endblock head %}
 
 {% block body %}
     <div id="main_content">
         <p id="mathCanvas">数式: <span id="canvas"></span></p>
         <p id="main_form">
-            <input type="text" id="textMath" value=""oninput="inputChange()">
+            <input type="text" id="textMath" value="" oninput="inputChange()">
             <button onclick="submit()">検索</button>
+            <button type="button" onclick="uploadImage()" id="camera">
+                <img src="{% static 'search/images/camera.png' %}" width="30" />
+            </button>
+            <!-- for camera (using mathpix) -->
+            <form id="imageForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="uploadImage" accept="image/*" id="uploadImage" style="display: none">
+            </form>
 
             <div class="tab-panel">
                 <!--タブ-->
                 <ul class="tab-group">
                     <li class="tab tab-A is-active">演算子など</li>
                     <li class="tab tab-B">ギリシャ文字</li>
-                    <li class="tab tab-C">その他</li>
+                    <li class="tab tab-C">行列</li>
+                    <li class="tab tab-D">その他</li>
                 </ul>
                 
                 <!--タブを切り替えて表示するコンテンツ-->
@@ -80,6 +90,20 @@
                         <button class="buttonGroup" onclick="pushString('\\omega ')">\(\omega\)</button>
                     </div>
                     <div class="panel tab-C">
+                        <button class="buttonGroup" onclick="pushString('\\begin{matrix} a & b \\\\ c & d \\\\ \\end{matrix}')">
+                            \begin{matrix} a & b \\ c & d \\ \end{matrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{pmatrix} a & b \\\\ c & d \\\\ \\end{pmatrix}')">
+                            \begin{pmatrix} a & b \\ c & d \\ \end{pmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{bmatrix} a & b \\\\ c & d \\\\ \\end{bmatrix}')">
+                            \begin{bmatrix} a & b \\ c & d \\ \end{bmatrix}
+                        </button>
+                        <button class="buttonGroup" onclick="pushString('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                            \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                        </button>
+                    </div>
+                    <div class="panel tab-D">
                         <button class="buttonGroup" onclick="pushString('\\infty ')">\(\infty\)</button>
                         <button class="buttonGroup" onclick="pushString('\\partial ')">\(\partial\)</button>
                         <button class="buttonGroup" onclick="pushString('\\nabla ')">\(\nabla\)</button>
@@ -222,11 +246,17 @@
         
         var params = getUrlParam();
 
-        // 検索したクエリを入力欄に残す
-        if (params['q'] != null){
+        // 入力欄にqueryを反映
+        {% autoescape off %}
+        let ocr = '{{ ocr }}';
+        {% endautoescape %}
+        if (ocr !== '') {
+            textMath.value = '';
+            textMath.value = ocr;
+        } else if (params['q'] != null) {
             textMath.value = params['q'];
-            inputChange();
         }
+        inputChange();
 
         // 選択した言語を残す
         var param_lr = params['lr'];

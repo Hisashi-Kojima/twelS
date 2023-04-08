@@ -205,3 +205,6 @@ socket/
 
 # logs
 front/logs/
+
+# selenium server log
+/tests/selenium_node/assets/*
