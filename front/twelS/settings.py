@@ -170,10 +170,12 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'),
             'encoding': 'utf-8',
+            'maxBytes': 100000,
+            'backupCount': 10,
         },
         'console': {
             'level': 'INFO',
@@ -186,7 +188,7 @@ LOGGING = {
             # 上で定義したhandlerを選択
             'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
     }
 }

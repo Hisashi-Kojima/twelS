@@ -41,6 +41,12 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
         settings.CSRF_COOKIE_SECURE = False
         settings.SESSION_COOKIE_SECURE = False
 
+        self.assertEqual(self.response.status_code, 200)
+
+        self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
+        self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
+        self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
+        
     # ----tests----
     # ブラウザごとにテストする
 

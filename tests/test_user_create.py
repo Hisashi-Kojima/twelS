@@ -38,10 +38,7 @@ class SuccessfulUserCreateTests(TestCase):
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
         self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
 
-        self.assertEqual(self.response.status_code, 302)
-
-        self.home_url = reverse('login:user_create_done')
-        self.assertRedirects(self.response, self.home_url)
+        self.assertEqual(self.response.status_code, 200)  # URLは変わらずにページを変更するのでstatus_code=200
 
         self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
         self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元

@@ -1,10 +1,10 @@
-from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail as send
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 
 
 def email_validater(email):
@@ -88,6 +88,9 @@ class IPAddress(models.Model):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
+    def __str__(self):
+        return self.user.email
+
 
 class PasswordResetRequest(models.Model):
     email = models.EmailField(_('email address'), unique=True)
@@ -100,6 +103,9 @@ class PasswordResetRequest(models.Model):
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
 
+    def __str__(self):
+        return self.email
+
 
 class UserCreateRequest(models.Model):
     email = models.EmailField(_('email address'), unique=True)
@@ -111,6 +117,9 @@ class UserCreateRequest(models.Model):
         ),
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
 
 
 class EmailUser(AbstractBaseUser):
@@ -149,3 +158,6 @@ class EmailLoginRequest(models.Model):
         ),
     )
     first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
