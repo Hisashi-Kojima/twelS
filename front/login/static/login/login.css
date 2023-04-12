@@ -1,32 +1,11 @@
-
-.forecast a {
-    display:block;
-    text-decoration: none;
-    color: white;
-    background-color: green;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    margin: 5px auto;
-    margin-left: 20px;
-    margin-right: 20px;
-    border-radius: 5px 5px 5px 5px;
-}
-
-.forecast a:hover {
-	background-color: white;
-}
-
-p {
-    text-align: center;
+*{
+    box-sizing: border-box; /* This makes sure that the padding and border are included in the total width and height of the elements. */
 }
 
 button {
     font-weight: bold;
     color: white;
-    background-color: green;
+    background-color: rgb(38, 132, 255);
     margin: 5px auto;
     width: 400px;
     height: 40px;
@@ -35,35 +14,22 @@ button {
 }
 
 button:hover {
-    background-color: white;
+    background-color: rgb(59, 144, 255);
 }
 
-.create {
-    margin-top: 15px;
+button:active {
+    background-color: rgb(53, 124, 218);
 }
 
-.cardGroup{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; 
+button a {
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    display: block;
 }
 
-.forecast {
-    margin: 0;
-    padding: 10px;
-    background-color: #eee;
-    width: 500px;
-    text-align: center;
-    height: 256px;
-    border-radius: 5px 5px 5px 5px;
-    border: solid 1px white;
-}
-
-form > input[type="text"] {
-    font-size: 100%;
-    margin: 10px;
-    padding: 10px;
-    width:400px;
+form > input[type="checkbox"] {
+    margin-top: 20px;
 }
 
 form > input[type="password"] {
@@ -73,8 +39,36 @@ form > input[type="password"] {
     width:400px;
 }
 
-form > input[type="checkbox"] {
-    margin-top: 20px;
+form > input[type="text"] {
+    font-size: 100%;
+    margin: 10px;
+    padding: 10px;
+    width:400px;
+}
+
+p {
+    text-align: center;
+}
+
+.card {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #eee;
+    width: 500px;
+    text-align: center;
+    height: 256px;
+    border-radius: 5px 5px 5px 5px;
+    border: solid 1px white;
+}
+
+.card button {
+    margin-top: 10px;
+}
+
+.cardGroup{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
 }
 
 .form-group input[type="text"] {
@@ -96,13 +90,4 @@ form > input[type="checkbox"] {
     margin: 10px;
     padding: 10px;
     width:200px;
-}
-
-.blueButton {
-    font-weight: bold;
-    color: white;
-    background-color: blue;
-    margin: 5px auto;
-    width: 100px;
-    height: 40px;
 }

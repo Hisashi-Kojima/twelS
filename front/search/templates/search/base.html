@@ -34,13 +34,6 @@
             <li>
                 <a href="{% url 'login:user' user.pk %}">ユーザーページ</a>
             </li>
-
-            {% else %}
-            <li>
-                <a href="{% url 'login:login' %}">
-                ようこそ、ゲスト！ログインはこちら
-                </a>
-            </li>
             {% endif %}
             </ul>
     </nav>
@@ -70,7 +63,7 @@
         justify-content: flex-start;
         align-items: center;
         min-height: 8vh;
-        background-color: green;
+        background-color: #6168FF;
     }
 
     nav a {

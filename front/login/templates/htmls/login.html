@@ -9,9 +9,14 @@
 {% block body %}
 
 <script src="{% static 'login/js/mask_password.js' %}"></script>
+
+<br>
+<h1>ログイン</h1>
+<br>
+
 <div class="cardGroup">
     <!-- 左側、ログインエリア -->
-    <div class="forecast">
+    <div class="card">
             <form action="{% url 'login:login' %}" method="POST">
                 {{ form.non_field_errors }}
                 {% for field in form %}
@@ -28,16 +33,10 @@
     </div>
 
     <!-- 右側、会員登録エリア -->
-    <div class="forecast">
-        <div class="create">
-            <a href="{% url 'login:user_create' %}" >会員登録</a>
-        </div>
-        <div>
-            <a href="{% url 'login:password_reset' %}" >パスワードを忘れた方</a>
-        </div>
-        <div>
-            <a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a>
-        </div>
+    <div class="card">
+        <button><a href="{% url 'login:user_create' %}" >会員登録</a></button>
+        <button><a href="{% url 'login:password_reset' %}" >パスワードを忘れた方</a></button>
+        <button><a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a></button>
     </div>
 </div>
 
