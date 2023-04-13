@@ -639,6 +639,7 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
 
 def test_select_uri_id_and_exprs_from_page_where_uri_1(cursor):
     """Cursor.select_uri_id_and_exprs_from_page_where_uri_1()のテスト．
+    指定したURIが登録されていた場合。
     """
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
     exprs = [Expression('<math>expr1</math>'), Expression('<math>expr2</math>')]
@@ -654,6 +655,16 @@ def test_select_uri_id_and_exprs_from_page_where_uri_1(cursor):
     result_uri_id, result_exprs = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == set(exprs)
+
+
+def test_select_uri_id_and_exprs_from_page_where_uri_2(cursor):
+    """Cursor.select_uri_id_and_exprs_from_page_where_uri_1()のテスト．
+    指定したURIが登録されていなかった場合。
+    """
+    uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
+
+    result_uri_id, result_exprs = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
+    assert result_uri_id is None
 
 
 def test_select_uri_id_from_page_where_uri_1(cursor):

@@ -203,12 +203,15 @@ class Cursor:
         return Info(json.loads(info_str)), expr_len
 
     @staticmethod
-    def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int, set[Expression]]:
+    def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int | None, set[Expression]]:
         cursor.execute('SELECT uri_id, exprs FROM page WHERE uri = %s', (uri,))
         # type(exprs) is bytearray.
-        uri_id, exprs = cursor.fetchone()
-        exprs_str = json.loads(exprs)
-        return uri_id, set(map(Expression, exprs_str))
+        tpl = cursor.fetchone()
+        if tpl is None:
+            return None, set()
+        else:
+            exprs_str = json.loads(tpl[1])
+            return tpl[0], set(map(Expression, exprs_str))
 
     @staticmethod
     def select_uri_id_from_page_where_uri_1(cursor, uri: str) -> int | None:
