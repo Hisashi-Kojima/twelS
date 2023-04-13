@@ -1,17 +1,19 @@
+from datetime import datetime
+import unicodedata
+
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.mail import EmailMultiAlternatives
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import (
     AuthenticationForm, SetPasswordForm
 )
-from django.contrib.auth import get_user_model, password_validation
-from .models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
-import unicodedata
-from django.core.exceptions import ValidationError
-from django.template import loader
-from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
+from django.template import loader
 from django.utils.encoding import force_bytes
-import datetime
+from django.utils.http import urlsafe_base64_encode
+
+from login.models import EmailUser, PasswordResetRequest, UserCreateRequest, EmailLoginRequest
 
 
 User = get_user_model()
@@ -19,43 +21,58 @@ Emailuser = EmailUser
 
 
 def check_request_times(MODEL, email):
+    """リクエストの回数をチェックする関数
+    リクエストの回数が3回のときにValidationErrorが発生する
+    """
     user_request = MODEL.objects.get(email=email)
 
     if user_request.email_request_times < 3:
         user_request.email_request_times += 1
         user_request.save()
-    
+
     else:
         message = """
         3回以上認証に失敗したので，24時間以上経過してからもう一度お試しください.もしくは，22801001@edu.cc.saga-u.ac.jpにご連絡ください.
         """
         raise ValidationError(message)
 
+
 def check_request_date(MODEL, email):
+    """リクエスト回数が1になった時間をチェックする
+    24時間以上経過していた場合リクエストの回数を0にする
+    """
     user_request = MODEL.objects.get(email=email)
 
-    now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-    user_date = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+    now = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-    now =  datetime.datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
-    user_date = datetime.datetime.strptime(user_date, '%Y/%m/%d %H:%M:%S')
-
-    elapsed_time = abs(now - user_date)
-
-
-    if elapsed_time.days > 1:
-        user_request.first_request_date = datetime.datetime.now()
-        user_request.email_request_times = 0
+    if user_request.first_request_date is None:
+        user_request.first_request_date = datetime.now()
         user_request.save()
 
-def check_request(MODEL, email):
-    email_login_request_exist = MODEL.objects.filter(email=email)
+    else:
+        now = datetime.strptime(now, '%Y/%m/%d %H:%M:%S')
+        user_date_str: str = user_request.first_request_date.strftime('%Y/%m/%d %H:%M:%S')
+        user_date: datetime = datetime.strptime(user_date_str, '%Y/%m/%d %H:%M:%S')
 
-    if email_login_request_exist:
+        elapsed_time = abs(now - user_date)
+
+        if elapsed_time.days > 1:
+            user_request.first_request_date = datetime.now()
+            user_request.email_request_times = 0
+            user_request.save()
+
+
+def check_request(MODEL, email):
+    """リクエストのチェックをする関数
+    リクエストが存在しない場合は作成する
+    """
+    request_exist = MODEL.objects.filter(email=email)
+
+    if request_exist:
         check_request_date(MODEL, email)
         check_request_times(MODEL, email)
-    
-    if not email_login_request_exist:
+
+    else:
         MODEL.objects.create(email=email)
         check_request_times(MODEL, email)
 
@@ -123,12 +140,10 @@ class CustomUserCreateForm(forms.ModelForm):
                 "id"
             ] = 'email'
         self.fields['password'].widget.attrs['id'] = 'Password'
-    
+
     def clean_email(self):
         email = self.cleaned_data['email']
         User.objects.filter(email=email, is_active=False).delete()
-
-        check_request(UserCreateRequest, email)
 
         return email
 
@@ -141,6 +156,8 @@ class CustomUserCreateForm(forms.ModelForm):
         if password:
             try:
                 password_validation.validate_password(password, self.instance)
+                email = self.cleaned_data['email']
+                check_request(UserCreateRequest, email)
             except ValidationError as error:
                 self.add_error("password", error)
 
@@ -216,6 +233,9 @@ class CustomPasswordChangeForm(forms.Form):
 
 
 def check_user(email):
+    """パスワードリセット時にユーザーの存在するか確認する関数
+    ユーザーが存在しない場合にValidationErrorが発生する
+    """
     user_exist = User.objects.filter(email=email, is_active=True)
 
     if user_exist:
@@ -355,7 +375,6 @@ class CustomSetPasswordForm(forms.Form):
         if commit:
             self.user.save()
         return self.user
-
 
 
 class EmailLoginForm(forms.ModelForm):

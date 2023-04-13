@@ -11,6 +11,7 @@ from django.shortcuts import render
 from front.twelS.settings import BASE_DIR
 from twels.searcher.searcher import Searcher
 from django.contrib.auth.decorators import login_required
+from twels.mathpix.mathpix import mathocr
 
 
 @login_required
@@ -41,9 +42,22 @@ def index(request: WSGIRequest):
             'page_list': page_list,
             'query': expr,
             'start': str(int(start)+10),
+            'ocr': '',
         }
+
+    elif request.method == 'POST':
+        if request.FILES.get('uploadImage', False):
+            uploadedImage: bytes = request.FILES['uploadImage'].read()
+            ocr = mathocr(uploadedImage)
+            if ocr is not False:
+                ocr: str = ocr.replace('\\', '\\\\')
+                context = {'ocr': ocr}
+            else:
+                context = {'ocr': ' '}
+        else:
+            context = {'ocr': ''}
     else:
-        print('GET以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
+        print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
     return render(request, 'search/index.html', context)
 

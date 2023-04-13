@@ -1,12 +1,10 @@
-from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail as send
 from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.contrib.auth.base_user import BaseUserManager
-from django.core.exceptions import ValidationError
-import datetime
 
 
 def email_validater(email):
@@ -90,6 +88,9 @@ class IPAddress(models.Model):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
+    def __str__(self):
+        return self.user.email
+
 
 class PasswordResetRequest(models.Model):
     email = models.EmailField(_('email address'), unique=True)
@@ -100,7 +101,10 @@ class PasswordResetRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
 
 
 class UserCreateRequest(models.Model):
@@ -112,7 +116,10 @@ class UserCreateRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email
 
 
 class EmailUser(AbstractBaseUser):
@@ -150,4 +157,7 @@ class EmailLoginRequest(models.Model):
             'Designates how many times this user sent email-request for certification'
         ),
     )
-    first_request_date = models.DateTimeField(_('first request date'), default=datetime.datetime.now() ,blank=True, null=True)
+    first_request_date = models.DateTimeField(_('first request date'), blank=True, null=True)
+
+    def __str__(self):
+        return self.email

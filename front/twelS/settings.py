@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     '.eagle4.fu.is.saga-u.ac.jp',
     env('ELASTIC_IP_ADDRESS'),
     env('LB_DNS_NAME'),
+    'testserver',  # for test
 ]
 
 # add Amazon EC2 private IP address to ALLOWED_HOSTS dynamically,
@@ -55,7 +56,7 @@ except requests.exceptions.RequestException:
 # Application definition
 
 INSTALLED_APPS = [
-    'login.apps.LoginConfig', # login
+    'login.apps.LoginConfig',  # login
     'search.apps.SearchConfig',  # my app
     'django.contrib.admin',
     'django.contrib.auth',
@@ -169,10 +170,12 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'),
             'encoding': 'utf-8',
+            'maxBytes': 100000,
+            'backupCount': 10,
         },
         'console': {
             'level': 'INFO',
@@ -185,7 +188,7 @@ LOGGING = {
             # 上で定義したhandlerを選択
             'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
     }
 }
