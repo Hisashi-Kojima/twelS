@@ -62,8 +62,9 @@ class LocalWikiEnSpider(scrapy.Spider):
     custom_settings = settings
 
     norm_path = os.path.normpath(os.path.join(base_path, '../../../web_pages/wiki/en'))
-    # 数学のページを登録
+    # 数学と物理学のページを登録
     target_paths = glob.glob(f'{norm_path}/math/*')
+    # target_paths.extend(glob.glob(f'{norm_path}/physics/*'))
     start_urls = [f'file://{path}' for path in target_paths]
 
     count = 0
