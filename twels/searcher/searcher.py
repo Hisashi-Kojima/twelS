@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 """module description
 """
-
-import html
-
 import latex2mathml.converter
 from lark import exceptions
 
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.database.cursor import Cursor
 from twels.normalizer.normalizer import Normalizer
@@ -35,7 +33,7 @@ class Searcher:
         try:
             mathml = latex2mathml.converter.convert(expr)
             normalized = Normalizer.normalize_subsup(mathml)
-            path_set: set[str] = Parser.parse(html.unescape(normalized))
+            path_set: set[str] = Parser.parse(Expression(normalized))
             print('path_set:', str(path_set))
             with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
                 score_list = Cursor.search(cursor, path_set)

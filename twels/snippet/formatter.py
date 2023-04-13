@@ -23,7 +23,6 @@ class Formatter:
         Returns:
             excerpted_snippet: 抜粋された文章．
         """
-        s = str(snippet)
         snippet_highlighted = ''
         start_pos = 0
         for pos in expr_start_pos:
@@ -32,7 +31,7 @@ class Formatter:
                 break
         end_pos = start_pos + expr_len
         # start_posから先に挿入するとend_posがずれるので，end_posから挿入する．
-        tmp = f'{s[:end_pos]}</span>{s[end_pos:]}'
+        tmp = f'{snippet.text[:end_pos]}</span>{snippet.text[end_pos:]}'
         snippet_highlighted = f'{tmp[:start_pos]}<span class="hl">{tmp[start_pos:]}'
         excerpted_snippet = __class__._excerpt(snippet_highlighted, start_pos)
         return excerpted_snippet
@@ -118,6 +117,6 @@ class Formatter:
         return last_index
 
     @staticmethod
-    def _get_result(snippet: str, result_length: int, last_tail: int):
+    def _get_result(snippet: str, result_length: int, last_tail: int) -> str:
         extra = __class__.excerpt_len - result_length
         return snippet[:last_tail+extra] + __class__.omit_str

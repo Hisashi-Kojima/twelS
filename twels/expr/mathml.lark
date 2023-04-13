@@ -40,7 +40,7 @@ _more_atom: (_mul | div) atom
      | mtext
 
 // this priority is higher than _mo.
-cdots.-1: "<mo" _attr* ">" ("&#x22EF;" | "&#x022EF;") "</mo>"
+cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
 
 // this priority is lower than atom.
 _mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
@@ -76,16 +76,16 @@ mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
 
-_add: _open ("+" | "&#x0002B;") _close
-subtract: _open ("-" | "&#x02212;" | "&#x2212;") _close
-_mul: _open ("*" | "×" | "&#x0002A;" | "&#x22C5;") _close  // &#x22C5; is '⋅'.
-div: _open ("/" | "÷" | "&#x0002F;") _close
-equal: _open ("=" | "&#x0003D;") _close
-less: _open ("<" | "&lt;" | "&#x0003C;") _close
-greater: _open (">" | "&gt;" | "&#x0003E;") _close
-in: _open ("∈" | "&#x2208;") _close
-_left_paren: _open ("&#x00028;" | "(") _close
-_right_paren: _open ("&#x00029;" | ")") _close
+_add: _open "+" _close
+subtract: _open ("−" | "-") _close
+_mul: _open ("*" | "×" | "⋅") _close
+div: _open ("/" | "÷") _close
+equal: _open "=" _close
+less: _open ("<" | "&lt;") _close
+greater: _open (">" | "&gt;") _close
+in: _open "∈" _close
+_left_paren: _open "(" _close
+_right_paren: _open ")" _close
 
 ?relational_operator: equal
                     | less

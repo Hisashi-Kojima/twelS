@@ -5,6 +5,7 @@
 from lark import Tree, Token
 import latex2mathml.converter
 
+from twels.expr.expression import Expression
 from twels.expr.tree import MathMLTree
 from twels.expr.parser import get_lark_parser
 from twels.expr.parser_const import ParserConst
@@ -23,7 +24,8 @@ def test_mathmlTree_1():
                         </mrow>
                     </semantics>
                 </math>"""
-    parsed_tree = parser.parse(mathml)
+    expr = Expression(mathml)
+    parsed_tree = parser.parse(expr.mathml)
     cleaned_tree = MathMLTree().transform(parsed_tree)
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
@@ -35,7 +37,8 @@ def test_mathmlTree_2():
     """cdotsのテスト"""
     parser = get_lark_parser()
     mathml = latex2mathml.converter.convert(r'0.999\cdots ')
-    parsed_tree = parser.parse(mathml)
+    expr = Expression(mathml)
+    parsed_tree = parser.parse(expr.mathml)
     cleaned_tree = MathMLTree().transform(parsed_tree)
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])

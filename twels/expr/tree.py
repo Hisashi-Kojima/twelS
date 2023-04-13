@@ -101,12 +101,57 @@ class MathMLTree(Transformer):
             table.append(_get_tr(nodes[i], i))
         return Tree(ParserConst.table_data, table)
 
+    def expr(self, children: list):
+        """
+        Tree(ParserConst.expr_data, [
+            Token(ParserConst.token_type, 'i'),
+            Tree(ParserConst.equal_data, []),
+            Token(ParserConst.token_type, '1')
+        ])
+        を
+        Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'i'),
+                Token(ParserConst.token_type, '1')
+            ])
+        に変形する。
+        """
+        ro_index_list = get_ro_index(children)
+
+        if len(ro_index_list) == 1 and ro_index_list[0] == 1 and len(children) == 3:
+            # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
+            # remove ParserConst.root_data
+            ro_tree = children[ro_index_list[0]]
+            if ro_tree.data in ParserConst.ro_commutative:
+                return Tree(ro_tree.data, [
+                    children[0],
+                    children[2]
+                ])
+            elif ro_tree.data in ParserConst.ro_non_commutative:
+                return Tree(ro_tree.data, [
+                    Tree('#0', [children[0]]),
+                    Tree('#1', [children[2]])
+                ])
+            else:
+                return Tree(ParserConst.expr_data, children)
+        else:
+            return Tree(ParserConst.expr_data, children)
+
     def __default__(self, data, children, meta):
         """Default funciton that is called if there is no attribute matching 'data'."""
         return Tree(data, children, meta)
 
 
 # ************** functions ******************
+def get_ro_index(children: list) -> list[int]:
+    """Treeのchildrenに含まれるrelational operatorのindexのリストを返す関数．
+    """
+    result = []
+    for i, child in enumerate(children):
+        if (isinstance(child, Tree)) and (child.data in ParserConst.relational_operators):
+            result.append(i)
+    return result
+
+
 def _insert_pseudo_num(nodes: list) -> list:
     """引数の順番の情報を追加する関数"""
     return [_get_pseudo_tree(i, node) for i, node in enumerate(nodes)]
