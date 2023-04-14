@@ -5,6 +5,7 @@ from django.core import mail
 from django.test.utils import override_settings
 from login.models import IPAddress
 from datetime import datetime
+from django.db.models.query import QuerySet
 
 
 User = get_user_model()
@@ -15,42 +16,48 @@ class IPTests(TestCase):
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
     def setUp(self):
         """ログインするユーザーを作成"""
-        url = reverse('login:user_create')
+        user_create_url = reverse('login:user_create')
         data = {
             'email': 'test@edu.cc.saga-u.ac.jp',
             'password': 'TestPass1',
         }
+        self.origin = 'http://127.0.0.1:8000'
+        self.client_ip = '127.0.0.2'
         # The headers sent via **extra should follow CGI specification.
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
-        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000', REMOTE_ADDR='127.0.0.1')
+        self.response = self.client.post(user_create_url, data, HTTP_ORIGIN=self.origin, REMOTE_ADDR=self.client_ip)
+
         body_lines = mail.outbox[0].body.split('\n')
         url = body_lines[6]  # メール本文から認証urlを取得
-        self.response = self.client.get(url)
-        self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))
+        self.response = self.client.get(url, REMOTE_ADDR=self.client_ip)
 
-        user = User.objects.get(email='test@edu.cc.saga-u.ac.jp')
-        user_ip = IPAddress.objects.get(user=user, ip_address='127.0.0.1')
-        self.assertTrue(user_ip)
+        self.assertRedirects(self.response, reverse('search:index'))  # 自動でログインされるのでindexにリダイレクトされるか確認
+        self.assertEqual(self.response.status_code, 302)
 
-    def test_known_ip(self):
-        """既知のIPでログインしたときのテスト
-        IPAdressのデータが更新されることを確認"""
-        self.response = self.client.get(reverse('login:login'))
-        self.assertEqual(self.response.status_code, 200)
+        self.user = User.objects.get(email='test@edu.cc.saga-u.ac.jp', is_active=True)
+        self.assertTrue(self.user)  # ユーザー登録終わり
+        self.assertEqual(len(IPAddress.objects.filter(user=self.user, ip_address=self.client_ip)), 1)  # IPアドレスが保存されることを確認
 
-        url = reverse('login:login')
-        data = {
+        self.client.get(reverse('login:logout'), REMOTE_ADDR=self.client_ip)
+
+        self.login_url = reverse('login:login')
+        self.login_data = {
             'username': 'test@edu.cc.saga-u.ac.jp',
             'password': 'TestPass1',
         }
+
+    def test_registered_ip(self):
+        """登録しているIPでログインしたときのテスト
+        IPAddressのデータが更新されることを確認"""
         # The headers sent via **extra should follow CGI specification.
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する\
-        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000', REMOTE_ADDR='127.0.0.1')
+        self.response = self.client.post(self.login_url, self.login_data, HTTP_ORIGIN=self.origin, REMOTE_ADDR=self.client_ip)
 
-        user = User.objects.get(email='test@edu.cc.saga-u.ac.jp')
-        self.assertEqual(len(IPAddress.objects.filter(user=user, ip_address='127.0.0.1')), 1)  # 同じメールアドレス・IPのデータが複数作られないか確認
+        user_ip_set: QuerySet = IPAddress.objects.filter(user=self.user, ip_address=self.client_ip)
 
-        user_ip = IPAddress.objects.get(user=user, ip_address='127.0.0.1')
+        self.assertEqual(len(user_ip_set), 1)  # 同じメールアドレス・IPのデータが複数作られないか確認
+
+        user_ip = user_ip_set[0]
         now_str: str = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         now: datetime = datetime.strptime(now_str, '%Y/%m/%d %H:%M:%S')
         user_date_str: str = user_ip.last_access.strftime('%Y/%m/%d %H:%M:%S')
@@ -60,24 +67,16 @@ class IPTests(TestCase):
         elapsed_time_seconds: int = int(elapsed_time.total_seconds())
         self.assertLess(elapsed_time_seconds, 1)  # 最後のアクセスが現在から1秒未満であることを確認
 
-    def test_unknown_ip(self):
-        """未知のIPでログインしたときのテスト
+    def test_new_ip(self):
+        """登録されていないIPでログインしたときのテスト
         警告メールが送信されることを確認する"""
-        self.response = self.client.get(reverse('login:login'))
-        self.assertEqual(self.response.status_code, 200)
-
-        url = reverse('login:login')
-        data = {
-            'username': 'test@edu.cc.saga-u.ac.jp',
-            'password': 'TestPass1',
-        }
+        client_new_ip = '127.0.0.3'
         # The headers sent via **extra should follow CGI specification.
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する\
-        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000', REMOTE_ADDR='127.0.0.2')
+        self.response = self.client.post(self.login_url, self.login_data, HTTP_ORIGIN=self.origin, REMOTE_ADDR=client_new_ip)
 
-        user = User.objects.get(email='test@edu.cc.saga-u.ac.jp')
-        user_ip = IPAddress.objects.get(user=user, ip_address='127.0.0.2')
+        user_ip = IPAddress.objects.get(user=self.user, ip_address=client_new_ip)  # IPが保存されることを確認
         self.assertTrue(user_ip)
 
-        email_ip = mail.outbox[1].body.split('\n')[3]
-        self.assertIn('127.0.0.2', email_ip)
+        text_include_ip = mail.outbox[1].body.split('\n')[3]
+        self.assertIn(client_new_ip, text_include_ip)  # 警告メールが送信されることを確認

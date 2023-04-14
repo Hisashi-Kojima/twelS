@@ -10,6 +10,7 @@ from django.contrib.auth.views import (
 )
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -170,6 +171,20 @@ class UserCreateComplete(generic.TemplateView):
                 user = User.objects.get(pk=user_pk)
                 UserCreateRequest.objects.filter(email=user.email).delete()  # リクエストを削除する．
 
+                current_ip = get_ip(self.request)
+
+                ip_set: QuerySet = IPAddress.objects.filter(user=user, ip_address=current_ip)
+
+                if not ip_set:
+                    # 未知のIPアドレスの場合はIPアドレスを登録する
+                    IPAddress.objects.create(user=user, ip_address=current_ip)
+                
+                else:
+                    # 既知のIPアドレスの場合は最後にアクセスした日時を更新する
+                    ip_address = ip_set[0]
+                    ip_address.last_access = timezone.now()
+                    ip_address.save()
+
             except Exception as e:
                 logger.error(f'{e} in user_create')
                 return render(request, 'htmls/token_error.html', status=401)
@@ -180,7 +195,7 @@ class UserCreateComplete(generic.TemplateView):
                     # 問題なければ本登録とする
                     user.is_active = True
                     user.save()
-                login(self.request, user)
+                login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('search:index')
 
 
