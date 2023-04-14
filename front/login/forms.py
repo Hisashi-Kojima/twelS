@@ -1,3 +1,11 @@
+"""CustomUserCreateFormはdjango.contrib.auth.forms.BaseUserCreationFormをもとにしている.
+メールアドレス，パスワードのバリデーションやリクエストの確認をする変更をしている．
+MyPasswordResetFormはdjango.contrib.auth.forms.PasswordResetFormをもとにしている.
+ユーザーが存在するかの確認やメール送信などの変更をしている．
+CustomSetPasswordFormはdjango.contrib.auth.forms.SetPasswordFormをもとにしている.
+確認用パスワードの入力が不要になるように修正している．
+"""
+
 from datetime import datetime
 import unicodedata
 
