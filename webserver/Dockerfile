@@ -1,4 +1,4 @@
-FROM nginx:1.23.3
+FROM nginx:1.23.4
 
 # staticファイルはNginxのコンテナに置く必要がある．
 RUN mkdir -p /front/static/

@@ -265,6 +265,100 @@ def test_update_index_and_path_table_2():
         reset_tables()
 
 
+def test_update_index_and_path_table_3():
+    """Indexer._update_index_and_path_table()のテスト．
+    <mspace>を含むMathMLがエラーにならないことを確認。
+    """
+    try:
+        uri_1 = 'uri_1'
+        title = 'title'
+        lang = 'ja'
+        mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}">
+                        <semantics>
+                            <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mfrac>
+                                    <mrow>
+                                    <mspace width="thickmathspace" />
+                                    <mrow class="MJX-TeXAtom-ORD">
+                                        <mstyle displaystyle="true" scriptlevel="0">
+                                        <mfrac>
+                                            <mi>a</mi>
+                                            <mi>b</mi>
+                                        </mfrac>
+                                        </mstyle>
+                                    </mrow>
+                                    <mspace width="thickmathspace" />
+                                    </mrow>
+                                    <mrow>
+                                    <mspace width="thickmathspace" />
+                                    <mrow class="MJX-TeXAtom-ORD">
+                                        <mstyle displaystyle="true" scriptlevel="0">
+                                        <mfrac>
+                                            <mi>c</mi>
+                                            <mi>d</mi>
+                                        </mfrac>
+                                        </mstyle>
+                                    </mrow>
+                                    <mspace width="thickmathspace" />
+                                    </mrow>
+                                </mfrac>
+                                </mrow>
+                            </mstyle>
+                            </mrow>
+                            <annotation encoding="application/x-tex">{\displaystyle {\frac {\;{\dfrac {a}{b}}\;}{\;{\dfrac {c}{d}}\;}}}</annotation>
+                        </semantics>
+                    </math>"""
+        body = f"""
+        {mathml}は数式です。
+        """
+        snippet = Snippet(body)
+        expr = Expression(mathml)
+        exprs = [expr]
+
+        page_item_1 = Page(uri=uri_1, title=title, snippet=snippet, lang=lang, exprs=exprs)
+        page_info_1 = ItemAdapter(page_item_1)
+
+        # page tableへの登録
+        uri_id, registered_exprs = Indexer._update_page_table(page_info_1, test=True)
+        assert registered_exprs == set()
+
+        Indexer._update_index_and_path_table(uri_id, registered_exprs, page_info_1, test=True)
+
+        with Cursor.connect(test=True) as cnx:
+            with Cursor.cursor(cnx) as cursor:
+                cursor.execute('SELECT * FROM inverted_index WHERE expr = %s', (expr.mathml,))
+                inverted_index_result = cursor.fetchone()
+                cursor.execute('SELECT expr_path FROM path_dictionary')
+                path_dict_result = cursor.fetchall()
+
+        expr_id = inverted_index_result[0]
+        actual_expr = inverted_index_result[1]
+        actual_expr_len = inverted_index_result[2]
+        actual_info = Info(json.loads(inverted_index_result[4]))
+        actual_paths = set([path_dict_result[i][0] for i in range(len(path_dict_result))])
+
+        expr_start_pos_list = [
+            [0]
+        ]
+        expected_info = Info({
+            'uri_id': [str(uri_id)],
+            'lang': [lang],
+            'expr_start_pos': expr_start_pos_list
+        })
+        expected_paths = Parser.parse(expr)
+
+        assert type(expr_id) == int
+        assert actual_expr == expr.mathml
+        assert actual_expr_len == len(expr.mathml)
+        assert str(actual_info) == str(expected_info)
+        assert actual_paths == expected_paths
+
+    finally:
+        reset_tables()
+
+
 def test_update_db_1():
     """Indexer.update_db()のテスト．
     inverted_index tableについて，あるexpr_idで複数のuri_idが登録されるか確認するテスト．
