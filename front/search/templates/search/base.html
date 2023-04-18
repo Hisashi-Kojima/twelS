@@ -26,23 +26,16 @@
     <!-- navi -->
     <nav>
         <a class="logo" href="{% url 'search:index' %}">twelS</a>
-            <ul class="nav-links">
-            {% if user.is_authenticated %}
+        <ul class="nav-links">
+        {% if user.is_authenticated %}
             <li>
                 <a href="{% url 'login:logout' %}">ログアウト</a>
             </li>
             <li>
                 <a href="{% url 'login:user' user.pk %}">ユーザーページ</a>
             </li>
-
-            {% else %}
-            <li>
-                <a href="{% url 'login:login' %}">
-                ようこそ、ゲスト！ログインはこちら
-                </a>
-            </li>
-            {% endif %}
-            </ul>
+        {% endif %}
+        </ul>
     </nav>
 
     <div>
@@ -70,7 +63,7 @@
         justify-content: flex-start;
         align-items: center;
         min-height: 8vh;
-        background-color: green;
+        background-color: #6168FF;
     }
 
     nav a {

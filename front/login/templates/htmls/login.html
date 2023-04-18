@@ -8,10 +8,13 @@
 
 {% block body %}
 
-<script src="{% static 'login/js/mask_password.js' %}"></script>
+<br>
+<h1>ログイン</h1>
+<br>
+
 <div class="cardGroup">
     <!-- 左側、ログインエリア -->
-    <div class="forecast">
+    <div class="card">
             <form action="{% url 'login:login' %}" method="POST">
                 {{ form.non_field_errors }}
                 {% for field in form %}
@@ -21,23 +24,25 @@
                 {% endfor %}
                 <!-- An element to toggle between password visibility -->
                 <input type="checkbox" onclick="mask_password()">Show Password
-                <button>ログイン</button>
+                <div><button class="button-wide">ログイン</button></div>
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% csrf_token %}
             </form>
     </div>
 
     <!-- 右側、会員登録エリア -->
-    <div class="forecast">
-        <div class="create">
+    <div class="card">
+        <!-- buttonをinline-blockからblockに変更するためにdivを付与。 -->
+        <!-- buttonを縦に並べたい。 -->
+        <div><button class="button-wide">
             <a href="{% url 'login:user_create' %}" >会員登録</a>
-        </div>
-        <div>
+        </button></div>
+        <div><button class="button-wide">
             <a href="{% url 'login:password_reset' %}" >パスワードを忘れた方</a>
-        </div>
-        <div>
+        </button></div>
+        <div><button class="button-wide">
             <a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a>
-        </div>
+        </button></div>
     </div>
 </div>
 
@@ -56,4 +61,6 @@
     小嶋 恒<br>
     までご連絡ください。
 </p>
+
+<script src="{% static 'login/js/mask_password.js' %}"></script>
 {% endblock body %}
