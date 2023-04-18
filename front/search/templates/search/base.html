@@ -26,16 +26,16 @@
     <!-- navi -->
     <nav>
         <a class="logo" href="{% url 'search:index' %}">twelS</a>
-            <ul class="nav-links">
-            {% if user.is_authenticated %}
+        <ul class="nav-links">
+        {% if user.is_authenticated %}
             <li>
                 <a href="{% url 'login:logout' %}">ログアウト</a>
             </li>
             <li>
                 <a href="{% url 'login:user' user.pk %}">ユーザーページ</a>
             </li>
-            {% endif %}
-            </ul>
+        {% endif %}
+        </ul>
     </nav>
 
     <div>

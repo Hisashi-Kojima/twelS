@@ -7,7 +7,7 @@ button {
     color: white;
     background-color: rgb(38, 132, 255);
     margin: 5px auto;
-    width: 400px;
+    min-width: 100px;
     height: 40px;
     border-radius:5px;
     border: none; 
@@ -32,22 +32,26 @@ form > input[type="checkbox"] {
     margin-top: 20px;
 }
 
-form > input[type="password"] {
+form > input[type="text"],input[type="password"] {
     font-size: 100%;
     margin: 10px;
     padding: 10px;
-    width:400px;
-}
-
-form > input[type="text"] {
-    font-size: 100%;
-    margin: 10px;
-    padding: 10px;
-    width:400px;
+    width: 400px;
 }
 
 p {
     text-align: center;
+}
+
+.button-wide {
+    font-weight: bold;
+    color: white;
+    background-color: rgb(38, 132, 255);
+    margin: 5px auto;
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+    border: none; 
 }
 
 .card {
@@ -71,23 +75,16 @@ p {
     justify-content: center; 
 }
 
-.form-group input[type="text"] {
+.form-group input[type="text"],input[type="email"] {
     font-size: 100%;
     margin: 10px;
     padding: 10px;
-    width:400px;
-}
-
-.form-group input[type="email"] {
-    font-size: 100%;
-    margin: 10px;
-    padding: 10px;
-    width:400px;
+    width: 400px;
 }
 
 .form-group input[type="password"] {
     font-size: 100%;
     margin: 10px;
     padding: 10px;
-    width:200px;
+    width: 200px;
 }
