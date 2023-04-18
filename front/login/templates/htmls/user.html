@@ -7,17 +7,13 @@
 {% endblock head %}
 
 {% block body %}
-<table class="table">
-    <br>
-    <h2>アカウント情報</h2>
-    <br><br>
-    <p>メールアドレス</p>
-    <p>{{ user.email }}</p>
-    <br><br>
-    <div><button class="button-wide">
-        <a href="{% url 'login:password_change' %}" >パスワード変更</a>
-    </button></div>
-
-
-</table>
+<br>
+<h2>アカウント情報</h2>
+<br><br>
+<p>メールアドレス</p>
+<p>{{ user.email }}</p>
+<br><br>
+<div><button class="button-wide">
+    <a href="{% url 'login:password_change' %}" >パスワード変更</a>
+</button></div>
 {% endblock body %}
