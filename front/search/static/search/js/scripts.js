@@ -37,7 +37,6 @@ function getUrlParam(){
 function reflectLRParam(param_lr){
     if (param_lr != null){
         let checkbox_lr = document.getElementsByName("lr");
-        console.log(param_lr);
         if (Array.isArray(param_lr)){
             for (let i = 0; i < checkbox_lr.length; i++){
                 checkbox_lr[i].checked = (param_lr.includes(checkbox_lr[i].value));
@@ -56,6 +55,20 @@ function reflectLRParam(param_lr){
  */
 function renderMath(canvas){
     MathJax.typeset([canvas]);
+}
+
+/** 
+ * formのsubmit前にクエリを処理する関数。
+ */
+function preProcess(){
+    let form = document.getElementById('mainForm');
+    form.action = '.';
+    form.method = 'GET';
+
+    form.q.value = makeQueryString(form.q.value);
+
+    const lr = document.getElementById("lang");
+    form.appendChild(lr);
 }
 
 /** 
@@ -121,31 +134,6 @@ function insertExpr(expr){
     text.setSelectionRange(caretIndex, caretIndex);
 
     inputChange();
-}
-
-/** 
- * formをsubmitする関数。
- */
-function submit(){
-    let form = document.createElement('form');
-    form.action = '.';
-    form.method = 'GET';
-
-    const inputText = document.getElementById("inputText");
-
-    let q = document.createElement('input');
-    q.value = makeQueryString(inputText.value);
-    q.name = 'q';
-    q.type = 'hidden';
-    q.formenctype = 'text/plain';
-    form.appendChild(q);
-
-    const lr = document.getElementById("lang");
-    form.appendChild(lr);
-
-    document.body.appendChild(form);
-
-    form.submit();
 }
 
 

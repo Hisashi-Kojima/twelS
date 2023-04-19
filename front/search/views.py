@@ -21,15 +21,15 @@ def index(request: WSGIRequest):
     if request.method == 'GET':
         page_list: list[dict] = []
 
-        expr: str | None = request.GET.get('q')
+        query: str | None = request.GET.get('q')
         start: str | None = request.GET.get('start')
         lr_list: list[str] = request.GET.getlist('lr')
         # 検索時
-        if expr is not None and expr != '':
+        if query:
             start_time = time.time()
             if start is None:
                 start = '0'
-            result = Searcher.search(expr, int(start), lr_list)
+            result = Searcher.search(query, int(start), lr_list)
             page_list: list[dict] = result['search_result']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
@@ -40,10 +40,11 @@ def index(request: WSGIRequest):
 
         context = {
             'page_list': page_list,
-            'query': expr,
+            'query': query,
             'start': str(int(start)+10),
             'ocr': '',
         }
+        return render(request, 'search/index.html', context)
 
     elif request.method == 'POST':
         if request.FILES.get('uploadImage', False):
@@ -56,10 +57,12 @@ def index(request: WSGIRequest):
                 context = {'ocr': ' '}
         else:
             context = {'ocr': ''}
+        return render(request, 'search/index.html', context)
+
     else:
         print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
-    return render(request, 'search/index.html', context)
+        return render(request, 'search/index.html', context)
 
 
 @login_required

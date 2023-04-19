@@ -84,7 +84,7 @@ label input:checked + span {
     font-size: 140%;
 }
 
-#main_form > button{
+#mainForm > input[type="submit"]{
     font-size: 120%;
     border-radius: 5px;
     background-color: rgb(38, 132, 255);
@@ -95,11 +95,11 @@ label input:checked + span {
     left: -5px;
     top: -2px;
 }
-#main_form > button:hover{
+#mainForm > input[type="submit"]:hover{
     background-color: rgb(59, 144, 255);
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
 }
-#main_form > button:active{
+#mainForm > input[type="submit"]:active{
     background-color: rgb(53, 124, 218);
 }
 
