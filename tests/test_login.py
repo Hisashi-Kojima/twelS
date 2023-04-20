@@ -32,10 +32,12 @@ class SuccessfulLoginTests(TestCase):
             'email': 'test@edu.cc.saga-u.ac.jp',
             'password': 'TestPass1',
         }
-        self.response = self.client.post(url, data)
+        # The headers sent via **extra should follow CGI specification.
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
+        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
         body_lines = mail.outbox[0].body.split('\n')
-        url = body_lines[6]  # メール本文から認証urlを取得
-        self.response = self.client.get(url)
+        auth_url = body_lines[6]  # メール本文から認証urlを取得
+        self.response = self.client.get(auth_url)
 
         self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))
         self.client.get(reverse('login:logout'))  # ユーザー登録時に自動的にログインされるのでログアウト
