@@ -1,19 +1,19 @@
 {% extends "search/base.html" %}
+{% load static %}
 
 {% block head %}
 <title>ユーザー情報</title>
+<link href="{% static 'login/login.css' %}" rel="stylesheet">
 {% endblock head %}
 
 {% block body %}
-<table class="table">
-    <tbody>
-        <tr>
-            <th>ユーザー名</th>
-            <td>{{ user.email }}</td>
-        </tr>
-    </tbody>
-    <a class="btn btn-primary btn-lg" href="{% url 'login:password_change' %}">パスワード変更</a>
-
-
-</table>
+<br>
+<h2>アカウント情報</h2>
+<br><br>
+<p>メールアドレス</p>
+<p>{{ user.email }}</p>
+<br><br>
+<div><button class="button-wide">
+    <a href="{% url 'login:password_change' %}" >パスワード変更</a>
+</button></div>
 {% endblock body %}

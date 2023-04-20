@@ -3,14 +3,18 @@
 
 {% block head %}
 <title>ログイン</title>
+<link href="{% static 'login/login.css' %}" rel="stylesheet">
 {% endblock head %}
 
 {% block body %}
-<script src="{% static 'login/js/mask_password.js' %}"></script>
-<div class="row">
+
+<br>
+<h1>ログイン</h1>
+<br>
+
+<div class="cardGroup">
     <!-- 左側、ログインエリア -->
-    <div class="card col-md-6">
-        <div class="card-body">
+    <div class="card">
             <form action="{% url 'login:login' %}" method="POST">
                 {{ form.non_field_errors }}
                 {% for field in form %}
@@ -20,21 +24,26 @@
                 {% endfor %}
                 <!-- An element to toggle between password visibility -->
                 <input type="checkbox" onclick="mask_password()">Show Password
-                <button type="submit" class="btn btn-success btn-lg btn-block" >ログイン</button>
+                <div><button class="button-wide">ログイン</button></div>
                 <input type="hidden" name="next" value="{{ next }}" />
                 {% csrf_token %}
             </form>
-        </div>
-    </div><!-- 左側、ログインエリアおわり -->
+    </div>
 
     <!-- 右側、会員登録エリア -->
-    <div class="card col-md-6">
-        <div class="card-body">
-            <a href="{% url 'login:user_create' %}" class="btn btn-success btn-lg btn-block" >会員登録</a>
-            <a href="{% url 'login:password_reset' %}" class="btn btn-success btn-lg btn-block" >パスワードを忘れた方</a>
-            <a href="{% url 'login:email_login' %}" class="btn btn-success btn-lg btn-block" >メールアドレスでのログイン</a>
-        </div>
-    </div><!-- 右側、会員登録エリアおわり -->
+    <div class="card">
+        <!-- buttonをinline-blockからblockに変更するためにdivを付与。 -->
+        <!-- buttonを縦に並べたい。 -->
+        <div><button class="button-wide">
+            <a href="{% url 'login:user_create' %}" >会員登録</a>
+        </button></div>
+        <div><button class="button-wide">
+            <a href="{% url 'login:password_reset' %}" >パスワードを忘れた方</a>
+        </button></div>
+        <div><button class="button-wide">
+            <a href="{% url 'login:email_login' %}" >メールアドレスでのログイン</a>
+        </button></div>
+    </div>
 </div>
 
 <p>
@@ -52,4 +61,6 @@
     小嶋 恒<br>
     までご連絡ください。
 </p>
+
+<script src="{% static 'login/js/mask_password.js' %}"></script>
 {% endblock body %}

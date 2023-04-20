@@ -3,6 +3,7 @@
 
 {% block head %}
 <title>会員登録</title>
+<link href="{% static 'login/login.css' %}" rel="stylesheet">
 {% endblock head %}
 
 {% block body %}
@@ -19,7 +20,7 @@
     <!-- An element to toggle between password visibility -->
     <input type="checkbox" onclick="mask_password()">Show Password
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary btn-lg">送信</button>
+    <button>送信</button>
 </form>
 
 {% endblock body %}
