@@ -141,7 +141,6 @@ class UserCreate(generic.CreateView):
 
 class UserCreateComplete(generic.TemplateView):
     """メール内URLアクセス後のユーザー本登録"""
-    template_name = 'htmls/user_create_complete.html'
     timeout_seconds = getattr(settings, 'ACTIVATION_TIMEOUT_SECONDS', 60*60*24)  # デフォルトでは1日以内
 
     def get(self, request, **kwargs):
@@ -178,7 +177,7 @@ class UserCreateComplete(generic.TemplateView):
                 if not ip_set:
                     # 未知のIPアドレスの場合はIPアドレスを登録する
                     IPAddress.objects.create(user=user, ip_address=current_ip)
-                
+
                 else:
                     # 既知のIPアドレスの場合は最後にアクセスした日時を更新する
                     ip_address = ip_set[0]
@@ -315,7 +314,6 @@ class EmailLogin(generic.FormView):
 
 
 class EmailLoginComplete(generic.TemplateView):
-    template_name = 'htmls/email_login_complete.html'
     timeout_seconds = getattr(settings, 'ACTIVATION_TIMEOUT_SECONDS', 60*5)  # デフォルトでは5分以内
 
     def get(self, request, **kwargs):
@@ -347,14 +345,13 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.email_request_times = 0
                 email_request.save()
 
-            except Emailuser.DoesNotExist:
-                logger.error('email_user not exist in email_login')
+            except Exception as e:
+                logger.error(f'{e} in email_login')
                 return render(request, 'htmls/token_error.html', status=401)
             else:
-                if not emailuser.is_active:
-                    # 問題なければ本登録とする
-                    emailuser.is_active = True
-                    emailuser.save()
-                    login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
-                    return super().get(request, **kwargs)
+                # 問題なければログインとする
+                emailuser.is_active = True
+                emailuser.save()
+                login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
+                return redirect('search:index')
         return render(request, 'htmls/token_error.html', status=401)
