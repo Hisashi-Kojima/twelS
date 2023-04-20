@@ -2,33 +2,31 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
-from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 
 User = get_user_model()
 
 
-class UserCreateTest(TestCase):
+class LoginTest(TestCase):
     def setUp(self) -> None:
-        self.response = self.client.get(reverse('login:user_create'))
+        self.response = self.client.get(reverse('search:index'))
+        self.assertEqual(self.response.status_code, 302)
+        self.response = self.client.get(reverse('login:login'))
 
     def test_user_create_status_code(self):
         """ステータスコード200を確認"""
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_csrf(self):
         """csrfトークンを含むこと"""
         self.assertContains(self.response, 'csrfmiddlewaretoken')
 
 
-class SuccessfulUserCreateTests(TestCase):
-    """ユーザー登録成功時のテスト"""
-    def setUp(self):
-        user = User.objects.filter(email="test@edu.cc.saga-u.ac.jp")
-        self.assertQuerysetEqual(user, [])
-
+class SuccessfulLoginTests(TestCase):
+    """ログイン成功時のテスト"""
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
-    def test_user_create(self):
+    def setUp(self):
+        """ログインするユーザーを作成"""
         url = reverse('login:user_create')
         data = {
             'email': 'test@edu.cc.saga-u.ac.jp',
@@ -37,19 +35,24 @@ class SuccessfulUserCreateTests(TestCase):
         # The headers sent via **extra should follow CGI specification.
         # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
         self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
-
-        self.assertEqual(self.response.status_code, 200)  # URLは変わらずにページを変更するのでstatus_code=200
-
-        self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
-        self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
-        self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
-
         body_lines = mail.outbox[0].body.split('\n')
         url = body_lines[6]  # メール本文から認証urlを取得
-
-        self.assertIn('http://127.0.0.1:8000/login/user_create/complete/', url)
-
         self.response = self.client.get(url)
 
-        self.assertEqual(self.response.status_code, 200)
         self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))
+
+    def test_login(self):
+        self.response = self.client.get(reverse('login:login'))
+        self.assertEqual(self.response.status_code, 200)
+
+        url = reverse('login:login')
+        data = {
+            'username': 'test@edu.cc.saga-u.ac.jp',
+            'password': 'TestPass1',
+        }
+        # The headers sent via **extra should follow CGI specification.
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する\
+        self.response = self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
+
+        self.assertRedirects(self.response, reverse('search:index'))
+        self.assertEqual(self.response.status_code, 302)

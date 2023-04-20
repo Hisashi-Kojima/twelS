@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 from scrapy.utils.httpobj import urlparse
 
+from twels.expr.expression import Expression
 from twels.snippet.snippet import Snippet
 
 
@@ -36,11 +37,11 @@ def get_domain_from_uri(uri: str) -> str:
     return f'{parseResult.scheme}://{parseResult.netloc}'
 
 
-def get_exprs(response) -> list[str]:
+def get_exprs(response) -> list[Expression]:
     """ページの式のリストを返す関数．"""
     result = []
     for mathml in response.xpath('//math').getall():
-        result.append(Snippet.clean(mathml))
+        result.append(Expression(mathml))
 
     # 数式が重複している場合に重複している数式を削除する。
     return list(set(result))

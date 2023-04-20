@@ -2,8 +2,11 @@ version: '3'
 
 services:
   python:
+    command: >
+      sh -c '
+        /bin/sh
+      '
     volumes: 
-      - ./front:/code/front  # TODO: frontをvolumeする必要があるか確認．
       - ./web_crawler:/code/web_crawler
     tty: true
 

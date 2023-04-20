@@ -10,6 +10,7 @@ from pathlib import Path
 import environ
 import mysql.connector
 
+from twels.expr.expression import Expression
 from twels.indexer.info import Info
 from twels.snippet.snippet import Snippet
 
@@ -61,11 +62,11 @@ class Cursor:
         cursor.execute(query, data)
 
     @staticmethod
-    def delete_from_inverted_index_where_expr_1(cursor, expr: str):
+    def delete_from_inverted_index_where_expr_1(cursor, expr: Expression):
         """inverted_index tableのexprが一致するレコードを削除する関数．
         最大1つしか一致しないので，'LIMIT 1'を付けている．
         """
-        cursor.execute('DELETE FROM inverted_index WHERE expr = %s LIMIT 1', (expr,))
+        cursor.execute('DELETE FROM inverted_index WHERE expr = %s LIMIT 1', (expr.mathml,))
 
     @staticmethod
     def delete_from_inverted_index_where_expr_id_1(cursor, expr_id: int):
@@ -99,8 +100,9 @@ class Cursor:
         return tmp[:-1]
 
     @staticmethod
-    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list, title: str, snippet: Snippet):
-        cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs), title, str(snippet)))
+    def insert_into_page_values_1_2_3_4(cursor, uri: str, exprs: list[Expression], title: str, snippet: Snippet):
+        exprs_str = __class__._make_exprs_json_serializable(exprs)
+        cursor.execute('INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)', (uri, json.dumps(exprs_str), title, str(snippet)))
 
     @staticmethod
     def remove_expr_id_from_path_dictionary(cursor, expr_id: int, expr_path: str, expr_size: int) -> list:
@@ -123,14 +125,14 @@ class Cursor:
         return json.loads(cursor.fetchone()[0])
 
     @staticmethod
-    def remove_info_from_inverted_index(cursor, expr: str, uri_id: int) -> Info:
+    def remove_info_from_inverted_index(cursor, expr: Expression, uri_id: int) -> Info:
         """削除する数式とuri_idをもとにinverted_indexのinfoの該当箇所を削除する関数
         """
         query = """
         SELECT remove_info(%(expr)s, %(uri_id)s)
         """
         data = {
-            'expr': expr,
+            'expr': expr.mathml,
             'uri_id': str(uri_id)
         }
         cursor.execute(query, data)
@@ -177,8 +179,8 @@ class Cursor:
             return tpl[0]
 
     @staticmethod
-    def select_expr_id_from_inverted_index_where_expr_1(cursor, expr: str) -> int | None:
-        cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    def select_expr_id_from_inverted_index_where_expr_1(cursor, expr: Expression) -> int | None:
+        cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr.mathml,))
         tpl = cursor.fetchone()
         if tpl is None:
             return None
@@ -201,11 +203,15 @@ class Cursor:
         return Info(json.loads(info_str)), expr_len
 
     @staticmethod
-    def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int, set[str]]:
+    def select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri: str) -> tuple[int | None, set[Expression]]:
         cursor.execute('SELECT uri_id, exprs FROM page WHERE uri = %s', (uri,))
         # type(exprs) is bytearray.
-        uri_id, exprs = cursor.fetchone()
-        return uri_id, set(json.loads(exprs))
+        tpl = cursor.fetchone()
+        if tpl is None:
+            return None, set()
+        else:
+            exprs_str = json.loads(tpl[1])
+            return tpl[0], set(map(Expression, exprs_str))
 
     @staticmethod
     def select_uri_id_from_page_where_uri_1(cursor, uri: str) -> int | None:
@@ -217,14 +223,14 @@ class Cursor:
             return tpl[0]
 
     @staticmethod
-    def select_json_search_uri_id_1_from_inverted_index_where_expr_2(cursor, uri_id: int, expr: str) -> str | None:
+    def select_json_search_uri_id_1_from_inverted_index_where_expr_2(cursor, uri_id: int, expr: Expression) -> str | None:
         """inverted_indexのinfo内の指定されたuri_idへのpathを返す．
         TODO: inverted_index tableのinfo内にuri_id以外で数字を保存すると，この関数はそのpathを返してしまう．
               それへの対応．
         """
         cursor.execute(
                 'SELECT JSON_SEARCH(info, "one", %s) FROM inverted_index WHERE expr = %s',
-                (uri_id, expr)
+                (uri_id, expr.mathml)
                 )
         json_path = cursor.fetchone()[0]
         if json_path is None:
@@ -234,7 +240,7 @@ class Cursor:
             return __class__.get_cleaned_path(json_path)
 
     @staticmethod
-    def update_index(cursor, mathml: str, expr_size: int, info: Info) -> tuple[int, bool]:
+    def update_index(cursor, expr: Expression, expr_size: int, info: Info) -> tuple[int, bool]:
         """inverted_index tableに問い合わせて，mathmlのexpr_idを取得する関数．
         数式が未登録の場合は，登録してexpr_idを取得する．
         数式が登録済みの場合は，infoを更新する．
@@ -248,8 +254,8 @@ class Cursor:
         """
 
         data = {
-            'expr': mathml,
-            'expr_len': len(mathml),
+            'expr': expr.mathml,
+            'expr_len': len(expr.mathml),
             'expr_size': expr_size,
             'info': info.dumps()
         }
@@ -258,16 +264,18 @@ class Cursor:
         return d['expr_id'], d['was_registered']
 
     @staticmethod
-    def update_inverted_index_set_info_1_where_expr_2(cursor, info_json: str, expr: str):
-        cursor.execute('UPDATE inverted_index SET info = %s WHERE expr = %s', (info_json, expr))
+    def update_inverted_index_set_info_1_where_expr_2(cursor, info_json: str, expr: Expression):
+        cursor.execute('UPDATE inverted_index SET info = %s WHERE expr = %s', (info_json, expr.mathml))
 
     @staticmethod
     def update_inverted_index_set_info_1_where_expr_id_2(cursor, info_json: str, expr_id: int):
         cursor.execute('UPDATE inverted_index SET info = %s WHERE expr_id = %s', (info_json, expr_id))
 
     @staticmethod
-    def update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, exprs: list, title: str, snippet: Snippet, uri_id):
-        cursor.execute('UPDATE page SET exprs = %s, title = %s, snippet = %s WHERE uri_id = %s', (json.dumps(exprs), title, str(snippet), uri_id))
+    def update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, exprs: list[Expression], title: str, snippet: Snippet, uri_id: int):
+        exprs_str = __class__._make_exprs_json_serializable(exprs)
+        query = 'UPDATE page SET exprs = %s, title = %s, snippet = %s WHERE uri_id = %s'
+        cursor.execute(query, (json.dumps(exprs_str), title, str(snippet), uri_id))
 
     @staticmethod
     def uri_is_already_registered(cursor, uri: str) -> bool:
@@ -298,3 +306,8 @@ class Cursor:
         c = cnx.cursor()
         yield c
         c.close()  # exit method
+
+    @staticmethod
+    def _make_exprs_json_serializable(exprs: list[Expression]) -> list[str]:
+        """json.dumps()をできるようにするための関数。"""
+        return list(map(str, exprs))

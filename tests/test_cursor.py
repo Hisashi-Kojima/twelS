@@ -5,8 +5,10 @@ import pytest
 import mysql.connector
 
 from twels.database.cursor import Cursor
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.indexer.info import Info
+from twels.snippet.snippet import Snippet
 from twels.utils.utils import print_in_red
 
 
@@ -158,7 +160,7 @@ def test_count_json_values_1(cursor):
 def test_delete_from_inverted_index_where_expr_1(cursor):
     """Cursor.delete_from_inverted_index_where_expr_1()のテスト．
     """
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
     info = Info({
         "uri_id": ["1", "2"],
         "lang": ["ja", "ja"],
@@ -170,8 +172,8 @@ def test_delete_from_inverted_index_where_expr_1(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': mathml,
+            'len': len(mathml),
             'info': info.dumps()
     }
 
@@ -179,19 +181,20 @@ def test_delete_from_inverted_index_where_expr_1(cursor):
 
     select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
 
-    cursor.execute(select_query, (expr,))
+    cursor.execute(select_query, (mathml,))
     assert cursor.fetchone() is not None  # データが登録されていることを確認．
 
+    expr = Expression(mathml)
     Cursor.delete_from_inverted_index_where_expr_1(cursor, expr)
 
-    cursor.execute(select_query, (expr,))
+    cursor.execute(select_query, (expr.mathml,))
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
 def test_delete_from_inverted_index_where_expr_id_1(cursor):
     """Cursor.delete_from_inverted_index_where_expr_id_1()のテスト．
     """
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
     info = Info({
         "uri_id": ["1", "2"],
         "lang": ["ja", "ja"],
@@ -203,8 +206,8 @@ def test_delete_from_inverted_index_where_expr_id_1(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': mathml,
+            'len': len(mathml),
             'info': info.dumps()
     }
 
@@ -212,15 +215,15 @@ def test_delete_from_inverted_index_where_expr_id_1(cursor):
 
     select_query = 'SELECT * FROM inverted_index WHERE expr = %s'
 
-    cursor.execute(select_query, (expr,))
+    cursor.execute(select_query, (mathml,))
     tpl = cursor.fetchone()
     # データが登録されていることを確認．
     expr_id: int = tpl[0]
-    assert tpl[1] == expr
+    assert tpl[1] == mathml
 
     Cursor.delete_from_inverted_index_where_expr_id_1(cursor, expr_id)
 
-    cursor.execute(select_query, (expr,))
+    cursor.execute(select_query, (mathml,))
     assert cursor.fetchone() is None  # データが削除されていることを確認．
 
 
@@ -278,9 +281,9 @@ def test_insert_into_uri_values_1(cursor):
     """Cursor.insert_into_page_values_1_2_3_4()のテスト．
     """
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
-    exprs = ['expr1', 'expr2']
+    exprs = [Expression('<math>expr1</math>'), Expression('<math>expr2</math>')]
     title = '総和 - Wikipedia'
-    snippet = 'snippet'
+    snippet = Snippet('snippet')
 
     select_query = 'SELECT * FROM page WHERE uri = %s'
 
@@ -298,9 +301,9 @@ def test_insert_into_uri_values_1(cursor):
     result_snippet = result[4]
     assert result_uri == uri
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
-    assert result_exprs == exprs
+    assert result_exprs == list(map(str, exprs))
     assert result_title == title
-    assert result_snippet == snippet
+    assert result_snippet == snippet.text
 
 
 def test_merge_expr_ids_1(cursor):
@@ -422,7 +425,8 @@ def test_remove_expr_id_from_path_dictionary_3(cursor):
 def test_remove_info_from_inverted_index_1(cursor):
     """Cursor.remove_info_from_inverted_index()のテスト．
     """
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
+    expr = Expression(mathml)
     remove_uri_id = 2
     info = Info({
         "uri_id": ["1", str(remove_uri_id), "3"],
@@ -436,8 +440,8 @@ def test_remove_info_from_inverted_index_1(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': expr.mathml,
+            'len': len(expr.mathml),
             'info': info.dumps()
     }
 
@@ -512,9 +516,9 @@ def test_search_1(cursor):
 def test_select_all_from_index_where_expr_id_1(cursor):
     """Cursor.select_all_from_index_where_expr_id_1()のテスト．
     """
-    expr = '<math><mi>a</mi></math>'
-    expr_len = len(expr)
-    path_set = Parser.parse(expr)
+    mathml = '<math><mi>a</mi></math>'
+    expr_len = len(mathml)
+    path_set = Parser.parse(Expression(mathml))
     expr_start_pos = [
         [76, 130],
         [27, 64, 113, 270]
@@ -529,9 +533,9 @@ def test_select_all_from_index_where_expr_id_1(cursor):
     query = """INSERT INTO inverted_index (expr, expr_len, expr_size, info)
     VALUES (%s, %s, %s, %s)
     """
-    cursor.execute(query, (expr, expr_len, len(path_set), info.dumps()))
+    cursor.execute(query, (mathml, expr_len, len(path_set), info.dumps()))
 
-    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (mathml,))
     expr_id = cursor.fetchone()[0]
 
     result = Cursor.select_all_from_index_where_expr_id_1(cursor, expr_id)
@@ -540,7 +544,7 @@ def test_select_all_from_index_where_expr_id_1(cursor):
     result_expr_len = result[2]
     result_info = Info(json.loads(result[4]))
     assert result_expr_id == expr_id
-    assert result_expr == expr
+    assert result_expr == mathml
     assert result_expr_len == expr_len
     assert str(result_info) == str(info)
 
@@ -608,7 +612,8 @@ def test_select_expr_from_inverted_index_where_expr_id_1(cursor):
 def test_select_info_from_inverted_index_where_expr_id_1(cursor):
     """Cursor.select_info_from_inverted_index_where_expr_id_1()のテスト．
     """
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
+    expr = Expression(mathml)
     info = Info({
         "uri_id": ["1", "2"],
         "lang": ["ja", "ja"],
@@ -620,8 +625,8 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': expr.mathml,
+            'len': len(expr.mathml),
             'info': info.dumps()
     }
 
@@ -634,22 +639,32 @@ def test_select_info_from_inverted_index_where_expr_id_1(cursor):
 
 def test_select_uri_id_and_exprs_from_page_where_uri_1(cursor):
     """Cursor.select_uri_id_and_exprs_from_page_where_uri_1()のテスト．
+    指定したURIが登録されていた場合。
     """
     uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
-    exprs = ['expr1', 'expr2']
+    exprs = [Expression('<math>expr1</math>'), Expression('<math>expr2</math>')]
+    exprs_str = Cursor._make_exprs_json_serializable(exprs)
     title = '総和 - Wikipedia'
     snippet = 'snippet'
 
     cursor.execute(
         'INSERT INTO page (uri, exprs, title, snippet) VALUES (%s, %s, %s, %s)',
-        (uri, json.dumps(exprs), title, snippet)
+        (uri, json.dumps(exprs_str), title, snippet)
         )
 
-    result = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
-    result_uri_id = result[0]
-    result_exprs = result[1]
+    result_uri_id, result_exprs = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
     assert type(result_uri_id) == int  # idの値は毎回異なるので，型の確認だけする
     assert result_exprs == set(exprs)
+
+
+def test_select_uri_id_and_exprs_from_page_where_uri_2(cursor):
+    """Cursor.select_uri_id_and_exprs_from_page_where_uri_1()のテスト．
+    指定したURIが登録されていなかった場合。
+    """
+    uri = 'https://ja.wikipedia.org/wiki/%E7%B7%8F%E5%92%8C'
+
+    result_uri_id, result_exprs = Cursor.select_uri_id_and_exprs_from_page_where_uri_1(cursor, uri)
+    assert result_uri_id is None
 
 
 def test_select_uri_id_from_page_where_uri_1(cursor):
@@ -690,7 +705,8 @@ def test_select_uri_id_from_page_where_uri_2(cursor):
 def test_select_json_search_uri_id_1_from_inverted_index_where_expr_2_1(cursor):
     """Cursor.select_json_search_uri_id_1_from_inverted_index_where_expr_2()のテスト．
     """
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
+    expr = Expression(mathml)
     uri_id = 2
     info = Info({
         "uri_id": ["1", str(uri_id), "3"],
@@ -704,8 +720,8 @@ def test_select_json_search_uri_id_1_from_inverted_index_where_expr_2_1(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': expr.mathml,
+            'len': len(expr.mathml),
             'info': info.dumps()
     }
 
@@ -720,7 +736,8 @@ def test_update_index_1(cursor):
     """Cursor.update_index()のテスト。
     数式が未登録の場合。
     """
-    expr = '<math><mi>a</mi></math>'
+    mathml = '<math><mi>a</mi></math>'
+    expr = Expression(mathml)
     info = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -741,7 +758,8 @@ def test_update_index_2(cursor):
     数式が既に登録されていて、uri_idも登録されている場合。
     langとexpr_start_posが更新されることを確認。
     """
-    expr = '<math><mi>a</mi></math>'
+    mathml = '<math><mi>a</mi></math>'
+    expr = Expression(mathml)
     info1 = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -778,7 +796,8 @@ def test_update_index_3(cursor):
     数式が既に登録されていて、uri_idが未登録の場合。
     uri_id、lang、expr_start_posが追加されることを確認。
     """
-    expr = '<math><mi>a</mi></math>'
+    mathml = '<math><mi>a</mi></math>'
+    expr = Expression(mathml)
     info1 = Info({
         "uri_id": ["1"],
         "lang": ["ja"],
@@ -820,7 +839,8 @@ def test_update_index_3(cursor):
 
 def test_update_inverted_index_set_info_1_where_expr_2(cursor):
     """Cursor.update_inverted_index_set_info_1_where_expr_2()のテスト．"""
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
+    expr = Expression(mathml)
     info = Info({
         "uri_id": ["1", "2"],
         "lang": ["ja", "ja"],
@@ -832,8 +852,8 @@ def test_update_inverted_index_set_info_1_where_expr_2(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': expr.mathml,
+            'len': len(expr.mathml),
             'info': info.dumps()
     }
 
@@ -849,14 +869,14 @@ def test_update_inverted_index_set_info_1_where_expr_2(cursor):
     })
     Cursor.update_inverted_index_set_info_1_where_expr_2(cursor, expected_info.dumps(), expr)
 
-    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr.mathml,))
     actual_info = json.loads(cursor.fetchone()[0])
     assert str(Info(actual_info)) == str(expected_info)
 
 
 def test_update_inverted_index_set_info_1_where_expr_id_2(cursor):
     """Cursor.update_inverted_index_set_info_1_where_expr_id_2()のテスト．"""
-    expr = '<math>a</math>'
+    mathml = '<math>a</math>'
     info = Info({
         "uri_id": ["1", "2"],
         "lang": ["ja", "ja"],
@@ -868,8 +888,8 @@ def test_update_inverted_index_set_info_1_where_expr_id_2(cursor):
 
     query = """INSERT INTO inverted_index (expr, expr_len, info) VALUES (%(expr)s, %(len)s, %(info)s)"""
     data = {
-            'expr': expr,
-            'len': len(expr),
+            'expr': mathml,
+            'len': len(mathml),
             'info': info.dumps()
     }
 
@@ -884,11 +904,11 @@ def test_update_inverted_index_set_info_1_where_expr_id_2(cursor):
         ]
     })
 
-    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (expr,))
+    cursor.execute('SELECT expr_id FROM inverted_index WHERE expr = %s', (mathml,))
     expr_id: int = cursor.fetchone()[0]
     Cursor.update_inverted_index_set_info_1_where_expr_id_2(cursor, expected_info.dumps(), expr_id)
 
-    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (expr,))
+    cursor.execute('SELECT info FROM inverted_index WHERE expr = %s', (mathml,))
     actual_info = json.loads(cursor.fetchone()[0])
     assert str(Info(actual_info)) == str(expected_info)
 
@@ -913,9 +933,9 @@ def test_update_page_set_exprs_title_snippet_where_uri_id_1(cursor):
     assert type(uri_id) == int
 
     # update
-    new_exprs = ['new_expr1', 'new_expr2']
+    new_exprs = [Expression('<math>new_expr1</math>'), Expression('<math>new_expr2</math>')]
     new_title = 'new title'
-    new_snippet = 'new snippet'
+    new_snippet = Snippet('new snippet')
     Cursor.update_page_set_exprs_1_title_2_snippet_3_where_uri_id_4(cursor, new_exprs, new_title, new_snippet, uri_id)
 
     # check updated record
@@ -926,9 +946,9 @@ def test_update_page_set_exprs_title_snippet_where_uri_id_1(cursor):
     result_exprs = json.loads(result[2])
     result_title = result[3]
     result_snippet = result[4]
-    assert result_exprs == new_exprs
+    assert result_exprs == list(map(str, new_exprs))
     assert result_title == new_title
-    assert result_snippet == new_snippet
+    assert result_snippet == new_snippet.text
 
 
 def test_uri_is_already_registered_1(cursor):

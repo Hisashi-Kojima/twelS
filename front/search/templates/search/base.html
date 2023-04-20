@@ -27,7 +27,7 @@
     <nav>
         <a class="logo" href="{% url 'search:index' %}">twelS</a>
         <ul class="nav-links">
-        {% if user.is_authenticated %}
+        {% if user.is_active %}
             <li>
                 <a href="{% url 'login:logout' %}">ログアウト</a>
             </li>

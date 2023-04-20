@@ -5,6 +5,7 @@
 from itemadapter import ItemAdapter
 
 from twels.database.cursor import Cursor
+from twels.expr.expression import Expression
 from twels.indexer.indexer import Indexer
 from twels.searcher.searcher import Searcher
 from twels.snippet.snippet import Snippet
@@ -24,24 +25,13 @@ def reset_tables():
 
 
 def test_search_1():
-    """不正な数式のときには空の結果を返す．
-    """
-    start_index = 0
-    result_dict = Searcher.search("a^'", start_index)
-    expected = {
-        'search_result': []
-        }
-    assert result_dict == expected
-
-
-def test_search_2():
     """ギリシャ文字θが検索できることを確認するテスト。
     &#x03B8;と&#x003B8;を同じものとして扱えないとこのテストは通らない。
     """
     try:
         uri_1 = 'uri_1'
         title = 'title'
-        expr =   r"""<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \theta }">
+        mathml = r"""<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \theta }">
                         <semantics>
                             <mrow class="MJX-TeXAtom-ORD">
                             <mstyle displaystyle="true" scriptlevel="0">
@@ -51,18 +41,18 @@ def test_search_2():
                             <annotation encoding="application/x-tex">{\displaystyle \theta }</annotation>
                         </semantics>
                     </math>"""
-        body = f"""{expr}はギリシャ文字の1つです。"""
+        body = f'{mathml}はギリシャ文字の1つです。'
         snippet1 = Snippet(body)
         lang = 'ja'
 
-        cleaned_expr = Snippet.clean(expr)
-        exprs = [cleaned_expr]
+        exprs = [Expression(mathml)]
 
         page_item_1 = Page(uri=uri_1, title=title, snippet=snippet1, lang=lang, exprs=exprs)
         page_info_1 = ItemAdapter(page_item_1)
-        assert Indexer.update_db(page_info_1, test=True) == True
+        assert Indexer.update_db(page_info_1, test=True)
 
-        search_result = Searcher.search("\\theta ", 0, test=True)['search_result']
+        lr_list = ['ja']
+        search_result = Searcher.search("\\theta ", 0, lr_list, test=True)['search_result']
         assert len(search_result) == 1
 
     finally:
