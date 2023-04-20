@@ -67,15 +67,12 @@ class Searcher:
         Returns:
             uri, title, snippetをkeyに持つdictionaryのリスト。
         """
-        # 現在のアルゴリズムだと，特定のページが複数回出てくる可能性がある
+        page_count = 0
         uri_ids = []  # 表示するuri_idのリスト
         search_result: list[dict] = []
-        num = len(score_list) - start
-        if num <= 0:
-            return []
 
-        for i in range(num):
-            expr_id: str = score_list[i][0]
+        for score in score_list:
+            expr_id: str = score[0]
             with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
                 info, expr_len = Cursor.select_info_and_len_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
                 for j, uri_id in enumerate(info.uri_id_list):
@@ -90,15 +87,17 @@ class Searcher:
                     expr_start_pos = info.expr_start_pos_list[j]
                     if not expr_start_pos:
                         continue
-                    search_result.append({
-                        'uri': page_info[0],
-                        'title': page_info[3],
-                        'snippet': Formatter.format(
-                            Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
-                            )
-                    })
-                    if len(search_result) >= __class__.search_num:
-                        break
+                    if start <= page_count:
+                        search_result.append({
+                            'uri': page_info[0],
+                            'title': page_info[3],
+                            'snippet': Formatter.format(
+                                Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
+                                )
+                        })
+                        if len(search_result) >= __class__.search_num:
+                            break
+                    page_count += 1
                 else:
                     # this code is executed when the inner loop doesn't break.
                     continue
