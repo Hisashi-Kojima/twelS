@@ -3,6 +3,7 @@
 """
 
 import time
+from urllib.parse import urlparse, parse_qs
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
@@ -19,29 +20,39 @@ def index(request: WSGIRequest):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
     if request.method == 'GET':
+        url_params = {
+            'q': [],
+            'start': [],
+            'lr': []
+        }
+
+        # request.GET.get('q')をしてしまうと'%20'が' 'に
+        # 変換されてしまうのでrequest.GET.get('q')などは使わない。
+        full_path = request.get_full_path().replace('%20', '')
+        url_params.update(parse_qs(urlparse(full_path).query))
+
+        if not url_params['start']:
+            url_params['start'].append('0')
+
         page_list: list[dict] = []
 
-        query: str | None = request.GET.get('q')
-        start: str | None = request.GET.get('start')
-        lr_list: list[str] = request.GET.getlist('lr')
         # 検索時
-        if query:
+        if url_params['q']:
+            # parse_qs()で'+'が' 'に変換されてしまうので、それを修正
+            url_params['q'] = url_params['q'][0].split(' ')
+
             start_time = time.time()
-            if start is None:
-                start = '0'
-            result = Searcher.search(query, int(start), lr_list)
-            page_list: list[dict] = result['search_result']
+            # TODO: 複数のキーワード検索にも対応する。
+            result = Searcher.search(
+                url_params['q'][0], int(url_params['start'][0]), url_params['lr']
+                )
+            page_list = result['search_result']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
-        # first access
-        else:
-            if start is None:
-                start = '0'
 
         context = {
             'page_list': page_list,
-            'query': query,
-            'start': str(int(start)+10),
+            'start': str(int(url_params['start'][0])+10),
             'ocr': '',
         }
         return render(request, 'search/index.html', context)

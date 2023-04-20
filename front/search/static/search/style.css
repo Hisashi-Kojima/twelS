@@ -80,11 +80,12 @@ label input:checked + span {
 }
 
 #mathCanvas {
-    padding-top: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     font-size: 140%;
 }
 
-#mainForm > input[type="submit"]{
+#mainForm > button{
     font-size: 120%;
     border-radius: 5px;
     background-color: rgb(38, 132, 255);
@@ -95,6 +96,17 @@ label input:checked + span {
     left: -5px;
     top: -2px;
 }
+/* #mainForm > input[type="submit"]{
+    font-size: 120%;
+    border-radius: 5px;
+    background-color: rgb(38, 132, 255);
+    color: white;
+    border: 1px solid rgb(207, 207, 207);
+    padding: 6px;
+    position: relative;
+    left: -5px;
+    top: -2px;
+} */
 #mainForm > input[type="submit"]:hover{
     background-color: rgb(59, 144, 255);
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
@@ -105,6 +117,23 @@ label input:checked + span {
 
 #main_content{
     margin-bottom: 100px;  /* footerとかぶらないように */
+}
+
+#news{
+    margin-top: 40px;
+}
+
+#next_page{
+    padding: 10px;
+    margin-top: 20px;
+}
+
+#next_page a{
+    text-decoration: none;
+    color: rgb(54, 54, 54);
+    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 .buttonGroup{
@@ -120,19 +149,6 @@ label input:checked + span {
   
 button:hover{
     background-color: #ddd;
-}
-
-.next_page{
-    padding: 10px;
-    margin-top: 20px;
-}
-
-.next_page a{
-    text-decoration: none;
-    color: rgb(54, 54, 54);
-    box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
-    padding: 10px;
-    border-radius: 5px;
 }
 
 .page{
@@ -219,10 +235,6 @@ TODO: 疑似要素のheightは200pxと固定されているが，
 
 .panel.is-show{
     display: block;
-}
-
-.news{
-    margin-top: 40px;
 }
 
 /* Extra small devices (phones, 600px and down) */

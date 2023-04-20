@@ -16,11 +16,11 @@
 {% block body %}
     
     <div id="main_content">
-        <p id="mathCanvas">数式: <span id="canvas"></span></p>
+        <div id="mathCanvas">数式: <span id="canvas"></span></div>
         
-        <form id="mainForm" onsubmit="preProcess()">
-            <input type="search" id="inputText" name="q" value="" oninput="inputChange()" >
-            <input type="submit" value="検索">
+        <form id="mainForm" action="." method="GET">
+            <input type="search" id="inputText" name="q" value="" oninput="renderInput()" >
+            <button type="button" onclick="submitForm()">検索</button>
         </form>
 
         <form id="imageForm" action="." method="POST" enctype="multipart/form-data">
@@ -119,17 +119,15 @@
             </div>
         </div>
 
-        <div id="lang">
+        <form id="lang" name="lang">
             <p>検索対象の言語</p><br>
             <label><input type="checkbox" name="lr" value="ja" checked><span>日本語</span></label>
             &emsp;
             <label><input type="checkbox" name="lr" value="en"><span>English</span></label>
-        </div>
+        </form>
 
-        <!-- queryが有効なもののときのみ表示 -->
-        {% if query %}
-            <div><p>{{ query }}  の検索結果</p><br></div>
-        {% endif %}
+        <!-- HTMLは複数のスペースを1つにまとめる点に注意。 -->
+        <div><p id="result"></p><br></div>
 
         {% for page in page_list %}
             <div class="page">
@@ -143,25 +141,13 @@
             </div>
         {% endfor %}
 
-        {% if query %}
-            {% if page_list %}
-                <div class="next_page">
-                    <a href="./?q={{query}}&start={{start}}">更に表示</a>
-                </div>
-            {% else %}
-                <p>検索結果は見つかりませんでした。</p>
-            {% endif %}
-        {% else %}
-            <div class="news">
-                <p>
-                    数式の入力はTeXの記法に対応しています。<br>
-                    数式の<a href="{% url 'search:input_example' %}">入力例</a><br>
-                    <br>
-                    ギリシャ文字を検索できるように修正しました。
-                </p>
-            </div>
-        {% endif %}
+        <div id="next_page"></div>
+        <div id="news"></div>
     </div>
+
+    <div id="url" style="display: none;">{% url 'search:input_example' %}</div>
+    <div id="page_list" style="display: none;">{{ page_list }}</div>
+    <div id="start" style="display: none;">{{ start }}</div>
 
     <script type="text/javascript" src="{% static 'search/js/scripts.js' %}"></script>
     <script type="text/javascript" src="{% static 'search/js/uploadImage.js' %}"></script>
@@ -172,8 +158,8 @@
          * Windowを読み込んだ際に実行される関数。
          * GET parameterの反映等を行う。
          */
-        function onLoad() {
-            var inputText = document.getElementById("inputText");
+        function onLoad(){
+            var inputText = document.getElementById('inputText');
             inputText.focus();
             
             const params = getUrlParam();
@@ -186,8 +172,30 @@
                 inputText.value = ocr;
             } else if (params['q'] != null) {
                 inputText.value = params['q'];
+                let result = document.getElementById('result');
+                result.textContent = params['q'] + 'の検索結果';
+
+                const page_list = document.getElementById('page_list').textContent;
+                const start = document.getElementById('start').textContent;
+                if (page_list == '[]') {
+                    let news = document.getElementById('news');
+                    news.innerHTML = '<p>検索結果は見つかりませんでした。</p>';
+                } else {
+                    let nextPage = document.getElementById('next_page');
+                    const lr = getLRString();
+                    nextPage.innerHTML = `<a href="./?q=${params['q']}&start=${start}${lr}">更に表示</a>`;
+                }
+            } else {
+                const url = document.getElementById('url');
+                let paragraph = document.createElement('p');
+                paragraph.innerHTML = '数式の入力はTeXの記法に対応しています。<br>数式の' 
+                    + `<a href="${url.textContent}">入力例</a>`
+                    + '<br><br>ギリシャ文字を検索できるように修正しました。';
+                
+                let news = document.getElementById('news');
+                news.appendChild(paragraph);
             }
-            inputChange();
+            renderInput();
 
             reflectLRParam(params['lr']);
         }

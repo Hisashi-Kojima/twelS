@@ -1,5 +1,7 @@
 /** 
  * get parameters from the GET method URL.
+ * Notes:
+ *   URLのクエリに含まれる'+'はスペース2つに変換する。
  * @return {dictionary[string|Array[string]]} The dictionary of the parameter names and their values.
  */
 function getUrlParam(){
@@ -12,8 +14,13 @@ function getUrlParam(){
         for (let i = 0; i < param_list.length; i++){
             const element = param_list[i].split('=');
 
-            const paramName = decodeURIComponent(element[0]);
-            const paramValue = decodeURIComponent(element[1]);
+            const paramName = element[0];
+            let paramValue = '';
+            if (paramName == 'q') {
+                paramValue = decodeURIComponent(element[1].replace(/\+/g, '  '));
+            } else {
+                paramValue = decodeURIComponent(element[1]);
+            }
 
             // 連想配列の作成。
             // 同じparamが複数ある場合にはArrayで格納。
@@ -31,7 +38,7 @@ function getUrlParam(){
 }
 
 /** 
- * GETパラメータの言語情報を反映する関数。
+ * GETパラメータの言語情報をcheckboxに反映する関数。
  * @param {string|Array[string]} param_lr: GET parameter of the language.
  */
 function reflectLRParam(param_lr){
@@ -58,17 +65,52 @@ function renderMath(canvas){
 }
 
 /** 
- * formのsubmit前にクエリを処理する関数。
+ * query中のspaceを処理する関数。
+ * space1つは%20に、space2つ以上は'+'に変換する。
+ * @param {string} inputText: queries.
+ * @return {string}
  */
-function preProcess(){
-    let form = document.getElementById('mainForm');
-    form.action = '.';
-    form.method = 'GET';
+function makeQueryString(inputText){
+    // '%20' is the encoded space.
+    return encodeURIComponent(inputText).replace(/(%20){2,}/g, '+');
+}
 
-    form.q.value = makeQueryString(form.q.value);
+/** 
+ * checkboxから言語の設定を取得して
+ * GETのパラメータ用の文字列を作成する関数。
+ * @return {string}
+ */
+function getLRString(){
+    let lrString = '';
+    const lrs = document.lang.lr;
+    for (let i = 0; i < lrs.length; i++) {
+        if (lrs[i].checked) {
+            lrString += `&lr=${lrs[i].value}`;
+        }
+    }
+    return lrString;
+}
 
-    const lr = document.getElementById("lang");
-    form.appendChild(lr);
+/** 
+ * formの情報をURL情報に含めてGETメソッドでアクセスする関数。
+ * Notes:
+ *   GET methodでサーバに検索クエリを送りたい。
+ *   フォームで送信すると、application/x-www-form-urlencodedが
+ *   適用されるため、自動で' 'が'+'に変換されてしまう。
+ *   事前に' 'を'%20'に変換すると、2度目の変換で'%'が'%25'になり、
+ *   ' 'が最終的には'%2520'になってしまう。
+ *   URL.searchParamasを使用すると自動でencodeされてしまうので
+ *   今回は使用しない。
+ */
+function submitForm(){
+    let url = window.location.origin + '/';
+
+    const mainForm = document.getElementById('mainForm');
+    const query = makeQueryString(mainForm.q.value);
+    url += `?q=${query}`;
+    url += getLRString();
+
+    window.location.href = url;
 }
 
 /** 
@@ -76,7 +118,7 @@ function preProcess(){
  * @param {string} inputText: queries.
  * @return {Array[string]} 
  */
-function splitQueries(inputText) {
+function splitQueries(inputText){
     return inputText.split(/ {2,}/g);
 }
 
@@ -84,39 +126,15 @@ function splitQueries(inputText) {
  * クエリ毎にspanタグで区切り、renderする関数。
  * @param {string} inputText: queries.
  */
-function inputChange(){
+function renderInput(){
     const inputText = document.getElementById("inputText");
     const queries = splitQueries(inputText.value);
     const canvas = document.getElementById("canvas");
     canvas.innerHTML = "";
-    for(let i = 0; i < queries.length; i++) {
+    for (let i = 0; i < queries.length; i++) {
         canvas.innerHTML += "<span>" + "\\(" + queries[i] + "\\)" + "</span>";
     }
     renderMath(canvas);
-}
-
-/** 
- * query中のspaceを処理する関数。
- * space1つは%20に、space2つ以上はspace1つに変換する。
- * TODO: ' 'のencodeについて考える。
- * @param {string} inputText: queries.
- * @return {string}
- */
-function makeQueryString(inputText) {
-    let queries = splitQueries(inputText);
-
-    let queryString = "";
-    for(let i = 0; i < queries.length; i++) {
-        // space1つをencodeする。
-        queries[i] = queries[i].replace(/ /, encodeURI(" "));
-
-        queryString += queries[i];
-        if(i + 1 < queries.length) {
-            queryString += " ";
-        }
-    }
-
-    return queryString;
 }
 
 /** 
@@ -133,21 +151,14 @@ function insertExpr(expr){
     text.focus();
     text.setSelectionRange(caretIndex, caretIndex);
 
-    inputChange();
+    renderInput();
 }
 
 
 document.addEventListener('DOMContentLoaded', function(){
     const tabs = document.getElementsByClassName('tab');
-    for(let i = 0; i < tabs.length; i++) {
+    for (let i = 0; i < tabs.length; i++) {
         tabs[i].addEventListener('click', switchTab, false);
-    }
-
-    // Enterで検索できるようにする。
-    window.document.onkeydown = function(event){
-        if (event.key === 'Enter') {
-            submit();
-        }
     }
 
     /** 
@@ -161,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function(){
         // is-showの切り替え
         document.getElementsByClassName('is-show')[0].classList.remove('is-show');
         // is-showにするパネルのindexを探す
-        for(var i = 0; i < tabs.length; i++) {
+        for (var i = 0; i < tabs.length; i++) {
             if (tabs[i] == this) {
                 break;
             }
