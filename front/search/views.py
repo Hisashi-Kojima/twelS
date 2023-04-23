@@ -3,16 +3,17 @@
 """
 
 import time
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 
+from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from front.twelS.settings import BASE_DIR
-from twels.searcher.searcher import Searcher
-from django.contrib.auth.decorators import login_required
 from twels.mathpix.mathpix import mathocr
+from twels.searcher.searcher import Searcher
+from twels.searcher.urlparser import parse_url
 
 
 @login_required
@@ -20,27 +21,14 @@ def index(request: WSGIRequest):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
     if request.method == 'GET':
-        url_params = {
-            'q': [],
-            'start': [],
-            'lr': []
-        }
-
         # request.GET.get('q')をしてしまうと'%20'が' 'に
         # 変換されてしまうのでrequest.GET.get('q')などは使わない。
-        full_path = request.get_full_path().replace('%20', '')
-        url_params.update(parse_qs(urlparse(full_path).query))
-
-        if not url_params['start']:
-            url_params['start'].append('0')
-
+        full_path = request.get_full_path()
+        url_params = parse_url(urlparse(full_path).query)
         page_list: list[dict] = []
 
         # 検索時
         if url_params['q']:
-            # parse_qs()で'+'が' 'に変換されてしまうので、それを修正
-            url_params['q'] = url_params['q'][0].split(' ')
-
             start_time = time.time()
             # TODO: 複数のキーワード検索にも対応する。
             result = Searcher.search(
