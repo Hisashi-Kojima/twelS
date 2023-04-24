@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """module description
 """
+import latex2mathml.converter
 import pytest
 
 from twels.expr.expression import Expression
@@ -8,6 +9,7 @@ from twels.expr.expression import Expression
 
 def test_expression_1():
     """Expression()のテスト。
+    frac{d}{dx}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                     <mfrac>
@@ -82,6 +84,15 @@ def test_expression_3():
                 </math>"""
     actual = Expression(mathml)
     expected = """<math><mover><mrow><mi>x</mi><mo>+</mo><mi>y</mi><mo>+</mo><mi>z</mi></mrow><mo>⏞</mo></mover></math>"""
+    assert actual.mathml == expected
+
+
+def test_expression_4():
+    """Expression()のテスト。
+    a < b
+    """
+    actual = Expression(latex2mathml.converter.convert('a < b'))
+    expected = """<math><mrow><mi>a</mi><mo>&lt;</mo><mi>b</mi></mrow></math>"""
     assert actual.mathml == expected
 
 

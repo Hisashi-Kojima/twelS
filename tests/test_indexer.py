@@ -6,6 +6,7 @@ import json
 
 from itemadapter import ItemAdapter
 
+from tests.functions import reset_tables
 from twels.database.cursor import Cursor
 from twels.expr.expression import Expression
 from twels.expr.parser import Parser
@@ -13,22 +14,6 @@ from twels.indexer.indexer import Indexer
 from twels.indexer.info import Info
 from twels.snippet.snippet import Snippet
 from web_crawler.web_crawler.items import Page
-
-# Indexerのメソッド内のCursor.connect()と競合しないように，
-# ここでは@pytest.fixtureではなくCursor.connect()を用いることで，
-# connectした状態でIndexerのmethodを呼ばないようにする．
-
-
-def reset_tables():
-    """tableのレコードをすべて削除する関数．
-    try-finallyを使って，必ずtestの最後に呼び出すことでtableを常に同じ状態に保つ．
-    このファイルのテストはデータベースの中にレコードがない状態で開始．
-    """
-    with Cursor.connect(test=True) as cnx:
-        with Cursor.cursor(cnx) as cursor:
-            cursor.execute('TRUNCATE TABLE inverted_index')
-            cursor.execute('TRUNCATE TABLE page')
-            cursor.execute('TRUNCATE TABLE path_dictionary')
 
 
 def test_update_page_table_1():
