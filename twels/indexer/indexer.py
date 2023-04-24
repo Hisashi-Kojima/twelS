@@ -2,6 +2,7 @@
 """module description
 """
 
+import logging
 import traceback
 
 from itemadapter import ItemAdapter
@@ -13,6 +14,8 @@ from twels.expr.parser import Parser
 from twels.indexer.info import Info
 from twels.snippet.snippet import Snippet
 from twels.utils.utils import print_in_red
+
+logger = logging.getLogger('django')
 
 
 class Indexer:
@@ -165,6 +168,7 @@ class Indexer:
                         cnx.commit()
 
             except exceptions.LarkError as e:
+                logger.exception(f'HTML title: {page_info["title"]}')
                 print_in_red(f'error in indexer._update_index_and_path_table(). {e}')
                 traceback.print_exc()
                 is_success = False

@@ -67,7 +67,7 @@ test_cursor.pyのみをテストする。
 
 ### crawlにかかる時間
 
-CPU: 12th Gen Intel Core(TM) i3-12100 @ 3.30GHz (4コア)、メモリ16GBのWindows PCで  
+CPU: 12th Gen Intel Core(TM) i3-12100 @ 3.30GHz (4コア)、メモリ16GB（8GB割り当て）のWindows PCで  
 日本語のWikipedia  
 
 * 数学 (7,021 pages)
@@ -85,7 +85,7 @@ manabitimes.jp (1,270 pages)
 
 これらのページ合わせて37,106ページ（一部無関係のファイルを含む）を  
 スクレイピングをしたとき、数式を含むページ6,826ページが登録され、  
-14,941秒（4時間9分1秒）かかった。  
+15,679秒（4時間21分19秒）かかった。  
 
 ## mysqlのバックアップ
 

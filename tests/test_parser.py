@@ -23,7 +23,7 @@ def test_get_parsed_tree_atom_1():
 
 
 def test_get_parsed_tree_add_1():
-    """加算のparse
+    """加算のparse。
     1+2
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -42,7 +42,7 @@ def test_get_parsed_tree_add_1():
 
 
 def test_get_parsed_tree_add_2():
-    """加算のparse
+    """加算のparse。
     1+2+a
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -63,7 +63,7 @@ def test_get_parsed_tree_add_2():
 
 
 def test_get_parsed_tree_add_3():
-    """加算のparse
+    """加算のparse。
     +7
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -79,7 +79,7 @@ def test_get_parsed_tree_add_3():
 
 
 def test_get_parsed_tree_subtract_1():
-    """減算のparse
+    """減算のparse。
     3-2
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -98,7 +98,7 @@ def test_get_parsed_tree_subtract_1():
 
 
 def test_get_parsed_tree_subtract_2():
-    """減算のparse
+    """減算のparse。
     -5
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -114,7 +114,7 @@ def test_get_parsed_tree_subtract_2():
 
 
 def test_get_parsed_tree_mul_1():
-    """乗算のparse
+    """乗算のparse。
     2*5
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -133,7 +133,7 @@ def test_get_parsed_tree_mul_1():
 
 
 def test_get_parsed_tree_mul_2():
-    """乗算のparse
+    """乗算のparse。
     abc
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -152,7 +152,7 @@ def test_get_parsed_tree_mul_2():
 
 
 def test_get_parsed_tree_frac_1():
-    """分数のparse
+    """分数のparse。
     frac{2}{3}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -177,7 +177,7 @@ def test_get_parsed_tree_frac_1():
 
 
 def test_get_parsed_tree_frac_2():
-    """分数のparse
+    """分数のparse。
     frac{d}{dx}e^{x}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
@@ -220,7 +220,7 @@ def test_get_parsed_tree_frac_2():
 
 
 def test_get_parsed_tree_frac_3():
-    """分数のparse
+    """分数のparse。
     frac{d}{dx}e^{x}=e^{x}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\frac {d}{dx}}e^{x}=e^{x},}">
@@ -353,7 +353,7 @@ def test_get_parsed_tree_frac_4():
 
 
 def test_get_parsed_tree_div_1():
-    """除算のparse
+    """除算のparse。
     3/4
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -396,7 +396,7 @@ def test_get_parsed_tree_div_2():
 
 
 def test_get_parsed_tree_eq_1():
-    """等号を含む式のparse
+    """等号を含む式のparse。
     y=ax
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -419,7 +419,7 @@ def test_get_parsed_tree_eq_1():
 
 
 def test_get_parsed_tree_eq_2():
-    """等号を2つ含む式のparse
+    """等号を2つ含む式のparse。
     a=b=c
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -442,7 +442,7 @@ def test_get_parsed_tree_eq_2():
 
 
 def test_get_parsed_tree_lt_1():
-    """不等号（&lt; <）を含む式のparse
+    """不等号（&lt; <）を含む式のparse。
     2<3
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
@@ -464,7 +464,7 @@ def test_get_parsed_tree_lt_1():
 
 
 def test_get_parsed_tree_gt_1():
-    """不等号（&gt; >）を含む式のparse
+    """不等号（&gt; >）を含む式のparse。
     3>2
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 2&lt;3}">
@@ -486,7 +486,7 @@ def test_get_parsed_tree_gt_1():
 
 
 def test_get_parsed_tree_paren_1():
-    """かっこを含む式のparse
+    """かっこを含む式のparse。
     3*(4+5)
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -513,7 +513,7 @@ def test_get_parsed_tree_paren_1():
 
 
 def test_get_parsed_tree_sup_1():
-    """上付き文字のparse
+    """上付き文字のparse。
     e^{x}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -536,7 +536,7 @@ def test_get_parsed_tree_sup_1():
 
 
 def test_get_parsed_tree_sub_1():
-    """下付き文字のparse
+    """下付き文字のparse。
     x_{i}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -559,7 +559,7 @@ def test_get_parsed_tree_sub_1():
 
 
 def test_get_parsed_tree_subsup_1():
-    """下付き上付き文字のparse
+    """下付き上付き文字のparse。
     x_{i}^{2}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -586,7 +586,7 @@ def test_get_parsed_tree_subsup_1():
 
 
 def test_get_parsed_tree_sqrt_1():
-    """平方根のparse
+    """平方根のparse。
     sqrt{3}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -607,7 +607,7 @@ def test_get_parsed_tree_sqrt_1():
 
 
 def test_get_parsed_tree_root_1():
-    """n乗根のparse
+    """n乗根のparse。
     sqrt[3]{5}
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
@@ -632,7 +632,7 @@ def test_get_parsed_tree_root_1():
 
 
 def test_get_parsed_tree_over_1():
-    """上にアクセントがある式のparse
+    """上にアクセントがある式のparse。
     bar{x+y+z}
     """
     mathml = """<math>
@@ -661,7 +661,7 @@ def test_get_parsed_tree_over_1():
 
 
 def test_get_parsed_tree_under_1():
-    """下にアクセントがある式のparse
+    """下にアクセントがある式のparse。
     https://developer.mozilla.org/ja/docs/Web/MathML/Element/munder
     """
     mathml = """<math>
@@ -690,7 +690,7 @@ def test_get_parsed_tree_under_1():
 
 
 def test_get_parsed_tree_underover_1():
-    """上下にアクセントがある式のparse
+    """上下にアクセントがある式のparse。
     https://developer.mozilla.org/en-US/docs/Web/MathML/Element/munderover
     """
     mathml = """<math displaystyle="true">
@@ -711,7 +711,7 @@ def test_get_parsed_tree_underover_1():
 
 
 def test_get_parsed_tree_summation_1():
-    r"""基本的な総和の式のparse
+    r"""基本的な総和の式のparse。
     \sum_{i=1}^{n} x_{i}
     """
     mathml = """<math displaystyle="true">
@@ -753,7 +753,7 @@ def test_get_parsed_tree_summation_1():
 
 
 def test_get_parsed_tree_summation_2():
-    r"""上と下がない総和の式のparse
+    r"""上と下がない総和の式のparse。
     \sum R
     """
     mathml = """<math displaystyle="true">
@@ -770,7 +770,7 @@ def test_get_parsed_tree_summation_2():
 
 
 def test_get_parsed_tree_summation_3():
-    r"""上がない総和の式のparse
+    r"""上がない総和の式のparse。
     \sum_{x\in R} x
     """
     mathml = """<math displaystyle="true">
@@ -802,7 +802,7 @@ def test_get_parsed_tree_summation_3():
 
 
 def test_get_parsed_tree_annotation_1():
-    """annotationを含むMathMLのparse
+    """annotationを含むMathMLのparse。
     出典: 方程式 - Wikipedia
     https://ja.wikipedia.org/wiki/%E6%96%B9%E7%A8%8B%E5%BC%8F
     """
@@ -870,7 +870,7 @@ def test_get_parsed_tree_annotation_1():
 
 
 def test_get_parsed_tree_table_1():
-    """mtableのparse
+    """mtableのparse。
     https://developer.mozilla.org/ja/docs/Web/MathML/Element/mtable
     """
     mathml = """<math>
@@ -914,7 +914,7 @@ def test_get_parsed_tree_table_1():
 
 
 def test_get_parsed_tree_table_2():
-    """行列のparse
+    """行列のparse。
     [  1 9 -13]
     [ 20 5  -6]
     """
@@ -989,7 +989,7 @@ def test_get_parsed_tree_table_2():
 
 
 def test_get_parsed_tree_table_3():
-    """mtableのparse．<mi>タグの中が空．
+    """mtableのparse。<mi>タグの中が空。
     https://ja.wikipedia.org/wiki/0.999...
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}">
@@ -1034,7 +1034,7 @@ def test_get_parsed_tree_table_3():
 
 def test_get_parsed_tree_mtext_1():
     """
-    mtextを含む式
+    mtextを含む式。
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{inv}}(A)=\#\{(A_{i},A_{j})\mid i&lt;j{\text{ and }}A_{i}&gt;A_{j}\}}">
                     <semantics>
@@ -1063,7 +1063,7 @@ def test_get_parsed_tree_mtext_1():
 
 
 def test_get_parsed_tree_cdots_1():
-    """0.999...のparse
+    """0.999...のparse。
     https://ja.wikipedia.org/wiki/%E7%B4%9A%E6%95%B0
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1083,7 +1083,7 @@ def test_get_parsed_tree_cdots_1():
 
 
 def test_get_parsed_tree_cdots_2():
-    """0.999...のparse
+    """0.999...のparse。
     https://ja.wikipedia.org/wiki/%E7%B4%9A%E6%95%B0
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 0.999\cdots =0.9+0.09+\cdots +9\cdot 10^{-n}+\cdots }">
@@ -1137,7 +1137,7 @@ def test_get_parsed_tree_cdots_2():
 
 
 def test_get_parsed_tree_cdots_3():
-    """0.999...のparse
+    """0.999...のparse。
     https://ja.wikipedia.org/wiki/0.999...
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{aligned}c&amp;=0.999\cdots \\10c&amp;=9.999\cdots \\10c-c&amp;=9.999\cdots -0.999\cdots \\9c&amp;=9\\c&amp;=1\end{aligned}}}">
@@ -1355,7 +1355,7 @@ def test_get_parsed_tree_mspace_1():
 
 
 def test_parse_num_1():
-    """数値のparse
+    """数値のparse。
     7
     """
     mathml = latex2mathml.converter.convert('7')
@@ -1365,7 +1365,7 @@ def test_parse_num_1():
 
 
 def test_parse_add_1():
-    """加算のparse
+    """加算のparse。
     1+2
     """
     mathml = latex2mathml.converter.convert('1+2')
@@ -1379,7 +1379,7 @@ def test_parse_add_1():
 
 
 def test_parse_subtract_1():
-    """減算のparse
+    """減算のparse。
     3-2
     """
     mathml = latex2mathml.converter.convert('3-2')
@@ -1394,7 +1394,7 @@ def test_parse_subtract_1():
 
 
 def test_parse_product_1():
-    """乗算のparse
+    """乗算のparse。
     4*5
     """
     mathml = latex2mathml.converter.convert('4*5')
@@ -1408,7 +1408,7 @@ def test_parse_product_1():
 
 
 def test_parse_div_1():
-    """除算のparse
+    """除算のparse。
     3/2
     これは3*(1/2)として処理する．
     """
@@ -1425,7 +1425,7 @@ def test_parse_div_1():
 
 
 def test_parse_eq_1():
-    """等式のparse
+    """等式のparse。
     a=b
     """
     mathml = latex2mathml.converter.convert('a=b')
@@ -1465,7 +1465,7 @@ def test_parse_eq_2():
 
 
 def test_parse_lt_1():
-    """不等式のparse
+    """不等式のparse。
     a<b
     """
     mathml = latex2mathml.converter.convert('a<b')
@@ -1479,7 +1479,7 @@ def test_parse_lt_1():
 
 
 def test_parse_gt_1():
-    """不等式のparse
+    """不等式のparse。
     a>b
     """
     mathml = latex2mathml.converter.convert('a>b')
@@ -1493,7 +1493,7 @@ def test_parse_gt_1():
 
 
 def test_parse_sum_1():
-    """総和のparse
+    """総和のparse。
     \sum_{i=1}^{n} x_{i}
     """
     mathml = latex2mathml.converter.convert('\sum_{i=1}^{n} x_{i}')
@@ -1514,7 +1514,7 @@ def test_parse_sum_1():
 
 
 def test_parse_table_1():
-    """行列のparse
+    """行列のparse。
     [  1 9 -13]
     [ 20 5  -6]
     """

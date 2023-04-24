@@ -14,7 +14,8 @@ def remove_comments(soup: BeautifulSoup):
 
 
 def remove_not_content(text: str) -> str:
-    """インデントや改行、属性などを削除する関数．
+    """インデントや改行、属性などを削除する関数。
+    ここではスペースに変換して、続く関数で複数のスペースを1つにまとめる。
     """
     # 属性を削除したい。
     # ' '以降を削除できればよい。
@@ -23,4 +24,4 @@ def remove_not_content(text: str) -> str:
     # <tag attr=""> ->  <tag>
     tmp = re.sub(attr_pattern, r'<\1>', text)
 
-    return re.sub(r'[\t\f\r\n]', '', tmp)
+    return re.sub(r'[\t\f\r\n]', ' ', tmp)
