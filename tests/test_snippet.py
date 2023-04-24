@@ -135,3 +135,19 @@ def test_clean_2():
     # MathML中のスペースは全て削除される。
     expected = """The ratio of the circumference of a circle to its diameter. <math><mfrac><mi>d</mi><mrow><mi>d</mi><mi>x</mi></mrow></mfrac></math>"""
     assert actual.text == expected
+
+
+def test_clean_3():
+    """styleタグが削除されていることを確認するテスト。
+    """
+    text =   """<p>This text will be green. Inline styles take precedence over CSS included externally.</p>
+
+                <p style="color: blue">The <code>style</code> attribute can override it, though.</p>
+                <style>
+                p {
+                    color: #26b72b;
+                }
+                </style>"""
+    actual = Snippet(text)
+    expected = 'This text will be green. Inline styles take precedence over CSS included externally. The style attribute can override it, though. '
+    assert actual.text == expected

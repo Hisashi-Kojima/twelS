@@ -63,8 +63,8 @@ class Snippet:
         remove_comments(soup)
 
         t1 = __class__._clean_text(soup)
-        t2 = re.sub(r' {2,}', ' ', t1)
-        return remove_not_content(t2)
+        t2 = remove_not_content(t1)
+        return re.sub(r' {2,}', ' ', t2)
 
     @staticmethod
     def _clean_text(soup: BeautifulSoup) -> str:
@@ -82,14 +82,15 @@ class Snippet:
             KaTeX are rendered in search results.
         """
         remove_list = [
-            'button', 'br', 'canvas', 'footer', 'form', 'header', 'img',
-            'iframe', 'input', 'label', 'nav', 'noscript', 'script', 'svg'
+            'button', 'br', 'canvas', 'cite', 'footer', 'form', 'header', 'img',
+            'iframe', 'input', 'label', 'link', 'nav', 'noscript', 'script', 'style',
+            'svg'
             ]
 
         save_list = [
-            'a', 'article', 'aside', 'b', 'caption', 'colgroup',
-            'dl', 'dt', 'dd', 'div', re.compile('h[1-6]'), 'i', 'ins', 'li',
-            'main', 'ol', 'p', 'span', 'section', 'table', 'tbody', 'td',
+            'a', 'article', 'aside', 'b', 'caption', 'code', 'colgroup',
+            'dl', 'dt', 'dd', 'div', 'em', 'embed', re.compile('h[1-6]'), 'i', 'ins', 'li',
+            'main', 'mark', 'ol', 'p', 'section', 'span', 'strong', 'table', 'tbody', 'td',
             'tfoot', 'th', 'thread', 'tr', 'ul'
             ]
 
