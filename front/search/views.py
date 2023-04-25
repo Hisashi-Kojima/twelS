@@ -26,6 +26,7 @@ def index(request: WSGIRequest):
         full_path = request.get_full_path()
         url_params = parse_url(urlparse(full_path).query)
         page_list: list[dict] = []
+        has_next = False
 
         # 検索時
         if url_params['q']:
@@ -35,11 +36,13 @@ def index(request: WSGIRequest):
                 url_params['q'][0], int(url_params['start'][0]), url_params['lr']
                 )
             page_list = result['search_result']
+            has_next = result['has_next']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
 
         context = {
             'page_list': page_list,
+            'has_next': has_next,
             'start': str(int(url_params['start'][0])+10),
             'ocr': '',
         }

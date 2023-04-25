@@ -173,7 +173,7 @@
                 if (page_list == '[]') {
                     let news = document.getElementById('news');
                     news.innerHTML = '<p>検索結果は見つかりませんでした。</p>';
-                } else {
+                } else if ('{{ has_next }}' == 'True') {
                     let nextPage = document.getElementById('next_page');
                     const lr = getLRString();
                     nextPage.innerHTML = `<a href="./?q=${params['q']}&start=${start}${lr}">更に表示</a>`;
