@@ -64,6 +64,7 @@ cover/
 
 # Django stuff:
 *.log
+*.log.*
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -201,9 +202,6 @@ mysql/
 
 # unix domain socket
 socket/
-
-# logs
-front/logs/
 
 # selenium server log
 /tests/selenium_node/assets/*

@@ -10,6 +10,7 @@ from django.contrib.auth.views import (
 )
 from django.core.signing import BadSignature, SignatureExpired, loads, dumps
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -53,47 +54,48 @@ class Login(LoginView):
     redirect_authenticated_user = True  # ログインしているユーザーがアクセスしたとき数式検索ページにリダイレクト
 
     def form_valid(self, form):
-
+        """ログイン時にIPアドレスを取得し,未知のIPアドレスだった場合は警告メールを送信する."""
         login(self.request, form.get_user())
 
-        if self.request.user.is_authenticated:
-            try:
-                user = User.objects.get(pk=self.request.user.pk)
+        try:
+            user = User.objects.get(pk=self.request.user.pk)
 
-                current_ip = get_ip(self.request)
+            current_ip = get_ip(self.request)
 
-                ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
+            ip = IPAddress.objects.filter(user=user, ip_address=current_ip)
 
-                if ip:
-                    ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
-                    ip_address.last_access = timezone.now()
-                    ip_address.save()
+            if ip:  # 既知のIPアドレスの場合は最後にアクセスした日時を更新する
+                ip_address = IPAddress.objects.get(user=user, ip_address=current_ip)
+                ip_address.last_access = timezone.now()
+                ip_address.save()
 
-                else:
-                    IPAddress.objects.create(user=user, ip_address=current_ip)
+            else:  # 未知のIPアドレスの場合はIPアドレスを登録し,ユーザーに警告メールを送信する
+                IPAddress.objects.create(user=user, ip_address=current_ip)
 
-                    origin: str = self.request.headers["Origin"]
-                    context = {
-                        'origin': origin,
-                        'user': user,
-                        'ip': current_ip
-                    }
+                origin: str = self.request.headers["Origin"]
+                context = {
+                    'origin': origin,
+                    'user': user,
+                    'ip': current_ip
+                }
 
-                    subject = render_to_string('mail_template/unknown_ip/subject.txt', context)
-                    message = render_to_string('mail_template/unknown_ip/message.txt', context)
+                subject = render_to_string('mail_template/unknown_ip/subject.txt', context)
+                message = render_to_string('mail_template/unknown_ip/message.txt', context)
 
-                    user.send_mail(subject, message)
+                user.send_mail(subject, message)
 
-            except ObjectDoesNotExist:
-                # userが存在しない場合でも正常に動作するように用意している
-                pass
+        except ObjectDoesNotExist:
+            # userが存在しない場合でも正常に動作するように用意している
+            pass
+        except Exception as e:
+            logger.error(f'{e} in login  user:{user}')
+
         return HttpResponseRedirect(self.get_success_url())
 
 
 class Logout(generic.View):
 
     def get(self, request):
-
         """メール認証ログインユーザーはログアウト時にis_active=False"""
         try:
             emailuser: EmailUser = Emailuser.objects.get(email=request.user)
@@ -139,7 +141,6 @@ class UserCreate(generic.CreateView):
 
 class UserCreateComplete(generic.TemplateView):
     """メール内URLアクセス後のユーザー本登録"""
-    template_name = 'htmls/user_create_complete.html'
     timeout_seconds = getattr(settings, 'ACTIVATION_TIMEOUT_SECONDS', 60*60*24)  # デフォルトでは1日以内
 
     def get(self, request, **kwargs):
@@ -149,37 +150,52 @@ class UserCreateComplete(generic.TemplateView):
             user_pk = loads(token, max_age=self.timeout_seconds)
 
         # 期限切れ
-        except SignatureExpired:
-            logger.error('expired token in user_create')
+        except SignatureExpired as e:
+            logger.error(f'{e} in user_create.')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
-        except BadSignature:
-            logger.error('wrong token in user_create')
+        except BadSignature as e:
+            logger.error(f'{e} in user_create.')
+            return render(request, 'htmls/token_error.html', status=401)
+
+        # それ以外のエラー
+        except Exception as e:
+            logger.error(f'{e} in user_create.')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
         else:
             try:
                 user = User.objects.get(pk=user_pk)
+                UserCreateRequest.objects.filter(email=user.email).delete()  # リクエストを削除する．
 
                 current_ip = get_ip(self.request)
-                IPAddress.objects.create(user=user, ip_address=current_ip)
 
-                UserCreateRequest.objects.filter(email=user.email).delete()
+                ip_set: QuerySet = IPAddress.objects.filter(user=user, ip_address=current_ip)
 
-            except User.DoesNotExist:
-                logger.error('user not exist in user_create')
+                if not ip_set:
+                    # 未知のIPアドレスの場合はIPアドレスを登録する
+                    IPAddress.objects.create(user=user, ip_address=current_ip)
+
+                else:
+                    # 既知のIPアドレスの場合は最後にアクセスした日時を更新する
+                    ip_address = ip_set[0]
+                    ip_address.last_access = timezone.now()
+                    ip_address.save()
+
+            except Exception as e:
+                logger.error(f'{e} in user_create')
                 return render(request, 'htmls/token_error.html', status=401)
 
             else:
+                # 同じ認証URLに複数回アクセスした場合もindexにリダイレクト
                 if not user.is_active:
                     # 問題なければ本登録とする
                     user.is_active = True
                     user.save()
-                    return super().get(request, **kwargs)
-
-        return render(request, 'htmls/token_error.html', status=401)
+                login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
+                return redirect('search:index')
 
 
 class OnlyYouMixin(UserPassesTestMixin):
@@ -298,7 +314,6 @@ class EmailLogin(generic.FormView):
 
 
 class EmailLoginComplete(generic.TemplateView):
-    template_name = 'htmls/email_login_complete.html'
     timeout_seconds = getattr(settings, 'ACTIVATION_TIMEOUT_SECONDS', 60*5)  # デフォルトでは5分以内
 
     def get(self, request, **kwargs):
@@ -307,14 +322,18 @@ class EmailLoginComplete(generic.TemplateView):
             user_pk = loads(token, max_age=self.timeout_seconds)
 
         # 期限切れ
-        except SignatureExpired:
-            logger.error('expired token in email_login')
+        except SignatureExpired as e:
+            logger.error(f'{e} in email_login')
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenが間違っている
-        except BadSignature:
-            logger.error('wrong token in email_login')
+        except BadSignature as e:
+            logger.error(f'{e} in email_login')
             return render(request, 'htmls/token_error.html', status=401)
+
+        # それ以外のエラー
+        except Exception as e:
+            logger.error(f'{e} in email_login')
 
         # tokenは問題なし
         else:
@@ -326,14 +345,13 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.email_request_times = 0
                 email_request.save()
 
-            except Emailuser.DoesNotExist:
-                logger.error('email_user not exist in email_login')
+            except Exception as e:
+                logger.error(f'{e} in email_login')
                 return render(request, 'htmls/token_error.html', status=401)
             else:
-                if not emailuser.is_active:
-                    # 問題なければ本登録とする
-                    emailuser.is_active = True
-                    emailuser.save()
-                    login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
-                    return super().get(request, **kwargs)
+                # 問題なければログインとする
+                emailuser.is_active = True
+                emailuser.save()
+                login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
+                return redirect('search:index')
         return render(request, 'htmls/token_error.html', status=401)
