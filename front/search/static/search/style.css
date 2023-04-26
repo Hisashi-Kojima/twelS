@@ -96,17 +96,6 @@ label input:checked + span {
     left: -5px;
     top: -2px;
 }
-/* #mainForm > input[type="submit"]{
-    font-size: 120%;
-    border-radius: 5px;
-    background-color: rgb(38, 132, 255);
-    color: white;
-    border: 1px solid rgb(207, 207, 207);
-    padding: 6px;
-    position: relative;
-    left: -5px;
-    top: -2px;
-} */
 #mainForm > input[type="submit"]:hover{
     background-color: rgb(59, 144, 255);
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
@@ -152,31 +141,29 @@ button:hover{
 }
 
 .page{
-    width: 80%;
+    margin-bottom: 32px;
     margin-left: 10%;
     margin-right: 10%;
+    width: 80%;
+    max-height: 200px;
     text-align: center;
     box-shadow: rgba(32, 33, 36, 0.28) 0px 1px 6px;
     padding: 0px 20px 20px 20px;
     border-radius: 12px;
-    margin-bottom: 32px;
-    max-height: 200px;
     overflow: hidden;
+    position: relative;
 }
 
 /* 下の方を薄くしたいからこれを使う */
-/* 
-TODO: 疑似要素のheightは200pxと固定されているが，
-.pageのheightはコンテンツの量によって動的に変わる．これに関する修正．
-*/
 .page > .fade{
-    width: 77%;
-    height: 200px;
     user-select: none;
     pointer-events: none;
-    z-index: 100;
-    content: ' ';
+    z-index: 1; /* put .fade above .page */
     position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background:linear-gradient(to bottom, transparent 70%, #f5f5f5);
 }
 
