@@ -1,6 +1,5 @@
 # own
 web_pages/
-test_data/
 # remove static root directory from git because it's created automatically
 front/static
 

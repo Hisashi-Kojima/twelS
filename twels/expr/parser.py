@@ -2,6 +2,7 @@
 """module description
 """
 
+import logging
 import os
 
 from lark import Lark, exceptions, Tree
@@ -10,6 +11,8 @@ from twels.expr.expression import Expression
 from twels.expr.pathset import PathSet
 from twels.expr.tree import MathMLTree, get_ro_index
 from twels.utils.utils import print_in_red
+
+logger = logging.getLogger('django')
 
 
 def get_lark_parser() -> Lark | None:
@@ -46,7 +49,10 @@ class Parser:
         # TODO: 1つの式を複数の式に分割したときに，それぞれにexpr_idを割り当てなくてよいのか考える．
         result = set()
         for t in tree_list:
-            result = result.union(PathSet(t))
+            try:
+                result = result.union(PathSet(t))
+            except Exception as e:
+                logger.exception(t)
         return result
 
     @staticmethod
@@ -64,9 +70,9 @@ class Parser:
             print_in_red('grammarファイルを正しく読み込めていない，もしくはgrammarに間違いがあります．')
             return Tree('error', [])
         except exceptions.LarkError as e:
-            print_in_red('LarkError')
-            print_in_red(e)
-            # logger.exception(e)
+            logger.error('expression: ')
+            logger.error(expr.mathml)
+            logger.exception('LarkError')
             return Tree('error', [])
 
     @staticmethod

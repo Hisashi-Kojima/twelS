@@ -3,15 +3,17 @@
 """
 
 import time
+from urllib.parse import urlparse
 
+from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from front.twelS.settings import BASE_DIR
-from twels.searcher.searcher import Searcher
-from django.contrib.auth.decorators import login_required
 from twels.mathpix.mathpix import mathocr
+from twels.searcher.searcher import Searcher
+from twels.searcher.urlparser import parse_url
 
 
 @login_required
@@ -19,31 +21,32 @@ def index(request: WSGIRequest):
     """サイトに最初にアクセスしたときや検索したときに呼び出される関数．
     """
     if request.method == 'GET':
+        # request.GET.get('q')をしてしまうと'%20'が' 'に
+        # 変換されてしまうのでrequest.GET.get('q')などは使わない。
+        full_path = request.get_full_path()
+        url_params = parse_url(urlparse(full_path).query)
         page_list: list[dict] = []
+        has_next = False
 
-        expr: str | None = request.GET.get('q')
-        start: str | None = request.GET.get('start')
-        lr_list: list[str] = request.GET.getlist('lr')
         # 検索時
-        if expr is not None and expr != '':
+        if url_params['q']:
             start_time = time.time()
-            if start is None:
-                start = '0'
-            result = Searcher.search(expr, int(start), lr_list)
-            page_list: list[dict] = result['search_result']
+            # TODO: 複数のキーワード検索にも対応する。
+            result = Searcher.search(
+                url_params['q'][0], int(url_params['start'][0]), url_params['lr']
+                )
+            page_list = result['search_result']
+            has_next = result['has_next']
             search_time = time.time() - start_time
             print(f'search time: {search_time}秒')
-        # first access
-        else:
-            if start is None:
-                start = '0'
 
         context = {
             'page_list': page_list,
-            'query': expr,
-            'start': str(int(start)+10),
+            'has_next': has_next,
+            'start': str(int(url_params['start'][0])+10),
             'ocr': '',
         }
+        return render(request, 'search/index.html', context)
 
     elif request.method == 'POST':
         if request.FILES.get('uploadImage', False):
@@ -56,10 +59,12 @@ def index(request: WSGIRequest):
                 context = {'ocr': ' '}
         else:
             context = {'ocr': ''}
+        return render(request, 'search/index.html', context)
+
     else:
         print('GET,POST以外のHTTP methodでアクセスされました．HTTP method: ', request.method)
         context = {}
-    return render(request, 'search/index.html', context)
+        return render(request, 'search/index.html', context)
 
 
 @login_required

@@ -25,9 +25,12 @@ class Searcher:
             expr: 検索する式（LaTeX）。
             start: 検索開始位置。
             lr_list: 検索対象の言語のリスト。
-            test: testのときにはTrueにする．
+            test: testのときにはTrueにする。
         Returns:
-            {'search_result': search_result}
+            {
+                'search_result': search result.
+                'has_next': 未表示の検索結果が残っていればTrue。
+            }
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
         try:
@@ -38,69 +41,67 @@ class Searcher:
             with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
                 score_list = Cursor.search(cursor, path_set)
 
-            search_result = __class__._get_search_result(score_list, start, lr_list, test)
-            result = {
-                'search_result': search_result
+            search_result, has_next = __class__._get_search_result(score_list, start, lr_list, test)
+            return {
+                'search_result': search_result,
+                'has_next': has_next
                 }
-            return result
         except exceptions.LarkError:
-            result = {
-                'search_result': []
+            return {
+                'search_result': [],
+                'has_next': False
             }
-            return result
         except Exception:
-            result = {
-                'search_result': []
+            return {
+                'search_result': [],
+                'has_next': False
             }
-            return result
 
     @staticmethod
-    def _get_search_result(score_list: list, start: int, lr_list: list[str], test: bool = False) -> list[dict]:
+    def _get_search_result(score_list: list, start: int, lr_list: list[str], test: bool = False) -> tuple[list[dict], bool]:
         """uri_idをクエリにpage tableからpageの情報を取得して返す関数．
         Args:
             score_list: [['expr_id', degree of similarity], ...]
                 e.g. [['10', 0.8], ['3', 0.7], ['23', 0.4]]
             start: 検索開始位置。
-            test: testのときにはTrueにする．
+            test: testのときにはTrueにする。
         Returns:
-            uri, title, snippetをkeyに持つdictionaryのリスト。
+            (search_result, has_next)
+            search_result: uri, title, snippetをkeyに持つdictionaryのリスト。
+            has_next: 未表示の検索結果が残っていればTrue。
         """
-        # 現在のアルゴリズムだと，特定のページが複数回出てくる可能性がある
-        uri_ids = []  # 表示するuri_idのリスト
+        page_count = 0
+        result_uri_ids = []
         search_result: list[dict] = []
-        num = len(score_list) - start
-        if num <= 0:
-            return []
 
-        for i in range(num):
-            expr_id: str = score_list[i][0]
+        for score in score_list:
+            expr_id: str = score[0]
             with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
                 info, expr_len = Cursor.select_info_and_len_from_inverted_index_where_expr_id_1(cursor, int(expr_id))
+
                 for j, uri_id in enumerate(info.uri_id_list):
-                    if uri_id in uri_ids:
+                    expr_start_pos = info.expr_start_pos_list[j]
+                    if (info.lang_list[j] not in lr_list) or\
+                       (uri_id in result_uri_ids) or\
+                       (not expr_start_pos):
                         continue
-                    lang = info.lang_list[j]
-                    if lang not in lr_list:
-                        continue
+
                     page_info = Cursor.select_all_from_page_where_uri_id_1(cursor, uri_id)
                     if page_info is None:
                         continue
-                    expr_start_pos = info.expr_start_pos_list[j]
-                    if not expr_start_pos:
-                        continue
-                    search_result.append({
-                        'uri': page_info[0],
-                        'title': page_info[3],
-                        'snippet': Formatter.format(
-                            Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
-                            )
-                    })
-                    if len(search_result) >= __class__.search_num:
-                        break
-                else:
-                    # this code is executed when the inner loop doesn't break.
-                    continue
-                # the outer loop breaks when the inner loop breaks.
-                break
+                    if start <= page_count:
+                        if len(search_result) < __class__.search_num:
+                            search_result.append({
+                                'uri': page_info[0],
+                                'title': page_info[3],
+                                'snippet': Formatter.format(
+                                    Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
+                                    )
+                            })
+                            result_uri_ids.append(uri_id)
+                        else:
+                            # (search_num + 1)個の検索結果があるとき
+                            return search_result, True
+                    page_count += 1
 
-        return search_result
+        return search_result, False
