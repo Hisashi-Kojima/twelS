@@ -44,7 +44,7 @@ class SuccessfulUserCreateTests(TestCase):
         self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
 
         body_lines = mail.outbox[0].body.split('\n')
-        auth_url = body_lines[6]  # メール本文から認証urlを取得
+        auth_url = body_lines[8]  # メール本文から認証urlを取得
 
         self.assertIn('http://127.0.0.1:8000/login/user_create/complete/', auth_url)
 

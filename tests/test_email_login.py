@@ -105,7 +105,7 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
             self.assertEqual(mail.outbox[0].to, [e_address])  # 宛先
             # 認証URLを取得
             body_lines = mail.outbox[0].body.split('\n')
-            url = body_lines[5]  # メール本文から認証urlを取得
+            url = body_lines[7]  # メール本文から認証urlを取得
             self.assertIn(self.live_server_url + '/login/email_login/complete/', url)
             # 認証URLにアクセス
             driver.get(url)
