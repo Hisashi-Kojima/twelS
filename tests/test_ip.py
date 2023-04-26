@@ -28,7 +28,7 @@ class IPTests(TestCase):
         self.response = self.client.post(user_create_url, data, HTTP_ORIGIN=self.origin, REMOTE_ADDR=self.client_ip)
 
         body_lines = mail.outbox[0].body.split('\n')
-        url = body_lines[6]  # メール本文から認証urlを取得
+        url = body_lines[8]  # メール本文から認証urlを取得
         self.response = self.client.get(url, REMOTE_ADDR=self.client_ip)
 
         self.assertRedirects(self.response, reverse('search:index'))  # 自動でログインされるのでindexにリダイレクトされるか確認
