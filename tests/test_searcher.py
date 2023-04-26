@@ -104,3 +104,167 @@ def test_search_2():
         assert expr.mathml in actual['search_result'][0]['snippet']
     finally:
         reset_tables()
+
+
+def test_search_3():
+    """検索結果数が0件のときにFalseが帰ってくることを確認するテスト。
+    """
+    mathml = '<math><mn>1</mn></math>'
+    expr = Expression(mathml)
+    actual = Searcher.search(expr, 0, ['ja'], test=True)
+    assert len(actual['search_result']) == 0
+    assert actual['has_next'] is False
+
+
+def test_search_4():
+    """検索結果数が9件のときにhas_nextがFalseであることを確認するテスト。
+    """
+    try:
+        page_num = Searcher.search_num - 1
+        number = '1'
+        mathml = f'<math><mn>{number}</mn></math>'
+        body = f'{mathml}は数字の1つです。'
+        snippet = Snippet(body)
+        lang = 'ja'
+
+        exprs = [Expression(mathml)]
+
+        for i in range(page_num):
+            uri = f'uri_{i}'
+            title = f'title_{i}'
+            page_item = Page(uri=uri, title=title, snippet=snippet, lang=lang, exprs=exprs)
+            assert Indexer.update_db(ItemAdapter(page_item), test=True)
+
+        lr_list = [lang]
+        actual = Searcher.search(number, 0, lr_list, test=True)
+        assert len(actual['search_result']) == page_num
+        assert actual['has_next'] is False
+
+    finally:
+        reset_tables()
+
+
+def test_search_5():
+    """検索結果数が10件のときにhas_nextがFalseであることを確認するテスト。
+    """
+    try:
+        page_num = Searcher.search_num
+        number = '1'
+        mathml = f'<math><mn>{number}</mn></math>'
+        body = f'{mathml}は数字の1つです。'
+        snippet = Snippet(body)
+        lang = 'ja'
+
+        exprs = [Expression(mathml)]
+
+        for i in range(page_num):
+            uri = f'uri_{i}'
+            title = f'title_{i}'
+            page_item = Page(uri=uri, title=title, snippet=snippet, lang=lang, exprs=exprs)
+            assert Indexer.update_db(ItemAdapter(page_item), test=True)
+
+        lr_list = [lang]
+        actual = Searcher.search(number, 0, lr_list, test=True)
+        assert len(actual['search_result']) == page_num
+        assert actual['has_next'] is False
+
+    finally:
+        reset_tables()
+
+
+def test_search_6():
+    """検索結果数が11件のときにhas_nextがTrueであることを確認するテスト。
+    """
+    try:
+        page_num = Searcher.search_num + 1
+        number = '1'
+        mathml = f'<math><mn>{number}</mn></math>'
+        body = f'{mathml}は数字の1つです。'
+        snippet = Snippet(body)
+        lang = 'ja'
+
+        exprs = [Expression(mathml)]
+
+        for i in range(page_num):
+            uri = f'uri_{i}'
+            title = f'title_{i}'
+            page_item = Page(uri=uri, title=title, snippet=snippet, lang=lang, exprs=exprs)
+            assert Indexer.update_db(ItemAdapter(page_item), test=True)
+
+        lr_list = [lang]
+        actual = Searcher.search(number, 0, lr_list, test=True)
+        assert len(actual['search_result']) == Searcher.search_num
+        assert actual['has_next'] is True
+
+    finally:
+        reset_tables()
+
+
+def test_search_7():
+    """登録数が9件、start=9のときにhas_nextがFalseであることを確認するテスト。
+    """
+    try:
+        page_num = 9
+        number = '1'
+        mathml = f'<math><mn>{number}</mn></math>'
+        body = f'{mathml}は数字の1つです。'
+        snippet = Snippet(body)
+        lang = 'ja'
+
+        exprs = [Expression(mathml)]
+
+        for i in range(page_num):
+            uri = f'uri_{i}'
+            title = f'title_{i}'
+            page_item = Page(uri=uri, title=title, snippet=snippet, lang=lang, exprs=exprs)
+            assert Indexer.update_db(ItemAdapter(page_item), test=True)
+
+        lr_list = [lang]
+        actual = Searcher.search(number, page_num, lr_list, test=True)
+        assert len(actual['search_result']) == 0
+        assert actual['has_next'] is False
+
+    finally:
+        reset_tables()
+
+
+def test_search_8():
+    """同じ検索結果が2回以上表示されないことを確認するテスト。
+    '1+2+3'がページ中の'1+2+3'と'1+2+4'のどちらにもヒットしたときに、
+    同じページが2回表示されないことを確認する。
+    """
+    try:
+        mathml_1 = """<math>
+                        <mn>1</mn>
+                        <mo>+</mo>
+                        <mn>2</mn>
+                        <mo>+</mo>
+                        <mn>3</mn>
+                      </math>"""
+        mathml_2 = """<math>
+                        <mn>1</mn>
+                        <mo>+</mo>
+                        <mn>2</mn>
+                        <mo>+</mo>
+                        <mn>4</mn>
+                      </math>"""
+
+        body = f'{mathml_1}や{mathml_2}は数式です。'
+        snippet = Snippet(body)
+        lang = 'ja'
+        expr_1 = Expression(mathml_1)
+        expr_2 = Expression(mathml_2)
+
+        exprs = [expr_1, expr_2]
+
+        uri = 'uri_1'
+        title = 'title_1'
+        page_item = Page(uri=uri, title=title, snippet=snippet, lang=lang, exprs=exprs)
+        assert Indexer.update_db(ItemAdapter(page_item), test=True)
+
+        lr_list = [lang]
+        actual = Searcher.search('1+2+3', 0, lr_list, test=True)
+        assert len(actual['search_result']) == 1
+
+    finally:
+        reset_tables()

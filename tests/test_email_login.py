@@ -40,7 +40,7 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
         # テスト中はCSRFの検証を切っておく
         settings.CSRF_COOKIE_SECURE = False
         settings.SESSION_COOKIE_SECURE = False
-        
+
     # ----tests----
     # ブラウザごとにテストする
 
@@ -105,15 +105,10 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
             self.assertEqual(mail.outbox[0].to, [e_address])  # 宛先
             # 認証URLを取得
             body_lines = mail.outbox[0].body.split('\n')
-            url = body_lines[5]  # メール本文から認証urlを取得
+            url = body_lines[7]  # メール本文から認証urlを取得
             self.assertIn(self.live_server_url + '/login/email_login/complete/', url)
             # 認証URLにアクセス
             driver.get(url)
-            wait.until(EC.presence_of_all_elements_located)
-            assert driver.title == 'メール認証が完了しました'
-            # 検索ページを確認
-            element = driver.find_element(By.LINK_TEXT, "ログイン完了")
-            element.click()
             wait.until(EC.presence_of_all_elements_located)
             assert driver.title == 'twelS'
             # ログインできているか確認

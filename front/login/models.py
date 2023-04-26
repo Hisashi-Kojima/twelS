@@ -89,7 +89,7 @@ class IPAddress(models.Model):
     last_access = models.DateTimeField(_('last access'), default=timezone.now)
 
     def __str__(self):
-        return self.user.email
+        return f"{self.user.email} ({self.ip_address})"
 
 
 class PasswordResetRequest(models.Model):
