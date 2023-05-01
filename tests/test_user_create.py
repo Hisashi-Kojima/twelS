@@ -53,3 +53,32 @@ class SuccessfulUserCreateTests(TestCase):
         self.assertRedirects(self.response, reverse('search:index'))  # ユーザー登録したら数式検索ページにリダイレクト
         self.assertEqual(self.response.status_code, 302)
         self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp', is_active=True))
+
+
+class AfterUserCreateTests(TestCase):
+    """ログイン成功時のテスト"""
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
+    def setUp(self):
+        """ログインするユーザーを作成"""
+        url = reverse('login:user_create')
+        self.data = {
+            'email': 'test@edu.cc.saga-u.ac.jp',
+            'password': 'TestPass1',
+        }
+        # The headers sent via **extra should follow CGI specification.
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
+        self.response = self.client.post(url, self.data, HTTP_ORIGIN='http://127.0.0.1:8000')
+        body_lines = mail.outbox[0].body.split('\n')
+        auth_url = body_lines[8]  # メール本文から認証urlを取得
+        self.response = self.client.get(auth_url)
+
+        self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp'))
+        self.client.get(reverse('login:logout'))  # ユーザー登録時に自動的にログインされるのでログアウト
+
+    def test_existing_user(self):
+        login_url = reverse('login:user_create')
+        self.response = self.client.get(login_url)
+
+        self.response = self.client.post(login_url, self.data)
+        self.assertRegex(self.response.request['PATH_INFO'], reverse('login:user_create'))  # 現在のページがユーザー登録ページであることを確認
+        self.assertContains(self.response, 'User with this Email address already exists.')  # エラーメッセージを確認

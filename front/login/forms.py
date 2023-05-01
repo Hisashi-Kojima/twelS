@@ -164,10 +164,12 @@ class CustomUserCreateForm(forms.ModelForm):
         if password:
             try:
                 password_validation.validate_password(password, self.instance)
-                email = self.cleaned_data['email']
-                check_request(UserCreateRequest, email)
             except ValidationError as error:
                 self.add_error("password", error)
+            else:
+                email = self.cleaned_data.get("email")
+                if email:
+                    check_request(UserCreateRequest, email)
 
     def save(self, commit=True):
         user = super().save(commit=False)
