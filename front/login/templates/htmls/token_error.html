@@ -6,7 +6,8 @@
 
 {% block body %}
 <p>
-    アクセスされた認証URLのトークンは正しくないか期限が切れています<br>
+    {{ message }}<br>
+    もう一度お試しください。<br>
     <a class="btn btn-primary btn-lg" href="{% url 'login:login' %}">ログイン画面に戻る</a>
 </p>
 {% endblock body %}

@@ -152,16 +152,25 @@ class UserCreateComplete(generic.TemplateView):
         # 期限切れ
         except SignatureExpired as e:
             logger.error(f'{e} in user_create.')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは期限切れです。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenが間違っている
         except BadSignature as e:
             logger.error(f'{e} in user_create.')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは正しくありません。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # それ以外のエラー
         except Exception as e:
             logger.error(f'{e} in user_create.')
+            context = {
+                'message': 'それ以外のエラー。',
+            }
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
@@ -324,16 +333,26 @@ class EmailLoginComplete(generic.TemplateView):
         # 期限切れ
         except SignatureExpired as e:
             logger.error(f'{e} in email_login')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは期限切れです。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenが間違っている
         except BadSignature as e:
             logger.error(f'{e} in email_login')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは正しくありません。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # それ以外のエラー
         except Exception as e:
             logger.error(f'{e} in email_login')
+            context = {
+                'message': 'それ以外のエラー。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenは問題なし
         else:
