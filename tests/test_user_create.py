@@ -1,8 +1,12 @@
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
+import freezegun
+
 
 User = get_user_model()
 
@@ -53,6 +57,51 @@ class SuccessfulUserCreateTests(TestCase):
         self.assertRedirects(self.response, reverse('search:index'))  # ユーザー登録したら数式検索ページにリダイレクト
         self.assertEqual(self.response.status_code, 302)
         self.assertTrue(User.objects.get(email='test@edu.cc.saga-u.ac.jp', is_active=True))
+
+
+class UnsuccessfulUserCreateTests(TestCase):
+    """ユーザー登録失敗時のテスト"""
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
+    def setUp(self):
+        user = User.objects.filter(email="test@edu.cc.saga-u.ac.jp")
+        self.assertQuerysetEqual(user, [])
+
+        url = reverse('login:user_create')
+        data = {
+            'email': 'test@edu.cc.saga-u.ac.jp',
+            'password': 'TestPass1',
+        }
+        # The headers sent via **extra should follow CGI specification.
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
+        self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
+
+        self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
+        self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
+        self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
+
+    def test_wrong_url(self):
+        wrong_url = 'http://127.0.0.1:8000/login/user_create/complete/wrong_token/'
+
+        response = self.client.get(wrong_url)
+
+        self.assertEqual(response.status_code, 401)
+
+        html_content = response.content.decode('utf-8')
+        self.assertIn('この認証URLは正しくありません。', html_content)
+
+    def test_expired_url(self):
+
+        body_lines = mail.outbox[0].body.split('\n')
+        auth_url = body_lines[8]  # メール本文から認証urlを取得
+
+        date_after_24h = datetime.datetime.now() + datetime.timedelta(hours=24)
+
+        with freezegun.freeze_time(date_after_24h):  # 24時間後の時刻で以下を実行
+            response = self.client.get(auth_url)
+
+            self.assertEqual(response.status_code, 401)
+            html_content = response.content.decode('utf-8')
+            self.assertIn('この認証URLは期限切れです。', html_content)
 
 
 class AfterUserCreateTests(TestCase):
