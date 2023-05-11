@@ -1,8 +1,11 @@
+import datetime
+
 from django.conf import settings
 from django.core import mail
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
+import freezegun
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,6 +28,49 @@ class EmailLoginTest(TestCase):
     def test_csrf(self):
         """csrfトークンを含むこと"""
         self.assertContains(self.response, 'csrfmiddlewaretoken')
+
+
+class UnsuccessfulEmailLoginTest(TestCase):
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き
+    def setUp(self):
+        emailuser = EmailUser.objects.filter(email="test@edu.cc.saga-u.ac.jp")
+        self.assertQuerysetEqual(emailuser, [])
+
+        url = reverse('login:email_login')
+        data = {
+            'email': 'test@edu.cc.saga-u.ac.jp',
+        }
+        # The headers sent via **extra should follow CGI specification.
+        # CGI (Common Gateway Interface)に対応するためにヘッダー名の先頭に'HTTP_'を追加する
+        self.client.post(url, data, HTTP_ORIGIN='http://127.0.0.1:8000')
+
+        self.assertEqual(len(mail.outbox), 1)  # 1通のメールが送信されていること
+        self.assertEqual(mail.outbox[0].from_email, '22801001@edu.cc.saga-u.ac.jp')  # 送信元
+        self.assertEqual(mail.outbox[0].to, ['test@edu.cc.saga-u.ac.jp'])  # 宛先
+
+    def test_wrong_url(self):
+        wrong_url = 'http://127.0.0.1:8000/login/email_login/complete/wrong_token/'
+
+        response = self.client.get(wrong_url)
+
+        self.assertEqual(response.status_code, 401)
+
+        html_content = response.content.decode('utf-8')
+        self.assertIn('この認証URLは正しくありません。', html_content)
+
+    def test_expired_url(self):
+
+        body_lines = mail.outbox[0].body.split('\n')
+        auth_url = body_lines[7]  # メール本文から認証urlを取得
+
+        date_after_5m = datetime.datetime.now() + datetime.timedelta(minutes=5)
+
+        with freezegun.freeze_time(date_after_5m):  # 5分後の時刻で以下を実行
+            response = self.client.get(auth_url)
+
+            self.assertEqual(response.status_code, 401)
+            html_content = response.content.decode('utf-8')
+            self.assertIn('この認証URLは期限切れです。', html_content)
 
 
 class SeleniumEmailLoginTests(LiveServerTestCase):
