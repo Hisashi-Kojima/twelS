@@ -26,10 +26,6 @@ class StackExchangeSpider(scrapy.Spider):
         'math.stackexchange.com',
     ]
 
-    custom_settings = {
-        'ROBOTSTXT_OBEY': False,
-    }
-
     count = 0
     category_urls = _load_script('web_crawler/spiders/stackexchange_urls.txt')
     start_urls = category_urls
