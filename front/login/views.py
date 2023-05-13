@@ -152,16 +152,25 @@ class UserCreateComplete(generic.TemplateView):
         # 期限切れ
         except SignatureExpired as e:
             logger.error(f'{e} in user_create.')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは期限切れです。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenが間違っている
         except BadSignature as e:
             logger.error(f'{e} in user_create.')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは正しくありません。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # それ以外のエラー
         except Exception as e:
             logger.error(f'{e} in user_create.')
+            context = {
+                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+            }
             return render(request, 'htmls/token_error.html', status=401)
 
         # tokenは問題なし
@@ -186,8 +195,10 @@ class UserCreateComplete(generic.TemplateView):
 
             except Exception as e:
                 logger.error(f'{e} in user_create')
-                return render(request, 'htmls/token_error.html', status=401)
-
+                context = {
+                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                }
+                return render(request, 'htmls/token_error.html', context, status=401)
             else:
                 # 同じ認証URLに複数回アクセスした場合もindexにリダイレクト
                 if not user.is_active:
@@ -265,6 +276,7 @@ class PasswordResetConfirm(PasswordResetConfirmView):
             user = User._default_manager.get(pk=uid)
             user.save()
 
+            # パスワードリセットのリクエストの回数制限をリセット
             user_request = PasswordResetRequest.objects.get(email=user.email)
 
             user_request.email_request_times = 0
@@ -324,20 +336,31 @@ class EmailLoginComplete(generic.TemplateView):
         # 期限切れ
         except SignatureExpired as e:
             logger.error(f'{e} in email_login')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは期限切れです。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenが間違っている
         except BadSignature as e:
             logger.error(f'{e} in email_login')
-            return render(request, 'htmls/token_error.html', status=401)
+            context = {
+                'message': 'この認証URLは正しくありません。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # それ以外のエラー
         except Exception as e:
             logger.error(f'{e} in email_login')
+            context = {
+                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+            }
+            return render(request, 'htmls/token_error.html', context, status=401)
 
         # tokenは問題なし
         else:
             try:
+                # メールアドレスログインの回数制限をリセットする
                 emailuser = Emailuser.objects.get(pk=user_pk)
 
                 email_request = EmailLoginRequest.objects.get(email=emailuser.email)
@@ -347,11 +370,14 @@ class EmailLoginComplete(generic.TemplateView):
 
             except Exception as e:
                 logger.error(f'{e} in email_login')
-                return render(request, 'htmls/token_error.html', status=401)
+                context = {
+                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                }
+                return render(request, 'htmls/token_error.html', context, status=401)
             else:
-                # 問題なければログインとする
+                # 問題なければログインする
+                # Emailuserはis_active=Trueのときログイン状態
                 emailuser.is_active = True
                 emailuser.save()
                 login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
                 return redirect('search:index')
-        return render(request, 'htmls/token_error.html', status=401)
