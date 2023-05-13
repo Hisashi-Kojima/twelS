@@ -276,6 +276,7 @@ class PasswordResetConfirm(PasswordResetConfirmView):
             user = User._default_manager.get(pk=uid)
             user.save()
 
+            # パスワードリセットのリクエストの回数制限をリセット
             user_request = PasswordResetRequest.objects.get(email=user.email)
 
             user_request.email_request_times = 0
@@ -359,6 +360,7 @@ class EmailLoginComplete(generic.TemplateView):
         # tokenは問題なし
         else:
             try:
+                # メールアドレスログインの回数制限をリセットする
                 emailuser = Emailuser.objects.get(pk=user_pk)
 
                 email_request = EmailLoginRequest.objects.get(email=emailuser.email)
@@ -373,9 +375,9 @@ class EmailLoginComplete(generic.TemplateView):
                 }
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
-                # 問題なければログインとする
+                # 問題なければログインする
+                # Emailuserはis_active=Trueのときログイン状態
                 emailuser.is_active = True
                 emailuser.save()
                 login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
                 return redirect('search:index')
-        return render(request, 'htmls/token_error.html', status=401)
