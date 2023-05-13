@@ -169,7 +169,7 @@ class UserCreateComplete(generic.TemplateView):
         except Exception as e:
             logger.error(f'{e} in user_create.')
             context = {
-                'message': 'それ以外のエラー。',
+                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
             }
             return render(request, 'htmls/token_error.html', status=401)
 
@@ -195,8 +195,10 @@ class UserCreateComplete(generic.TemplateView):
 
             except Exception as e:
                 logger.error(f'{e} in user_create')
-                return render(request, 'htmls/token_error.html', status=401)
-
+                context = {
+                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                }
+                return render(request, 'htmls/token_error.html', context, status=401)
             else:
                 # 同じ認証URLに複数回アクセスした場合もindexにリダイレクト
                 if not user.is_active:
@@ -350,7 +352,7 @@ class EmailLoginComplete(generic.TemplateView):
         except Exception as e:
             logger.error(f'{e} in email_login')
             context = {
-                'message': 'それ以外のエラー。',
+                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
             }
             return render(request, 'htmls/token_error.html', context, status=401)
 
@@ -366,7 +368,10 @@ class EmailLoginComplete(generic.TemplateView):
 
             except Exception as e:
                 logger.error(f'{e} in email_login')
-                return render(request, 'htmls/token_error.html', status=401)
+                context = {
+                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                }
+                return render(request, 'htmls/token_error.html', context, status=401)
             else:
                 # 問題なければログインとする
                 emailuser.is_active = True
