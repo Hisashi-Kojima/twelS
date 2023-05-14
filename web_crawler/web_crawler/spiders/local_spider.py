@@ -4,8 +4,8 @@
 from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
 
-from web_crawler.spiders.local_manabitimes_spider import LocalManabitimesSpider
-from web_crawler.spiders.local_wiki_spider import LocalWikiSpider, LocalWikiEnSpider
+from local_manabitimes_spider import LocalManabitimesSpider
+from local_wiki_spider import LocalWikiSpider, LocalWikiEnSpider
 
 
 if __name__ == "__main__":

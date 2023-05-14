@@ -8,8 +8,8 @@ import os
 import scrapy
 from scrapy.http.response.html import HtmlResponse
 
-from web_crawler.items import Page
-from web_crawler.spiders import functions
+from web_crawler.web_crawler.items import Page
+from web_crawler.web_crawler.spiders import functions
 
 
 class LocalManabitimesSpider(scrapy.Spider):
