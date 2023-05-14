@@ -92,28 +92,6 @@ function getLRString(){
 }
 
 /** 
- * formの情報をURL情報に含めてGETメソッドでアクセスする関数。
- * Notes:
- *   GET methodでサーバに検索クエリを送りたい。
- *   フォームで送信すると、application/x-www-form-urlencodedが
- *   適用されるため、自動で' 'が'+'に変換されてしまう。
- *   事前に' 'を'%20'に変換すると、2度目の変換で'%'が'%25'になり、
- *   ' 'が最終的には'%2520'になってしまう。
- *   URL.searchParamasを使用すると自動でencodeされてしまうので
- *   今回は使用しない。
- */
-function submitForm(){
-    let url = window.location.origin + '/';
-
-    const mainForm = document.getElementById('mainForm');
-    const query = makeQueryString(mainForm.q.value);
-    url += `?q=${query}`;
-    url += getLRString();
-
-    window.location.href = url;
-}
-
-/** 
  * 2つ以上のspaceをqueryの区切り文字として複数のqueryを区切る関数。
  * @param {string} inputText: queries.
  * @return {Array[string]} 
@@ -153,6 +131,31 @@ function insertExpr(expr){
 
     renderInput();
 }
+
+
+/** 
+ * formの情報をURL情報に含めてGETメソッドでアクセスする関数。
+ * Notes:
+ *   GET methodでサーバに検索クエリを送りたい。
+ *   フォームで送信すると、application/x-www-form-urlencodedが
+ *   適用されるため、自動で' 'が'+'に変換されてしまう。
+ *   事前に' 'を'%20'に変換すると、2度目の変換で'%'が'%25'になり、
+ *   ' 'が最終的には'%2520'になってしまう。
+ *   URL.searchParamasを使用すると自動でencodeされてしまうので
+ *   今回は使用しない。
+ */
+const mainForm = document.getElementById('mainForm');
+mainForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    let url = window.location.origin + '/';
+
+    const query = makeQueryString(mainForm.q.value);
+    url += `?q=${query}`;
+    url += getLRString();
+
+    window.location.href = url;
+}, false);
 
 
 document.addEventListener('DOMContentLoaded', function(){
