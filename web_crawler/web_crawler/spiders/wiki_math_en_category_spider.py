@@ -7,14 +7,12 @@ from scrapy.http import TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-from ..items import DownloadItem
 
-
-class WikiEconomicsCategorySpider(CrawlSpider):
-    # type 'scrapy crawl wiki_economics' to crawl.
-    name = 'economics_category'
+class WikiMathCategorySpider(CrawlSpider):
+    # type 'scrapy crawl wiki_math_en' to crawl.
+    name = 'wiki_math_en_category'
     allowed_domains = [
-        'ja.wikipedia.org',
+        'en.wikipedia.org',
     ]
 
     custom_settings = {
@@ -22,10 +20,9 @@ class WikiEconomicsCategorySpider(CrawlSpider):
         'DEPTH_LIMIT': 3,
     }
 
-    count = 0
     start_urls = [
-        # 経済学に関する記事の一覧
-        'https://ja.wikipedia.org/wiki/Category:%E7%B5%8C%E6%B8%88%E5%AD%A6',
+        # 数学に関する記事の一覧
+        'https://en.wikipedia.org/wiki/Category:Mathematics',
     ]
 
     category_path = 'wiki/Category:'
@@ -48,8 +45,8 @@ class WikiEconomicsCategorySpider(CrawlSpider):
                 restrict_xpaths=([
                     '//*[@id="mw-normal-catlinks"]',
                 ]),
-                # Category:学科別分類はいらない
-                deny=('https://ja.wikipedia.org/wiki/Category:%E5%AD%A6%E7%A7%91%E5%88%A5%E5%88%86%E9%A1%9E'),
+                # Category:Main topic classificationsはいらない
+                deny=('https://en.wikipedia.org/wiki/Category:Main_topic_classifications'),
             ),
             callback='parse'
         ),
@@ -60,4 +57,3 @@ class WikiEconomicsCategorySpider(CrawlSpider):
         with open("web_crawler/spiders/category.txt", "a", encoding='utf-8',newline="\n") as file:
             file.write(response.url),
             file.write("\n"),
-

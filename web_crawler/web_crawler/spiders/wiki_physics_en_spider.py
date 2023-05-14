@@ -18,23 +18,27 @@ def _load_script(path: str) -> str:
     return script
 
 
-class WikiEconomicsSpider(CrawlSpider):
-    # type 'scrapy crawl math' to crawl.
-    name = 'economics'
+class WikiPhysicsSpider(CrawlSpider):
+    # type 'scrapy crawl wiki_physics_en' to crawl.
+    name = 'wiki_physics_en'
+    allowed_domains = [
+        'en.wikipedia.org',
+    ]
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
-        'FILES_STORE': 'web_pages/economics',
-        'ITEM_PIPELINES': {'wiki_crawler.pipelines.DownloadPipeline': 300},
+        'FILES_STORE': 'web_pages/en/physics',
+        'ITEM_PIPELINES': {'web_crawler.pipelines.DownloadPipeline': 300},
     }
 
     count = 0
     category_urls = _load_script('web_crawler/spiders/category.txt')
     start_urls = category_urls
-    
+
     category_path = 'wiki/Category:'
     next_page = '/w/index'
     rules = (
+        # extract category links to crawl all categories.
         Rule(
             LinkExtractor(
                 allow=(category_path, next_page),
@@ -54,7 +58,6 @@ class WikiEconomicsSpider(CrawlSpider):
             callback='parse_item'
         ),
     )
-
 
     def parse_item(self, response: TextResponse) -> scrapy.Item:
         """ページを解析する関数．"""
