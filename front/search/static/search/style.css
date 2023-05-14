@@ -85,7 +85,7 @@ label input:checked + span {
     font-size: 140%;
 }
 
-#mainForm > button{
+#mainForm > input[type="submit"]{
     font-size: 120%;
     border-radius: 5px;
     background-color: rgb(38, 132, 255);
