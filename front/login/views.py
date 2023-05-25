@@ -169,7 +169,7 @@ class UserCreateComplete(generic.TemplateView):
         except Exception as e:
             logger.error(f'{e} in UserCreateComplete.', stack_info=True)
             context = {
-                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                'message': '予期していないエラーが発生しました。',
             }
             return render(request, 'htmls/token_error.html', status=401)
 
@@ -196,7 +196,7 @@ class UserCreateComplete(generic.TemplateView):
             except Exception as e:
                 logger.error(f'{e} in UserCreateComplete.', stack_info=True)
                 context = {
-                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                    'message': '予期していないエラーが発生しました。',
                 }
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
@@ -353,7 +353,7 @@ class EmailLoginComplete(generic.TemplateView):
         except Exception as e:
             logger.error(f'{e} in EmailLoginComplete', stack_info=True)
             context = {
-                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                'message': '予期していないエラーが発生しました。',
             }
             return render(request, 'htmls/token_error.html', context, status=401)
 
@@ -371,7 +371,7 @@ class EmailLoginComplete(generic.TemplateView):
             except Exception as e:
                 logger.error(f'{e} in EmailLoginComplete', stack_info=True)
                 context = {
-                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                    'message': '予期していないエラーが発生しました。',
                 }
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
