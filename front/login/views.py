@@ -103,10 +103,7 @@ class Logout(generic.View):
         except Emailuser.DoesNotExist:
             pass
         else:
-            emailuser: EmailUser = Emailuser.objects.get(email=request.user)
-            emailuser.is_active = False
-            emailuser.save()
-
+            emailuser.logout(request)
         logout(request)
         return redirect('login:login')
 
@@ -376,8 +373,5 @@ class EmailLoginComplete(generic.TemplateView):
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
                 # 問題なければログインする
-                # Emailuserはis_active=Trueのときログイン状態
-                emailuser.is_active = True
-                emailuser.save()
-                login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
+                emailuser.login(request)
                 return redirect('search:index')

@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail as send
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
@@ -129,7 +130,7 @@ class EmailUser(AbstractBaseUser):
     password = models.CharField(_('password'), max_length=128, blank=True, null=True)
     last_login = models.DateTimeField(_('last login'), blank=True, null=True)
 
-    is_active = models.BooleanField(
+    is_active = models.BooleanField(  # ログイン中はTrue, ログアウト中はFalse
         _('active'),
         default=True,
         help_text=_(
@@ -146,6 +147,16 @@ class EmailUser(AbstractBaseUser):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
         send(subject, message, from_email, [self.email], **kwargs)
+    
+    def login(self, request):
+        self.is_active = True
+        self.save()
+        login(request, self, backend='login.auth_backend.PasswordlessAuthBackend')
+    
+    def logout(self, request):
+        self.is_active = False
+        self.save()
+        logout(request)
 
 
 class EmailLoginRequest(models.Model):
