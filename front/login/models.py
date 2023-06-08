@@ -57,12 +57,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_(
             'Designates whether the user can log into this admin site.'),
     )
+    # TODO: 退会時にFalseになるようにする。
     is_active = models.BooleanField(
         _('active'),
         default=True,
         help_text=_(
-            'Designates whether this user should be treated as active. '
+            '"is_active" indicates whether this user is active.'
             'Unselect this instead of deleting accounts.'
+            'True if the user has completed registration, False if the user is in a temporary registration state.'
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -130,12 +132,12 @@ class EmailUser(AbstractBaseUser):
     password = models.CharField(_('password'), max_length=128, blank=True, null=True)
     last_login = models.DateTimeField(_('last login'), blank=True, null=True)
 
-    is_active = models.BooleanField(  # ログイン中はTrue, ログアウト中はFalse
+    is_active = models.BooleanField(
         _('active'),
         default=True,
         help_text=_(
-            'Designates whether this user should be treated as active. '
             'Unselect this instead of deleting accounts.'
+            '"is_active" indicates whether this Emailuser is currently logged in.'
         ),
     )
 

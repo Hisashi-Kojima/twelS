@@ -94,7 +94,7 @@ class Login(LoginView):
 
 
 class Logout(generic.View):
-
+    """ログアウトした後、ログインページにリダイレクトする。"""
     def get(self, request):
         """メール認証ログインユーザーはログアウト時にis_active=False"""
         try:
@@ -104,7 +104,6 @@ class Logout(generic.View):
             pass
         else:
             emailuser.logout(request)
-        logout(request)
         return redirect('login:login')
 
 
