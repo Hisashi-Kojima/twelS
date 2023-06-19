@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail as send
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
@@ -56,12 +57,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_(
             'Designates whether the user can log into this admin site.'),
     )
+    # TODO: 退会時にFalseになるようにする。
     is_active = models.BooleanField(
         _('active'),
         default=True,
         help_text=_(
-            'Designates whether this user should be treated as active. '
+            '"is_active" indicates whether this user is active.'
             'Unselect this instead of deleting accounts.'
+            'True if the user has completed registration, False if the user is in a temporary registration state.'
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -133,8 +136,8 @@ class EmailUser(AbstractBaseUser):
         _('active'),
         default=True,
         help_text=_(
-            'Designates whether this user should be treated as active. '
             'Unselect this instead of deleting accounts.'
+            '"is_active" indicates whether this Emailuser is currently logged in.'
         ),
     )
 
@@ -146,6 +149,16 @@ class EmailUser(AbstractBaseUser):
         """Send an email to this user."""
         from_email = '22801001@edu.cc.saga-u.ac.jp'
         send(subject, message, from_email, [self.email], **kwargs)
+    
+    def login(self, request):
+        self.is_active = True
+        self.save()
+        login(request, self, backend='login.auth_backend.PasswordlessAuthBackend')
+    
+    def logout(self, request):
+        self.is_active = False
+        self.save()
+        logout(request)
 
 
 class EmailLoginRequest(models.Model):

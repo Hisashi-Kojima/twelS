@@ -94,7 +94,7 @@ class Login(LoginView):
 
 
 class Logout(generic.View):
-
+    """ログアウトした後、ログインページにリダイレクトする。"""
     def get(self, request):
         """メール認証ログインユーザーはログアウト時にis_active=False"""
         try:
@@ -103,11 +103,7 @@ class Logout(generic.View):
         except Emailuser.DoesNotExist:
             pass
         else:
-            emailuser: EmailUser = Emailuser.objects.get(email=request.user)
-            emailuser.is_active = False
-            emailuser.save()
-
-        logout(request)
+            emailuser.logout(request)
         return redirect('login:login')
 
 
@@ -151,7 +147,7 @@ class UserCreateComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired as e:
-            logger.error(f'{e} in user_create.')
+            logger.error(f'{e} in UserCreateComplete.', stack_info=True)
             context = {
                 'message': 'この認証URLは期限切れです。',
             }
@@ -159,7 +155,7 @@ class UserCreateComplete(generic.TemplateView):
 
         # tokenが間違っている
         except BadSignature as e:
-            logger.error(f'{e} in user_create.')
+            logger.error(f'{e} in UserCreateComplete.', stack_info=True)
             context = {
                 'message': 'この認証URLは正しくありません。',
             }
@@ -167,9 +163,9 @@ class UserCreateComplete(generic.TemplateView):
 
         # それ以外のエラー
         except Exception as e:
-            logger.error(f'{e} in user_create.')
+            logger.error(f'{e} in UserCreateComplete.', stack_info=True)
             context = {
-                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                'message': '予期していないエラーが発生しました。',
             }
             return render(request, 'htmls/token_error.html', status=401)
 
@@ -194,9 +190,9 @@ class UserCreateComplete(generic.TemplateView):
                     ip_address.save()
 
             except Exception as e:
-                logger.error(f'{e} in user_create')
+                logger.error(f'{e} in UserCreateComplete.', stack_info=True)
                 context = {
-                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                    'message': '予期していないエラーが発生しました。',
                 }
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
@@ -335,7 +331,7 @@ class EmailLoginComplete(generic.TemplateView):
 
         # 期限切れ
         except SignatureExpired as e:
-            logger.error(f'{e} in email_login')
+            logger.error(f'{e} in EmailLoginComplete', stack_info=True)
             context = {
                 'message': 'この認証URLは期限切れです。',
             }
@@ -343,7 +339,7 @@ class EmailLoginComplete(generic.TemplateView):
 
         # tokenが間違っている
         except BadSignature as e:
-            logger.error(f'{e} in email_login')
+            logger.error(f'{e} in EmailLoginComplete', stack_info=True)
             context = {
                 'message': 'この認証URLは正しくありません。',
             }
@@ -351,9 +347,9 @@ class EmailLoginComplete(generic.TemplateView):
 
         # それ以外のエラー
         except Exception as e:
-            logger.error(f'{e} in email_login')
+            logger.error(f'{e} in EmailLoginComplete', stack_info=True)
             context = {
-                'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                'message': '予期していないエラーが発生しました。',
             }
             return render(request, 'htmls/token_error.html', context, status=401)
 
@@ -369,15 +365,12 @@ class EmailLoginComplete(generic.TemplateView):
                 email_request.save()
 
             except Exception as e:
-                logger.error(f'{e} in email_login')
+                logger.error(f'{e} in EmailLoginComplete', stack_info=True)
                 context = {
-                    'message': '予期していないエラーが発生しました。お手数ですが、最初から手続きをお願いいたします。',
+                    'message': '予期していないエラーが発生しました。',
                 }
                 return render(request, 'htmls/token_error.html', context, status=401)
             else:
                 # 問題なければログインする
-                # Emailuserはis_active=Trueのときログイン状態
-                emailuser.is_active = True
-                emailuser.save()
-                login(request, emailuser, backend='login.auth_backend.PasswordlessAuthBackend')
+                emailuser.login(request)
                 return redirect('search:index')
