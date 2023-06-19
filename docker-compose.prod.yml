@@ -15,15 +15,15 @@ services:
       - ./webserver/logs:/var/log/nginx
       - ./uwsgi/uwsgi_params:/etc/nginx/uwsgi_params
       - ./socket:/run  # unix domain socket でpythonコンテナと通信するために必要
-      - ./front/static:/front/static
+      - ./python/front/static:/front/static
     depends_on:
       - python
     restart: always
 
   python:
     volumes: 
-      - ./front:/code/front
-      - ./web_crawler:/code/web_crawler
+      - ./python/front:/code/front
+      - ./python/web_crawler:/code/web_crawler
       - ./uwsgi:/code/uwsgi
       - ./socket:/run  # unix domain socket でNginxコンテナと通信するために必要
     tty: true

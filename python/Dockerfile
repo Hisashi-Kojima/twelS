@@ -34,7 +34,7 @@ RUN apt update \
 WORKDIR /code/
 
 # DjangoProjectディレクトリを /code/front/ へコピーする．
-COPY ./front/ /code/front/
+COPY ./python/front/ /code/front/
 
 # uWSGIの設定ファイルをコピー
 COPY ./uwsgi/ /code/uwsgi/
