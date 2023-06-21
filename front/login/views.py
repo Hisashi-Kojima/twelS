@@ -104,6 +104,7 @@ class Logout(generic.View):
             pass
         else:
             emailuser.logout(request)
+        logout(request)  # パスワードを用いるUserのログアウト
         return redirect('login:login')
 
 
