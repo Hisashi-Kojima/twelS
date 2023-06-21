@@ -1,5 +1,10 @@
 # own
 web_pages/
+
+# Solr and ZooKeeper
+solr-data/
+zoo-data/
+
 # remove static root directory from git because it's created automatically
 python/front/static/
 
@@ -205,3 +210,6 @@ socket/
 
 # selenium server log
 python/tests/selenium_node/assets/
+
+# log files
+log.*

@@ -1,5 +1,17 @@
 # プログラムの実行手順
 
+## Solrの初期化
+
+永続化している  
+/java/solr-data  
+/java/zoo-data/data  
+/java/zoo-data/datalog  
+を空にして下記コマンドを実行することでSolrを初期化できる。
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.solr.yml up
+```
+
 ## 本番環境の起動
 
 ```sh

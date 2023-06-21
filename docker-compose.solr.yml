@@ -1,0 +1,19 @@
+# docker-compose.yml for initializing Solr.
+version: '3'
+
+services:
+  python:
+    # remove old data.
+    # Solrコンテナが起動するのを待つためにsleepを入れている。
+    # docker-compose.ymlのdepends_onのservice_healthyを活用しても良いと思う。
+    command: >
+      sh -c '
+        sleep 10
+        ./entrypoint.sh
+        ./solr.sh
+        /bin/sh
+      '
+    tty: true
+    volumes:
+      - ./python/web_crawler:/code/web_crawler
+      - ./solr.sh:/code/solr.sh

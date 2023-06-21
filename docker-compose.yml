@@ -16,9 +16,17 @@ services:
     volumes:
       - ./.env:/code/.env  # for django-environ
       - ./python/twels:/code/twels  # own packages
+      - ./python/solr:/code/solr
       - ./logs:/code/logs
     environment:
       - PYTHONPATH=/code
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+      - solr1
+      - solr2
+      - solr3
     networks:
       - app_net
 
@@ -42,6 +50,113 @@ services:
       - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
     networks:
       - app_net
+
+  solr1:
+    image: solr:9.2.1
+    container_name: solr1
+    ports:
+     - "8981:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    volumes:
+      - ./java/solr-conf:/code/solr-conf
+      - ./java/security.json:/code/security.json
+      - ./java/solr-data:/var/solr
+    # With SolrCloud, Solr configuration files are kept in ZooKeeper,
+    # so upload the configuration files to ZooKeeper.
+    command: >
+      sh -c '
+        /opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zoo1:2181 -cmd upconfig -confdir /code/solr-conf -confname myconf
+        /opt/solr/bin/solr zk cp /code/security.json zk:/security.json -z zoo1:2181
+        solr-foreground
+      '
+    networks:
+      - app_net
+    tty: true
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  solr2:
+    image: solr:9.2.1
+    container_name: solr2
+    ports:
+     - "8982:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    networks:
+      - app_net
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  solr3:
+    image: solr:9.2.1
+    container_name: solr3
+    ports:
+     - "8983:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    networks:
+      - app_net
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  zoo1:
+    image: zookeeper:3.8.1
+    container_name: zoo1
+    restart: always
+    hostname: zoo1
+    ports:
+      - 2181:2181
+      - 7001:7000
+    volumes:
+      - ./java/zoo-data/data:/data
+      - ./java/zoo-data/datalog:/datalog
+    networks:
+      - app_net
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+
+  zoo2:
+    image: zookeeper:3.8.1
+    container_name: zoo2
+    restart: always
+    hostname: zoo2
+    ports:
+      - 2182:2181
+      - 7002:7000
+    networks:
+      - app_net
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+
+  zoo3:
+    image: zookeeper:3.8.1
+    container_name: zoo3
+    restart: always
+    hostname: zoo3
+    ports:
+      - 2183:2181
+      - 7003:7000
+    networks:
+      - app_net
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+
 
 networks:
   app_net:
