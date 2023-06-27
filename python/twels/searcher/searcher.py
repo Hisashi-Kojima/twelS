@@ -87,13 +87,11 @@ class Searcher:
                         continue
                     if start <= page_count:
                         if len(search_result) < __class__.search_num:
-                            search_result.append({
-                                'uri': page_info[0],
-                                'title': page_info[3],
-                                'snippet': Formatter.format(
-                                    Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len
-                                    )
-                            })
+                            search_result.append(__class__._search_result(
+                                page_info[0],
+                                page_info[3],
+                                Formatter.format(Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len)
+                            ))
                             result_uri_ids.append(uri_id)
                         else:
                             # (search_num + 1)個の検索結果があるとき
@@ -147,14 +145,39 @@ class Searcher:
     @staticmethod
     def _search_natural_lang(query: str) -> dict:
         """自然言語を検索する関数。
-        TODO: この関数の実装。
+        TODO: start, lr_listへの対応。
         """
+        print('search_natural_lang()')
         solr = get_solr_client()
-        results = solr.search(query)
-        for result in results:
-            print('Title: ', result['title'])
+        print('0')
+        results = solr.search(f'text:{query}', **{
+            'hl': 'true',
+            'hl.fl': 'content',
+            'hl.fragsize': 300,
+            'hl.tag.pre': '<span class="hl">',
+            'hl.tag.post': '</span>',
+        })
 
+        search_result: list[dict] = []
+
+        for result in results:
+            search_result.append(__class__._search_result(
+                result['url'],
+                result['title'][0],
+                Snippet(results.highlighting[result['id']]['content'][0], no_clean=True)
+            ))
+
+        # TODO: has_nextの更新。
         return {
-            'search_result': [],
+            'search_result': search_result,
             'has_next': False
             }
+
+    @staticmethod
+    def _search_result(uri: str, title: str, snippet: Snippet) -> dict:
+        """コンストラクタの役割。"""
+        return {
+            'uri': uri,
+            'title': title,
+            'snippet': snippet
+        }

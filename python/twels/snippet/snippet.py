@@ -16,6 +16,8 @@ class Snippet:
         数式は数式オブジェクトに変換することで文字数を調整できるようになる。
     TODO:
         登録できる文字のmax lengthを設定して、それに収まっているかを確認する。
+        no_clean=Falseをclean=Trueに変更。
+        不要なタグの削除(_clean_text())の高速化。
     """
     def __init__(self, snippet: str, no_clean=False):
         """登録時にはcleanする。検索時にはcleanは不要。
@@ -82,9 +84,9 @@ class Snippet:
             KaTeX are rendered in search results.
         """
         remove_list = [
-            'button', 'br', 'canvas', 'cite', 'footer', 'form', 'header', 'img',
-            'iframe', 'input', 'label', 'link', 'nav', 'noscript', 'script', 'style',
-            'svg'
+            'button', 'br', 'canvas', 'cite', 'footer', 'form', 'head', 'header',
+            'img', 'iframe', 'input', 'label', 'link', 'nav', 'noscript',
+            'script', 'style', 'svg'
             ]
 
         save_list = [

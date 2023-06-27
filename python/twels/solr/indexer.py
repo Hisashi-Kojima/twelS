@@ -7,6 +7,7 @@ import traceback
 
 import pysolr
 
+from twels.snippet.snippet import Snippet
 from twels.solr.client import get_solr_client
 from twels.utils.utils import print_in_red
 
@@ -26,12 +27,14 @@ if __name__ == '__main__':
         for i in range(len(html_paths)):
             with open(html_paths[i]) as f:
                 raw_doc: dict = solr.extract(f)
+                html_content = raw_doc['file'].replace('<?xml version="1.0" encoding="UTF-8"?>', '')
 
                 doc = {
                     'id': str(i+1),
                     'title': raw_doc['file_metadata'][23],
                     'description': raw_doc['file_metadata'][21],
                     'url': raw_doc['file_metadata'][43],
+                    'content': Snippet(html_content).text
                 }
                 docs.append(doc)
             solr.add(docs)
