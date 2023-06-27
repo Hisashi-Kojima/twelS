@@ -15,7 +15,6 @@ from pathlib import Path
 import os
 
 import environ
-import requests
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,20 +36,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '.twels.jp',
     '.eagle4.fu.is.saga-u.ac.jp',
-    env('ELASTIC_IP_ADDRESS'),
-    env('LB_DNS_NAME'),
     'testserver',  # for test
 ]
-
-# add Amazon EC2 private IP address to ALLOWED_HOSTS dynamically,
-# because EC2 private IP address changes if you stop EC2.
-# get meta data from http://169.254.169.254/latest/meta-data/
-# more detail: https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
-try:
-    EC2_PRIVATE_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.01).text
-    ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
-except requests.exceptions.RequestException:
-    pass
 
 
 # Application definition
