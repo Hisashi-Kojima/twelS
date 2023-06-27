@@ -16,17 +16,16 @@ class Snippet:
         数式は数式オブジェクトに変換することで文字数を調整できるようになる。
     TODO:
         登録できる文字のmax lengthを設定して、それに収まっているかを確認する。
-        no_clean=Falseをclean=Trueに変更。
         不要なタグの削除(_clean_text())の高速化。
     """
-    def __init__(self, snippet: str, no_clean=False):
+    def __init__(self, snippet: str, clean=True):
         """登録時にはcleanする。検索時にはcleanは不要。
         """
-        if no_clean:
-            self.snippet = __class__._parse_snippet(snippet)
-        else:
+        if clean:
             cleaned = __class__._clean(snippet)
             self.snippet = __class__._parse_snippet(cleaned)
+        else:
+            self.snippet = __class__._parse_snippet(snippet)
 
         self.text = __class__.__str__(self)
 

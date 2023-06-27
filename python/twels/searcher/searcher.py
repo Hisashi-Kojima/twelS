@@ -90,7 +90,7 @@ class Searcher:
                             search_result.append(__class__._search_result(
                                 page_info[0],
                                 page_info[3],
-                                Formatter.format(Snippet(page_info[4], no_clean=True), expr_start_pos, expr_len)
+                                Formatter.format(Snippet(page_info[4], clean=False), expr_start_pos, expr_len)
                             ))
                             result_uri_ids.append(uri_id)
                         else:
@@ -164,7 +164,7 @@ class Searcher:
             search_result.append(__class__._search_result(
                 result['url'],
                 result['title'][0],
-                Snippet(results.highlighting[result['id']]['content'][0], no_clean=True)
+                Snippet(results.highlighting[result['id']]['content'][0], clean=False)
             ))
 
         # TODO: has_nextの更新。
