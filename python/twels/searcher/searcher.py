@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """module description
 """
+import re
+
 import latex2mathml.converter
 from lark import exceptions
 
@@ -10,6 +12,7 @@ from twels.database.cursor import Cursor
 from twels.normalizer.normalizer import Normalizer
 from twels.snippet.formatter import Formatter
 from twels.snippet.snippet import Snippet
+from twels.solr.client import get_solr_client
 
 
 class Searcher:
@@ -19,10 +22,10 @@ class Searcher:
     search_num = 10
 
     @staticmethod
-    def search(expr: str, start: int, lr_list: list[str], test: bool = False) -> dict:
+    def search(query: str, start: int, lr_list: list[str], test: bool = False) -> dict:
         """
         Args:
-            expr: 検索する式（LaTeX）。
+            query: 検索する自然言語または数式（LaTeX）。
             start: 検索開始位置。
             lr_list: 検索対象の言語のリスト。
             test: testのときにはTrueにする。
@@ -34,18 +37,11 @@ class Searcher:
         """
         # LaTeX -> MathML -> Tree (-> Normalize) -> path set
         try:
-            mathml = latex2mathml.converter.convert(expr)
-            normalized = Normalizer.normalize_subsup(mathml)
-            path_set: set[str] = Parser.parse(Expression(normalized))
-            print('path_set:', str(path_set))
-            with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
-                score_list = Cursor.search(cursor, path_set)
+            if __class__._is_expr(query):
+                return __class__._search_expr(query, start, lr_list, test)
+            else:
+                return __class__._search_natural_lang(query)
 
-            search_result, has_next = __class__._get_search_result(score_list, start, lr_list, test)
-            return {
-                'search_result': search_result,
-                'has_next': has_next
-                }
         except exceptions.LarkError:
             return {
                 'search_result': [],
@@ -105,3 +101,60 @@ class Searcher:
                     page_count += 1
 
         return search_result, False
+
+    @staticmethod
+    def _is_expr(s: str) -> bool:
+        """return True when the input is a mathematical expression.
+        TODO: '/'をどう扱うかを決める。1/2は数式だが、he/sheは数式ではない。
+            エスケープを用意する？もっと前の処理で区別できるようにしておく？
+        TODO: a-bとwell-beingを区別する方法を考える。
+        TODO: 'K8s'のように数字を含む自然言語と'8y'などを区別することについて考える。
+        """
+        # starting with '\'.
+        # numbers.
+        # include operators.
+        expr_pattern = r'\\.+|\d+|.*[+\-*/<>^]+.*'
+        result = re.search(expr_pattern, s)
+        return result is not None
+
+    @staticmethod
+    def _search_expr(latex: str, start: int, lr_list: list[str], test: bool = False) -> dict:
+        """数式を検索する関数。
+        Args:
+            latex: 検索する数式（LaTeX）。
+            start: 検索開始位置。
+            lr_list: 検索対象の言語のリスト。
+            test: testのときにはTrueにする。
+        Returns:
+            {
+                'search_result': search result.
+                'has_next': 未表示の検索結果が残っていればTrue。
+            }
+        """
+        mathml = latex2mathml.converter.convert(latex)
+        normalized = Normalizer.normalize_subsup(mathml)
+        path_set: set[str] = Parser.parse(Expression(normalized))
+        print('path_set:', str(path_set))
+        with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
+            score_list = Cursor.search(cursor, path_set)
+
+        search_result, has_next = __class__._get_search_result(score_list, start, lr_list, test)
+        return {
+            'search_result': search_result,
+            'has_next': has_next
+            }
+
+    @staticmethod
+    def _search_natural_lang(query: str) -> dict:
+        """自然言語を検索する関数。
+        TODO: この関数の実装。
+        """
+        solr = get_solr_client()
+        results = solr.search(query)
+        for result in results:
+            print('Title: ', result['title'])
+
+        return {
+            'search_result': [],
+            'has_next': False
+            }

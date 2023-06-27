@@ -3,6 +3,7 @@
 """
 
 from itemadapter import ItemAdapter
+import pytest
 
 from tests.functions import reset_tables
 from twels.expr.expression import Expression
@@ -268,3 +269,30 @@ def test_search_8():
 
     finally:
         reset_tables()
+
+
+@pytest.mark.parametrize('test_input, expected', [
+    ("not expressions.", False),
+    ('1+2', True),
+    (r'\pi ', True),
+    (r'\alpha + \beta', True),
+    ('a-b', True),
+    ('1', True),
+    ('123456789', True),
+    ('-77', True),
+    ('8y', True),
+    ('well-being', False),
+    ('y=ax+b', True),
+    ('a*b', True),
+    ('1/2', True),
+    ('1<b', True),
+    ('10>d', True),
+    ('方程式', False),
+    ('e^x', True),
+    ('Kubernetes', False),
+    ('K8s', False),
+    ('he/she', False)
+])
+def test_is_expr_1(test_input, expected):
+    """入力が数式かどうかを判別する関数のテスト。"""
+    assert Searcher._is_expr(test_input) == expected
