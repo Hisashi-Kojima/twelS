@@ -19,7 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS/twelS:/home/runner/work/twelS/twelS/front
+      # add '/home/runner/work/twelS/twelS/python/front' for pytest.
+      PYTHONPATH: /home/runner/work/twelS/twelS:/home/runner/work/twelS/twelS/python/front
       
       # incorrect values
       DJANGO_SECRET_KEY: foo
@@ -54,13 +55,23 @@ jobs:
 
       - name: create a dummy file
         run: |
-          cd python
-          mkdir front/logs
-          touch front/logs/debug.log
+          mkdir python/front/logs
+          touch python/front/logs/debug.log
 
-      - name: tests
-        run: |
-          cd python
-          pytest tests/test_settings.py
-          pytest tests/test_parser.py
-          pytest tests/test_tree.py
+      - name: check Django DEBUG = False
+        run: pytest python/tests/test_settings.py
+
+      - name: parser test
+        run: pytest python/tests/test_parser.py
+
+      - name: pathset test
+        run: pytest python/tests/test_pathset.py
+
+      - name: tree test
+        run: pytest python/tests/test_tree.py
+
+      - name: cursor test
+        run: pytest python/tests/test_cursor.py
+
+      - name: indexer test
+        run: pytest python/tests/test_indexer.py
