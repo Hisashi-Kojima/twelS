@@ -13,18 +13,17 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
+  # This workflow contains a single job called "python-test"
+  python-test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: /home/runner/work/twelS/twelS:/home/runner/work/twelS/twelS/front
+      # add '/home/runner/work/twelS/twelS/python/front' for pytest.
+      PYTHONPATH: /home/runner/work/twelS/twelS/python:/home/runner/work/twelS/twelS/python/front
       
-      # incorrect values
+      # dummy values
       DJANGO_SECRET_KEY: foo
-      ELASTIC_IP_ADDRESS: 127.0.0.2
-      LB_DNS_NAME: foo.com
       MY_HISASHI_PASSWORD: foo
       MY_DB_NAME: foo
       DB_CONTAINER_NAME: foo
@@ -51,19 +50,25 @@ jobs:
           pwd
           ls
           echo '################'
-          cd ../
+          cd python
+          ls
+          echo '################'
+          cd ../..
           ls
 
       - name: create a dummy file
         run: |
-          mkdir front/logs
-          touch front/logs/debug.log
+          mkdir python/front/logs
+          touch python/front/logs/debug.log
 
       - name: check Django DEBUG = False
-        run: pytest tests/test_settings.py
+        run: pytest python/tests/test_settings.py
 
       - name: parser test
-        run: pytest tests/test_parser.py
+        run: pytest python/tests/test_parser.py
+
+      - name: pathset test
+        run: pytest python/tests/test_pathset.py
 
       - name: tree test
-        run: pytest tests/test_tree.py
+        run: pytest python/tests/test_tree.py
