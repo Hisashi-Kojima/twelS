@@ -58,10 +58,10 @@ jobs:
           touch python/front/logs/debug.log
 
       - name: check Django DEBUG = False
-        run: pytest tests/test_settings.py
+        run: pytest python/tests/test_settings.py
 
       - name: parser test
-        run: pytest tests/test_parser.py
+        run: pytest python/tests/test_parser.py
 
       - name: tree test
-        run: pytest tests/test_tree.py
+        run: pytest python/tests/test_tree.py
