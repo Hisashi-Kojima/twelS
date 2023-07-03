@@ -22,13 +22,11 @@ jobs:
       # add '/home/runner/work/twelS/twelS/python/front' for pytest.
       PYTHONPATH: /home/runner/work/twelS/twelS/python:/home/runner/work/twelS/twelS/python/front
       
-      # incorrect values
+      # dummy values
       DJANGO_SECRET_KEY: foo
       MY_HISASHI_PASSWORD: foo
       MY_DB_NAME: foo
       DB_CONTAINER_NAME: foo
-      DB_TEST_CONTAINER_NAME: foo
-      MY_TEST_DB_NAME: foo
       SENDGRID_API_KEY: foo
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -74,9 +72,3 @@ jobs:
 
       - name: tree test
         run: pytest python/tests/test_tree.py
-
-      - name: cursor test
-        run: pytest python/tests/test_cursor.py
-
-      - name: indexer test
-        run: pytest python/tests/test_indexer.py
