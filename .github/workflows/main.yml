@@ -50,7 +50,10 @@ jobs:
           pwd
           ls
           echo '################'
-          cd ../
+          cd python
+          ls
+          echo '################'
+          cd ../..
           ls
 
       - name: create a dummy file
@@ -59,7 +62,10 @@ jobs:
           touch python/front/logs/debug.log
 
       - name: check Django DEBUG = False
-        run: pytest python/tests/test_settings.py
+#         run: pytest python/tests/test_settings.py
+        run: |
+          cd python
+          pytest tests/test_settings.py
 
       - name: parser test
         run: pytest python/tests/test_parser.py
