@@ -1,7 +1,7 @@
 # own
 web_pages/
 
-# Solr and ZooKeeper
+# Solr
 java/solr-data/data/
 
 # remove static root directory from git because it's created automatically
