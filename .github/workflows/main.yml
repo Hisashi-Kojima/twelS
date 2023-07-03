@@ -28,6 +28,7 @@ jobs:
       MY_DB_NAME: foo
       DB_CONTAINER_NAME: foo
       DB_TEST_CONTAINER_NAME: foo
+      MY_TEST_DB_NAME: foo
       SENDGRID_API_KEY: foo
 
     # Steps represent a sequence of tasks that will be executed as part of the job
