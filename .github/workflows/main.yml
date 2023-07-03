@@ -13,8 +13,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
+  # This workflow contains a single job called "python-test"
+  python-test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -27,6 +27,7 @@ jobs:
       MY_HISASHI_PASSWORD: foo
       MY_DB_NAME: foo
       DB_CONTAINER_NAME: foo
+      DB_TEST_CONTAINER_NAME: foo
       SENDGRID_API_KEY: foo
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -62,10 +63,7 @@ jobs:
           touch python/front/logs/debug.log
 
       - name: check Django DEBUG = False
-#         run: pytest python/tests/test_settings.py
-        run: |
-          cd python
-          pytest tests/test_settings.py
+        run: pytest python/tests/test_settings.py
 
       - name: parser test
         run: pytest python/tests/test_parser.py
