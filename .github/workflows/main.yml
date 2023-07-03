@@ -49,19 +49,19 @@ jobs:
           pwd
           ls
           echo '################'
-          cd ../
+          cd python
           ls
 
       - name: create a dummy file
         run: |
-          mkdir python/front/logs
-          touch python/front/logs/debug.log
+          mkdir front/logs
+          touch front/logs/debug.log
 
       - name: check Django DEBUG = False
-        run: pytest python/tests/test_settings.py
+        run: pytest tests/test_settings.py
 
       - name: parser test
-        run: pytest python/tests/test_parser.py
+        run: pytest tests/test_parser.py
 
       - name: tree test
-        run: pytest python/tests/test_tree.py
+        run: pytest tests/test_tree.py
