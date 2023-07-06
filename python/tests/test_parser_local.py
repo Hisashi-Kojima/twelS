@@ -4,6 +4,7 @@
 
 from lark import Tree, Token
 
+from twels.expr.expression import Expression
 from twels.expr.parser import Parser
 from twels.expr.parser_const import ParserConst
 
@@ -84,4 +85,31 @@ def test_get_parsed_tree_log_1():
     # TODO: expectedの実装。
     expected = Tree(ParserConst.root_data, [
     ])
-    assert expected == False
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_equiv_1():
+    """congruenceのparse。
+    a ≡ b (mod n)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle a\equiv b{\pmod {n}}}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mi>a</mi>
+                            <mo>&#x2261;<!-- ≡ --></mo>
+                            <mi>b</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mspace width="1em" />
+                                <mo stretchy="false">(</mo>
+                                <mi>mod</mi>
+                                <mspace width="0.333em" />
+                                <mi>n</mi>
+                                <mo stretchy="false">)</mo>
+                            </mrow>
+                        </mstyle>
+                    </mrow>
+                </math>"""
+    # TODO: expectedの実装。
+    expected = Tree(ParserConst.root_data, [
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
