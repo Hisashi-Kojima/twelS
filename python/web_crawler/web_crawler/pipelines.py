@@ -51,3 +51,10 @@ class WebCrawlerPipeline:
         """
         Indexer.update_db(ItemAdapter(item))
         return item
+
+
+class TestCrawlerPipeline:
+    """Crawlerの動作確認のためのPipeline。"""
+    def process_item(self, item, spider: Spider):
+        Indexer.update_db(ItemAdapter(item), test=True)
+        return item
