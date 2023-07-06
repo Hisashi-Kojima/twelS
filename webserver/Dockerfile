@@ -2,4 +2,4 @@ FROM nginx:1.23.4
 
 # staticファイルはNginxのコンテナに置く必要がある．
 RUN mkdir -p /front/static/
-COPY ./front/static/ /front/static
+COPY ./python/front/static/ /front/static

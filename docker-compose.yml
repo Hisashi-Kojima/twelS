@@ -3,7 +3,6 @@ version: '3'
 
 services:
   python:
-    container_name: $PYTHON_CONTAINER_NAME
     build:
       context: .
       dockerfile: ./python/Dockerfile
@@ -13,35 +12,150 @@ services:
         uwsgi /code/uwsgi/uwsgi.ini
         /bin/sh
       '
-    volumes:
-      - ./.env:/code/.env  # for django-environ
-      - ./twels:/code/twels  # own packages
-      - ./logs:/code/logs
+    container_name: $PYTHON_CONTAINER_NAME
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+      - solr1
+      - solr2
+      - solr3
     environment:
       - PYTHONPATH=/code
     networks:
       - app_net
+    volumes:
+      - ./.env:/code/.env  # for django-environ
+      - ./python/twels:/code/twels  # own packages
+      - ./logs:/code/logs
 
   db:
     container_name: $DB_CONTAINER_NAME
-    image: mysql:$MYSQL_VERSION
-    ports:
-      # host port : container port
-      # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
-      # host portは何でもよい．
-      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
       MYSQL_DATABASE: $MY_DB_NAME  # イメージの起動時に作成するデータベースの名前
       MYSQL_USER: hisashi
       MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
+    image: mysql:$MYSQL_VERSION
+    networks:
+      - app_net
+    ports:
+      # host port : container port
+      # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
+      # host portは何でもよい．
+      - 3306:3306
     volumes:
       - ./db/mysql:/var/lib/mysql  # 永続化
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./db/logs:/var/log/mysql
       - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
+
+  solr1:
+    # With SolrCloud, Solr configuration files are kept in ZooKeeper,
+    # so upload the configuration files to ZooKeeper.
+    command: >
+      sh -c '
+        /opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zoo1:2181 -cmd upconfig -confdir /code/solr-conf -confname myconf
+        /opt/solr/bin/solr zk cp /code/security.json zk:/security.json -z zoo1:2181
+        solr-foreground
+      '
+    container_name: solr1
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    image: solr:9.2.1
     networks:
       - app_net
+    ports:
+     - "8981:8983"
+    tty: true
+    volumes:
+      - ./java/solr-conf:/code/solr-conf
+      - ./java/security.json:/code/security.json
+      - ./java/solr-data/data:/var/solr/data
+      - ./java/solr-data/log4j2.xml:/var/solr/log4j2.xml
+      - ./logs/solr:/var/solr/logs
+
+  solr2:
+    container_name: solr2
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    image: solr:9.2.1
+    networks:
+      - app_net
+    ports:
+     - "8982:8983"
+    
+  solr3:
+    container_name: solr3
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    image: solr:9.2.1
+    networks:
+      - app_net
+    ports:
+     - "8983:8983"
+
+
+  zoo1:
+    container_name: zoo1
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+    hostname: zoo1
+    image: zookeeper:3.8.1
+    networks:
+      - app_net
+    ports:
+      - 2181:2181
+      - 7001:7000
+    restart: always
+
+  zoo2:
+    container_name: zoo2
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+    hostname: zoo2
+    image: zookeeper:3.8.1
+    networks:
+      - app_net
+    ports:
+      - 2182:2181
+      - 7002:7000
+    restart: always
+
+  zoo3:
+    container_name: zoo3
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+    hostname: zoo3
+    image: zookeeper:3.8.1
+    networks:
+      - app_net
+    ports:
+      - 2183:2181
+      - 7003:7000
+    restart: always
+
 
 networks:
   app_net:

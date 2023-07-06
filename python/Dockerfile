@@ -29,12 +29,12 @@ COPY --from=build /site-packages /usr/local/lib/python${PYTHON_VERSION}/site-pac
 # install libxml2 for uWSGI.
 # make code directory for twelS code.
 RUN apt update \
-    && apt install -y libxml2 \
+    && apt install -y curl libxml2 \
     && mkdir /code/
 WORKDIR /code/
 
 # DjangoProjectディレクトリを /code/front/ へコピーする．
-COPY ./front/ /code/front/
+COPY ./python/front/ /code/front/
 
 # uWSGIの設定ファイルをコピー
 COPY ./uwsgi/ /code/uwsgi/
