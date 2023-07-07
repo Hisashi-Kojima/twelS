@@ -61,6 +61,8 @@
                     <button class="buttonGroup" onclick="insertExpr('\\vee ')">\(\vee\)</button>
                     <button class="buttonGroup" onclick="insertExpr('\\cap ')">\(\cap\)</button>
                     <button class="buttonGroup" onclick="insertExpr('\\cup ')">\(\cup\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\forall ')">\(\forall\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\exists ')">\(\exists\)</button>
                 </div>
                 <div class="panel tab-B">
                     <button class="buttonGroup" onclick="insertExpr('\\alpha ')">\(\alpha\)</button>
@@ -183,7 +185,7 @@
                 let paragraph = document.createElement('p');
                 paragraph.innerHTML = '数式の入力はTeXの記法に対応しています。<br>数式の' 
                     + `<a href="${url.textContent}">入力例</a>`
-                    + '<br><br>ギリシャ文字を検索できるように修正しました。';
+                    + '<br><br>自然言語の検索ができるようになりました。';
                 
                 let news = document.getElementById('news');
                 news.appendChild(paragraph);

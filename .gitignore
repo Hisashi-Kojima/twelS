@@ -3,6 +3,7 @@ web_pages/
 
 # Solr
 java/solr-data/data/
+java/backup/
 
 # remove static root directory from git because it's created automatically
 python/front/static/

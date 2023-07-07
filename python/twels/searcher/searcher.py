@@ -147,9 +147,7 @@ class Searcher:
         """自然言語を検索する関数。
         TODO: start, lr_listへの対応。
         """
-        print('search_natural_lang()')
         solr = get_solr_client()
-        print('0')
         results = solr.search(f'text:{query}', **{
             'hl': 'true',
             'hl.fl': 'content',

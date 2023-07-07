@@ -20,7 +20,11 @@ settings = {
         # use local_spider.py.
         'ITEM_PIPELINES': {'web_crawler.web_crawler.pipelines.WebCrawlerPipeline': 300}
     }
-base_path = os.path.abspath(__file__)  # local_wiki_spider.pyのpath
+
+
+def _get_norm_path() -> str:
+    base_path = os.path.abspath(__file__)  # local_wiki_spider.pyのpath
+    return os.path.normpath(os.path.join(base_path, '../../../web_pages/wiki'))
 
 
 def _get_wiki_uri(response: HtmlResponse) -> str:
@@ -35,7 +39,7 @@ class LocalWikiSpider(scrapy.Spider):
     name = 'local_wiki'
     custom_settings = settings
 
-    norm_path = os.path.normpath(os.path.join(base_path, '../../../web_pages/wiki'))
+    norm_path = _get_norm_path()
     # 数学と物理学、経済学のページを登録
     target_paths = glob.glob(f'{norm_path}/math/*')
     target_paths.extend(glob.glob(f'{norm_path}/physics/*'))
@@ -61,7 +65,7 @@ class LocalWikiEnSpider(scrapy.Spider):
     name = 'local_wiki_en'
     custom_settings = settings
 
-    norm_path = os.path.normpath(os.path.join(base_path, '../../../web_pages/wiki/en'))
+    norm_path = f'{_get_norm_path()}/en'
     # 数学と物理学のページを登録
     target_paths = glob.glob(f'{norm_path}/math/*')
     # target_paths.extend(glob.glob(f'{norm_path}/physics/*'))
@@ -72,6 +76,22 @@ class LocalWikiEnSpider(scrapy.Spider):
     def parse(self, response: HtmlResponse):
         LocalWikiEnSpider.count += 1
         print(f'{LocalWikiEnSpider.count}番目')
+        yield Page(
+            uri=_get_wiki_uri(response),
+            title=functions.get_title(response),
+            snippet=functions.get_snippet(response),
+            lang=functions.get_lang(response),
+            exprs=functions.get_exprs(response)
+        )
+
+
+class LocalTestSpider(scrapy.Spider):
+    """Crawlerの動作確認のためのSpider。"""
+    name = 'local_test'
+
+    start_urls = [f'{_get_norm_path()}/math/微分方程式 - Wikipedia.html']
+
+    def parse(self, response: HtmlResponse):
         yield Page(
             uri=_get_wiki_uri(response),
             title=functions.get_title(response),
