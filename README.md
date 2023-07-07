@@ -1,5 +1,11 @@
 # プログラムの実行手順
 
+## Solrの初期化
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.solr.yml up
+```
+
 ## 本番環境の起動
 
 ```sh

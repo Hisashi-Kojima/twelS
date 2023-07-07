@@ -7,7 +7,7 @@ services:
         /bin/sh
       '
     volumes: 
-      - ./web_crawler:/code/web_crawler
+      - ./python/web_crawler:/code/web_crawler
     tty: true
 
   db:

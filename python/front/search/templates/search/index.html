@@ -1,0 +1,198 @@
+{% extends './base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <!-- 公開まで検索に引っかからないようにする -->
+    <meta name="robots" content="noindex">
+
+    <title>twelS</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+{% endblock head %}
+
+{% block body %}
+    <div id="main_content">
+        <div id="mathCanvas"><span id="canvas"></span></div>
+        
+        <form id="mainForm" action="." method="GET">
+            <input type="search" id="inputText" name="q" value="" oninput="renderInput()" >
+            <input type="submit" value="検索">
+        </form>
+
+        <form id="imageForm" action="." method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="uploadImage" accept="image/*" id="uploadImage" style="display: none">
+        </form>
+
+        <div class="tab-panel">
+            <ul class="tab-group">
+                <li class="tab tab-A is-active">演算子など</li>
+                <li class="tab tab-B">ギリシャ文字</li>
+                <li class="tab tab-C">行列</li>
+                <li class="tab tab-D">その他</li>
+                <button type="button" onclick="uploadImage()">
+                    <img src="{% static 'search/images/camera-outline.png' %}" width="30" />
+                </button>
+            </ul>
+
+            <div class="panel-group">
+                <div class="panel tab-A is-show">
+                    <button class="buttonGroup" onclick="insertExpr('+')">\(+\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('-')">\(-\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\times ')">\(\times\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\div ')">\(\div\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\frac{x}{y}')">\(\frac{x}{y}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('x^{n}')">\(x^{n}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('x_{n}')">\(x_{n}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\sqrt{x}')">\(\sqrt{x}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\sqrt[n]{x}')">\(\sqrt[n]{x}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\log_{y}{x}')">\(\log_{y}{x}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('=')">\(=\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\lt ')">\(\lt\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\gt ')">\(\gt\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\ll ')">\(\ll\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\gg ')">\(\gg\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\leqq ')">\(\leqq\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\geqq ')">\(\geqq\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\wedge ')">\(\wedge\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\vee ')">\(\vee\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\cap ')">\(\cap\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\cup ')">\(\cup\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\forall ')">\(\forall\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\exists ')">\(\exists\)</button>
+                </div>
+                <div class="panel tab-B">
+                    <button class="buttonGroup" onclick="insertExpr('\\alpha ')">\(\alpha\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\beta ')">\(\beta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\gamma ')">\(\gamma\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\delta ')">\(\delta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\epsilon ')">\(\epsilon\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\zeta ')">\(\zeta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\eta ')">\(\eta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\theta ')">\(\theta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\iota ')">\(\iota\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\kappa ')">\(\kappa\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\lambda ')">\(\lambda\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\mu ')">\(\mu\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\nu ')">\(\nu\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\xi ')">\(\xi\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\o ')">\(o\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\pi ')">\(\pi\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\rho ')">\(\rho\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\sigma ')">\(\sigma\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\tau ')">\(\tau\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\upsilon ')">\(\upsilon\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\phi ')">\(\phi\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\chi ')">\(\chi\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\psi ')">\(\psi\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\omega ')">\(\omega\)</button>
+                </div>
+                <div class="panel tab-C">
+                    <button class="buttonGroup" onclick="insertExpr('\\begin{matrix} a & b \\\\ c & d \\\\ \\end{matrix}')">
+                        \begin{matrix} a & b \\ c & d \\ \end{matrix}
+                    </button>
+                    <button class="buttonGroup" onclick="insertExpr('\\begin{pmatrix} a & b \\\\ c & d \\\\ \\end{pmatrix}')">
+                        \begin{pmatrix} a & b \\ c & d \\ \end{pmatrix}
+                    </button>
+                    <button class="buttonGroup" onclick="insertExpr('\\begin{bmatrix} a & b \\\\ c & d \\\\ \\end{bmatrix}')">
+                        \begin{bmatrix} a & b \\ c & d \\ \end{bmatrix}
+                    </button>
+                    <button class="buttonGroup" onclick="insertExpr('\\begin{vmatrix} a & b \\\\ c & d \\\\ \\end{vmatrix}')">
+                        \begin{vmatrix} a & b \\ c & d \\ \end{vmatrix}
+                    </button>
+                </div>
+                <div class="panel tab-D">
+                    <button class="buttonGroup" onclick="insertExpr('\\infty ')">\(\infty\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\partial ')">\(\partial\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\nabla ')">\(\nabla\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\Delta ')">\(\Delta\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\ln{x}')">\(\ln{x}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\int_{b}^{a} f(x) dx')">\(\int_{b}^{a} f(x) dx\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\lim_{n \\to \\infty}x_{n}')">\(\lim_{n \to \infty}x_{n}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('f\\left(x\\right)')">\(f\left(x\right)\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\left| x \\right|')">\(\left| x \right|\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\sum_{i=1}^{n}x_{i}')">\(\sum_{i=1}^{n}x_{i}\)</button>
+                    <button class="buttonGroup" onclick="insertExpr('\\prod_{i=1}^{n}x_{i}')">\(\prod_{i=1}^{n}x_{i}\)</button>
+                </div>
+            </div>
+        </div>
+
+        <form id="lang" name="lang">
+            <p>検索対象の言語</p><br>
+            <label><input type="checkbox" name="lr" value="ja" checked><span>日本語</span></label>
+            &emsp;
+            <label><input type="checkbox" name="lr" value="en"><span>English</span></label>
+        </form>
+
+        <!-- HTMLは複数のスペースを1つにまとめる点に注意。 -->
+        <div><p id="result"></p><br></div>
+
+        {% for page in page_list %}
+            <div class="page">
+                <div class="fade"></div>
+                <a href="{{ page.uri }}"><h3>{{ page.title }}</h3></a>
+                <p>{{ page.snippet|safe }}</p><br>
+            </div>
+        {% endfor %}
+
+        <div id="next_page"></div>
+        <div id="news"></div>
+    </div>
+
+    <div id="url" style="display: none;">{% url 'search:input_example' %}</div>
+    <div id="page_list" style="display: none;">{{ page_list }}</div>
+    <div id="start" style="display: none;">{{ start }}</div>
+
+    <script type="text/javascript" src="{% static 'search/js/scripts.js' %}"></script>
+    <script type="text/javascript" src="{% static 'search/js/uploadImage.js' %}"></script>
+    <script type="text/javascript">
+        window.onload = onLoad;
+
+        /** 
+         * Windowを読み込んだ際に実行される関数。
+         * GET parameterの反映等を行う。
+         */
+        function onLoad(){
+            var inputText = document.getElementById('inputText');
+            inputText.focus();
+            
+            const params = getUrlParam();
+
+            // 入力欄にqueryを反映
+            let ocr = '{{ ocr|safe }}';
+            if (ocr !== '') {
+                inputText.value = ocr;
+            } else if (params['q'] != null) {
+                inputText.value = params['q'];
+                let result = document.getElementById('result');
+                result.textContent = params['q'] + 'の検索結果';
+
+                const page_list = document.getElementById('page_list').textContent;
+                const start = document.getElementById('start').textContent;
+                if (page_list == '[]') {
+                    let news = document.getElementById('news');
+                    news.innerHTML = '<p>検索結果は見つかりませんでした。</p>';
+                } else if ('{{ has_next }}' == 'True') {
+                    let nextPage = document.getElementById('next_page');
+                    const lr = getLRString();
+                    nextPage.innerHTML = `<a href="./?q=${params['q']}&start=${start}${lr}">更に表示</a>`;
+                }
+            } else {
+                const url = document.getElementById('url');
+                let paragraph = document.createElement('p');
+                paragraph.innerHTML = '数式の入力はTeXの記法に対応しています。<br>数式の' 
+                    + `<a href="${url.textContent}">入力例</a>`
+                    + '<br><br>自然言語の検索ができるようになりました。';
+                
+                let news = document.getElementById('news');
+                news.appendChild(paragraph);
+            }
+            renderInput();
+
+            reflectLRParam(params['lr']);
+        }
+    </script>
+{% endblock body %}

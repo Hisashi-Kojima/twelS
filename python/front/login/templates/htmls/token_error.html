@@ -1,0 +1,13 @@
+{% extends "search/base.html" %}
+
+{% block head %}
+<title>トークンエラー</title>
+{% endblock head %}
+
+{% block body %}
+<p>
+    {{ message }}<br>
+    お手数ですが、最初から手続きをお願いいたします。<br>
+    <a class="btn btn-primary btn-lg" href="{% url 'login:login' %}">ログイン画面に戻る</a>
+</p>
+{% endblock body %}
