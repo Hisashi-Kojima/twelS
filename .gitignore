@@ -5,6 +5,9 @@ web_pages/
 java/solr-data/data/
 java/backup/
 
+# ZooKeeper
+java/zoo-keeper/
+
 # remove static root directory from git because it's created automatically
 python/front/static/
 

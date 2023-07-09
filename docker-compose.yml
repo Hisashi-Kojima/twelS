@@ -14,12 +14,12 @@ services:
       '
     container_name: $PYTHON_CONTAINER_NAME
     depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
-      - solr1
-      - solr2
-      - solr3
+      solr1:
+        condition: service_healthy
+      solr2:
+        condition: service_healthy
+      solr3:
+        condition: service_healthy
     environment:
       - PYTHONPATH=/code
     networks:
@@ -66,6 +66,14 @@ services:
       - zoo3
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    healthcheck:
+      # solr:SolrRocks is initial_user:initial_password.
+      # 'curl http://localhost:8983/api/collections' is used as ping.
+      test: 'curl -f --user solr:SolrRocks http://localhost:8983/api/collections || exit 1'
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     image: solr:9.2.1
     networks:
       - app_net
@@ -87,6 +95,12 @@ services:
       - zoo3
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    healthcheck:
+      test: 'curl -f --user solr:SolrRocks http://localhost:8983/api/collections || exit 1'
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     image: solr:9.2.1
     networks:
       - app_net
@@ -101,6 +115,12 @@ services:
       - zoo3
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    healthcheck:
+      test: 'curl -f --user solr:SolrRocks http://localhost:8983/api/collections || exit 1'
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     image: solr:9.2.1
     networks:
       - app_net
@@ -123,6 +143,9 @@ services:
       - 2181:2181
       - 7001:7000
     restart: always
+    volumes:
+      - ./java/zoo-keeper/zoo1/data:/data
+      - ./java/zoo-keeper/zoo1/datalog:/datalog
 
   zoo2:
     container_name: zoo2
@@ -139,6 +162,9 @@ services:
       - 2182:2181
       - 7002:7000
     restart: always
+    volumes:
+      - ./java/zoo-keeper/zoo2/data:/data
+      - ./java/zoo-keeper/zoo2/datalog:/datalog
 
   zoo3:
     container_name: zoo3
@@ -155,6 +181,9 @@ services:
       - 2183:2181
       - 7003:7000
     restart: always
+    volumes:
+      - ./java/zoo-keeper/zoo3/data:/data
+      - ./java/zoo-keeper/zoo3/datalog:/datalog
 
 
 networks:
