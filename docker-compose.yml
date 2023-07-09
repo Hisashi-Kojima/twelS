@@ -13,6 +13,9 @@ services:
         /bin/sh
       '
     container_name: $PYTHON_CONTAINER_NAME
+    # Solrコンテナが立ち上がるのを待つために"sleep 10"とかを使用すると、
+    # 端末の性能によって成功するかどうかが変わりうるので、
+    # depends_onのconditionでservice_healthyを指定した。
     depends_on:
       solr1:
         condition: service_healthy

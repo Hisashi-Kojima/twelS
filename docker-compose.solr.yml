@@ -26,9 +26,6 @@ services:
       - ./java/zoo-keeper/zoo3/datalog:/code/remove/zoo3/datalog
 
   python:
-    # remove old data.
-    # Solrコンテナが起動するのを待つためにsleepを入れている。
-    # docker-compose.ymlのdepends_onのservice_healthyを活用しても良いと思う。
     command: >
       sh -c '
         ./entrypoint.sh
