@@ -53,20 +53,46 @@ services:
       - ./db/logs:/var/log/mysql
       - ./sqls/initdb:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
 
-  solr1:
+  init:
+    # There are certain configuration files containing cluster wide configuration.
+    # Since some of these are crucial for the cluster to function properly,
+    # you may need to upload such files to ZooKeeper
+    # before starting your Solr cluster for the first time.
+    # Examples of such configuration files (not exhaustive) are security.json and clusterprops.json.
+
+    # If you for example would like to enable authentication, 
+    # you can push your security.json file to ZooKeeper with the bin/solr utility.
+
+    # more info:
+    # https://solr.apache.org/guide/solr/latest/deployment-guide/zookeeper-file-management.html#preparing-zookeeper-before-first-cluster-start
+    
     # With SolrCloud, Solr configuration files are kept in ZooKeeper,
     # so upload the configuration files to ZooKeeper.
     command: >
       sh -c '
         /opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zoo1:2181 -cmd upconfig -confdir /code/solr-conf -confname myconf
         /opt/solr/bin/solr zk cp /code/security.json zk:/security.json -z zoo1:2181
-        solr-foreground
+        /opt/solr/bin/solr zk cp /opt/solr/server/solr/solr.xml zk:/solr.xml -z zoo1:2181
       '
-    container_name: solr1
     depends_on:
       - zoo1
       - zoo2
       - zoo3
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    image: solr:9.2.1
+    networks:
+      - app_net
+    volumes:
+      - ./java/solr-conf:/code/solr-conf
+      - ./java/security.json:/code/security.json
+      - ./java/solr-data/solr.xml:/opt/solr/server/solr/solr.xml
+
+  solr1:
+    container_name: solr1
+    depends_on:
+      init:
+        condition: service_completed_successfully
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     healthcheck:
@@ -82,20 +108,17 @@ services:
       - app_net
     ports:
      - "8981:8983"
-    tty: true
     volumes:
-      - ./java/solr-conf:/code/solr-conf
-      - ./java/security.json:/code/security.json
-      - ./java/solr-data/data:/var/solr/data
       - ./java/solr-data/log4j2.xml:/var/solr/log4j2.xml
-      - ./logs/solr:/var/solr/logs
+      - ./java/solr-data/solr1:/var/solr/data
+      - ./logs/solr/solr1:/var/solr/logs
+      - ./java/backup:/opt/solr/server/backup  # share the drive with other solr containers to backup.
 
   solr2:
     container_name: solr2
     depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
+      init:
+        condition: service_completed_successfully
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     healthcheck:
@@ -109,13 +132,16 @@ services:
       - app_net
     ports:
      - "8982:8983"
+    volumes:
+      - ./java/solr-data/solr2:/var/solr/data
+      - ./logs/solr/solr2:/var/solr/logs
+      - ./java/backup:/opt/solr/server/backup  # share the drive with other solr containers to backup.
     
   solr3:
     container_name: solr3
     depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
+      init:
+        condition: service_completed_successfully
     environment:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     healthcheck:
@@ -128,7 +154,11 @@ services:
     networks:
       - app_net
     ports:
-     - "8983:8983"
+      - "8983:8983"
+    volumes:
+      - ./java/solr-data/solr3:/var/solr/data
+      - ./logs/solr/solr3:/var/solr/logs
+      - ./java/backup:/opt/solr/server/backup  # share the drive with other solr containers to backup.
 
 
   zoo1:

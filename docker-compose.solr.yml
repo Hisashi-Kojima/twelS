@@ -12,12 +12,14 @@ services:
     networks:
       - app_net
     # SolrとZooKeeperを初期化するために、永続化している
-    # /java/solr-data
+    # /java/solr-data/solrX
     # /java/zoo-keeper/zooX/data
     # /java/zoo-keeper/zooX/datalog
     # を空にする必要があった。
     volumes:
-      - ./java/solr-data/data:/code/remove/solr/data
+      - ./java/solr-data/solr1:/code/remove/solr1
+      - ./java/solr-data/solr2:/code/remove/solr2
+      - ./java/solr-data/solr3:/code/remove/solr3
       - ./java/zoo-keeper/zoo1/data:/code/remove/zoo1/data
       - ./java/zoo-keeper/zoo1/datalog:/code/remove/zoo1/datalog
       - ./java/zoo-keeper/zoo2/data:/code/remove/zoo2/data

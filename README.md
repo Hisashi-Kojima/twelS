@@ -103,6 +103,20 @@ mysqldump --single-transaction -u root -p twels > mysql_backup.sql
 
 mysqlのバックアップのファイル名には221007_mysql_backup.sql（2022年10月7日の場合）のように先頭に日付を入れること。
 
+## Solrのバックアップ
+
+pythonコンテナで以下のコマンドを実行。  
+
+```sh
+curl --user Hisashi:Kojima "http://solr1:8983/solr/admin/collections?action=BACKUP&name=solrBackup&collection=twels_collection&location=backup"
+```
+
+## Solrのリストア
+
+```sh
+curl --user Hisashi:Kojima "http://solr1:8983/solr/admin/collections?action=RESTORE&name=solrBackup&collection=twels_collection&location=backup"
+```
+
 ## ローカルブランチのアップデート
 
 ```sh
@@ -113,12 +127,6 @@ e.g.
 
 ```sh
 git pull origin develop:develop
-```
-
-## EC2内でのdocker daemonの再起動
-
-```sh
-sudo systemctl restart docker
 ```
 
 ## docker composeの設定の確認

@@ -2,7 +2,7 @@
 web_pages/
 
 # Solr
-java/solr-data/data/
+java/solr-data/solr?/
 java/backup/
 
 # ZooKeeper
