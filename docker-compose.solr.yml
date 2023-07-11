@@ -3,23 +3,33 @@ version: '3'
 
 services:
   remove:
-    command: rm -rf /code/remove
+    command: >
+      sh -c '
+        rm -rf /code/remove
+        exit 0
+      '
     image: ubuntu:22.04
     networks:
       - app_net
-    # Solrを初期化するために、永続化している
-    # /java/solr-data
+    # SolrとZooKeeperを初期化するために、永続化している
+    # /java/solr-data/solrX
+    # /java/zoo-keeper/zooX/data
+    # /java/zoo-keeper/zooX/datalog
     # を空にする必要があった。
     volumes:
-      - ./java/solr-data/data:/code/remove/solr/data
+      - ./java/solr-data/solr1:/code/remove/solr1
+      - ./java/solr-data/solr2:/code/remove/solr2
+      - ./java/solr-data/solr3:/code/remove/solr3
+      - ./java/zoo-keeper/zoo1/data:/code/remove/zoo1/data
+      - ./java/zoo-keeper/zoo1/datalog:/code/remove/zoo1/datalog
+      - ./java/zoo-keeper/zoo2/data:/code/remove/zoo2/data
+      - ./java/zoo-keeper/zoo2/datalog:/code/remove/zoo2/datalog
+      - ./java/zoo-keeper/zoo3/data:/code/remove/zoo3/data
+      - ./java/zoo-keeper/zoo3/datalog:/code/remove/zoo3/datalog
 
   python:
-    # remove old data.
-    # Solrコンテナが起動するのを待つためにsleepを入れている。
-    # docker-compose.ymlのdepends_onのservice_healthyを活用しても良いと思う。
     command: >
       sh -c '
-        sleep 10
         ./entrypoint.sh
         ./solr.sh
         /bin/sh
@@ -34,12 +44,15 @@ services:
   # Solrのdepends_onを上書きするのはややこしくなりそうなので避けた。
   zoo1:
     depends_on:
-      - remove
+      remove:
+        condition: service_completed_successfully
   
   zoo2:
     depends_on:
-      - remove
+      remove:
+        condition: service_completed_successfully
   
   zoo3:
     depends_on:
-      - remove
+      remove:
+        condition: service_completed_successfully
