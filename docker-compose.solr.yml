@@ -3,9 +3,19 @@ version: '3'
 
 services:
   remove:
+    # 他のコンテナでvolumeしているディレクトリは残して、その中身だけを空にする。
+    # volumeしているディレクトリを削除すると失敗する。
     command: >
       sh -c '
-        rm -rf /code/remove
+        rm -rf /code/remove/solr1/* || exit 1
+        rm -rf /code/remove/solr2/* || exit 1
+        rm -rf /code/remove/solr3/* || exit 1
+        rm -rf /code/remove/zoo1/data/* || exit 1
+        rm -rf /code/remove/zoo2/data/* || exit 1
+        rm -rf /code/remove/zoo3/data/* || exit 1
+        rm -rf /code/remove/zoo1/datalog/* || exit 1
+        rm -rf /code/remove/zoo2/datalog/* || exit 1
+        rm -rf /code/remove/zoo3/datalog/* || exit 1
         exit 0
       '
     image: ubuntu:22.04
