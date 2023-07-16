@@ -89,6 +89,14 @@ services:
       - ./java/solr-data/solr.xml:/opt/solr/server/solr/solr.xml
 
   solr1:
+    build:
+      args:
+        - USER=${USER:?}
+        - UID=${UID:?}
+        - GROUP=${GROUP:?}
+        - GID=${GID:?}
+      context: .
+      dockerfile: ./java/Dockerfile
     container_name: solr1
     depends_on:
       init:
@@ -103,7 +111,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    image: solr:9.2.1
     networks:
       - app_net
     ports:
@@ -115,6 +122,14 @@ services:
       - ./java/backup:/opt/solr/server/backup  # share the drive with other solr containers to backup.
 
   solr2:
+    build:
+      args:
+        - USER=${USER:?}
+        - UID=${UID:?}
+        - GROUP=${GROUP:?}
+        - GID=${GID:?}
+      context: .
+      dockerfile: ./java/Dockerfile
     container_name: solr2
     depends_on:
       init:
@@ -127,7 +142,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    image: solr:9.2.1
     networks:
       - app_net
     ports:
@@ -138,6 +152,14 @@ services:
       - ./java/backup:/opt/solr/server/backup  # share the drive with other solr containers to backup.
     
   solr3:
+    build:
+      args:
+        - USER=${USER:?}
+        - UID=${UID:?}
+        - GROUP=${GROUP:?}
+        - GID=${GID:?}
+      context: .
+      dockerfile: ./java/Dockerfile
     container_name: solr3
     depends_on:
       init:
@@ -150,7 +172,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    image: solr:9.2.1
     networks:
       - app_net
     ports:
