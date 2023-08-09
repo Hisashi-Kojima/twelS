@@ -996,6 +996,50 @@ def test_get_parsed_tree_prod_of_a_seq_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_integral_1():
+    r"""parse integral.
+    \int _{a}^{b}f(x) dx
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <msubsup>
+                            <mo>&#x222B;<!-- ∫ --></mo>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>a</mi>
+                            </mrow>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>b</mi>
+                            </mrow>
+                        </msubsup>
+                        <mi>f</mi>
+                        <mo stretchy="false">(</mo>
+                        <mi>x</mi>
+                        <mo stretchy="false">)</mo>
+                        <mspace width="thinmathspace" />
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mi mathvariant="normal">d</mi>
+                        </mrow>
+                        <mi>x</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.integral_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'a')]),
+            Tree('#1', [Token(ParserConst.token_type, 'b')]),
+            Tree('#2', [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, 'f'),
+                    Tree(ParserConst.paren_data, [
+                        Token(ParserConst.token_type, 'x')
+                    ])
+                ])
+            ]),
+            Tree('#3', [Token(ParserConst.token_type, 'x')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_annotation_1():
     """annotationを含むMathMLのparse。
     出典: 方程式 - Wikipedia
@@ -1702,6 +1746,25 @@ def test_parse_sum_1():
         'n', f'n/#1/{s}',
         'x', f'x/#0/{sub}', f'x/#0/{sub}/#2/{s}',
         f'i/#1/{sub}', f'i/#1/{sub}/#2/{s}'  # expectedは集合なので既に登場している'i'は書かない。
+    }
+    assert actual == expected
+
+
+def test_parse_integral_1():
+    """積分のparse。
+    \int^{b}_{a} f(x) dx
+    """
+    mathml = latex2mathml.converter.convert('\int^{b}_{a} f(x) dx')
+    actual = Parser.parse(Expression(mathml))
+    integral = ParserConst.integral_data
+    prod = ParserConst.product_data
+    paren = ParserConst.paren_data
+    expected = {
+        'a', f'a/#0/{integral}',
+        'b', f'b/#1/{integral}',
+        'f', f'f/{prod}', f'f/{prod}/#2/{integral}',
+        'x', f'x/{paren}', f'x/{paren}/{prod}', f'x/{paren}/{prod}/#2/{integral}',
+        f'x/#3/{integral}'  # x of dx
     }
     assert actual == expected
 

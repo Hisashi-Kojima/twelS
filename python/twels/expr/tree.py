@@ -45,6 +45,9 @@ class MathMLTree(Transformer):
     def product_of_seq(self, nodes: list):
         return Tree('product_of_seq', _insert_pseudo_num(nodes))
 
+    def integral(self, nodes: list):
+        return Tree('integral', _insert_pseudo_num(nodes))
+
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""

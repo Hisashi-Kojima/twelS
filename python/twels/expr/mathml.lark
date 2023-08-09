@@ -67,6 +67,7 @@ _mspace: "<mspace" _attr* "/>"
      | "<munder" _attr* ">" expr expr "</munder>" -> under
      | summation
      | product_of_seq
+     | integral
      | underover
      | table
 
@@ -75,13 +76,15 @@ table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
 mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
 
-// underover priority is lower than summation and product of a sequence.
-underover.-1: "<munderover" _attr* ">" expr expr expr "</munderover>"
-            | "<msubsup" _attr* ">" expr expr expr "</msubsup>"
-summation: "<munderover" _attr* "><mo" _attr* ">" ("&#x2211;" | "∑") "</mo>" expr expr "</munderover>" expr
-         | "<msubsup" _attr* "><mo" _attr* ">" ("&#x2211;" | "∑") "</mo>" expr expr "</msubsup>" expr
-product_of_seq: "<munderover" _attr* "><mo" _attr* ">" ("&#x220F;" | "∏") "</mo>" expr expr "</munderover>" expr
-              | "<msubsup" _attr* "><mo" _attr* ">" ("&#x220F;" | "∏") "</mo>" expr expr "</msubsup>" expr
+// underover priority is lower than summation, product of a sequence, and so on.
+underover.-1: _underover_tag expr expr expr "</munderover>"
+            | _subsup_tag expr expr expr "</msubsup>"
+summation: _underover_tag _summation_op expr expr "</munderover>" expr
+         | _subsup_tag _summation_op expr expr "</msubsup>" expr
+product_of_seq: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
+              | _subsup_tag _product_of_seq_op expr expr "</msubsup>" expr
+integral: _underover_tag _integral_op_1 expr expr "</munderover>" expr _integral_op_2 atom
+        | _subsup_tag _integral_op_1 expr expr "</msubsup>" expr _integral_op_2 atom
 
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
@@ -96,6 +99,14 @@ greater: _open (">" | "&gt;") _close
 in: _open "∈" _close
 _left_paren: _open "(" _close
 _right_paren: _open ")" _close
+
+_underover_tag: "<munderover" _attr* ">"
+_subsup_tag: "<msubsup" _attr* ">"
+
+_summation_op: "<mo" _attr* ">" ("&#x2211;" | "∑") "</mo>"
+_product_of_seq_op:  "<mo" _attr* ">" ("&#x220F;" | "∏") "</mo>"
+_integral_op_1: "<mo" _attr* ">" ("&#x222B;" | "∫") "</mo>"
+_integral_op_2: ("<mi>d</mi>" | "<mrow><mi>d</mi></mrow>")
 
 ?relational_operator: equal
                     | less
