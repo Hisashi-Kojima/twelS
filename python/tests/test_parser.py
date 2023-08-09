@@ -562,6 +562,7 @@ def test_get_parsed_tree_sub_1():
 def test_get_parsed_tree_subsup_1():
     """下付き上付き文字のparse。
     x_{i}^{2}
+    Notes: subsupはunderoverに正規化する。
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                     <mrow>
@@ -577,7 +578,7 @@ def test_get_parsed_tree_subsup_1():
                     </mrow>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.subsup_data, [
+        Tree(ParserConst.underover_data, [
             Tree('#0', [Token(ParserConst.token_type, 'x')]),
             Tree('#1', [Token(ParserConst.token_type, 'i')]),
             Tree('#2', [Token(ParserConst.token_type, '2')])
@@ -1694,15 +1695,13 @@ def test_parse_sum_1():
     actual = Parser.parse(Expression(mathml))
     equal = ParserConst.equal_data
     sub = ParserConst.sub_data
-    subsup = ParserConst.subsup_data
-    product = ParserConst.product_data
+    s = ParserConst.summation_data
     expected = {
-        '∑', f'∑/#0/{subsup}', f'∑/#0/{subsup}/{product}',
-        '1', f'1/{equal}', f'1/{equal}/#1/{subsup}', f'1/{equal}/#1/{subsup}/{product}',
-        'i', f'i/{equal}', f'i/{equal}/#1/{subsup}', f'i/{equal}/#1/{subsup}/{product}',
-        'n', f'n/#2/{subsup}', f'n/#2/{subsup}/{product}',
-        'x', f'x/#0/{sub}', f'x/#0/{sub}/{product}',
-        f'i/#1/{sub}', f'i/#1/{sub}/{product}'  # ここに'n'がないのは、これが集合だから
+        'i', f'i/{equal}', f'i/{equal}/#0/{s}',
+        '1', f'1/{equal}', f'1/{equal}/#0/{s}',
+        'n', f'n/#1/{s}',
+        'x', f'x/#0/{sub}', f'x/#0/{sub}/#2/{s}',
+        f'i/#1/{sub}', f'i/#1/{sub}/#2/{s}'  # expectedは集合なので既に登場している'i'は書かない。
     }
     assert actual == expected
 
