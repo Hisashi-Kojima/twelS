@@ -13,6 +13,8 @@ class ParserConst:
     token_type = 'TOKEN'
     expr_data = 'expr'
     sum_data = 'sum'
+    summation_data = 'summation'
+    product_of_seq_data = 'product_of_seq'
     product_data = 'product'
     atom_data = 'atom'
     neg_data = 'neg'

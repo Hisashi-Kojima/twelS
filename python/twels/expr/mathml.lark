@@ -5,6 +5,8 @@
 //   '?'だったら，childが1つのとき，そのノードを作らない．
 // see here: https://github.com/lark-parser/lark/blob/master/docs/tree_construction.md
 
+// default value of priority is 0.
+
 start: _open mathml _close
 
 ?mathml: _open mathml _close _annotation?  // mathやsemantics, mrowなど
@@ -64,7 +66,9 @@ _mspace: "<mspace" _attr* "/>"
      // use expr for dealing with relational operators
      | "<mover" _attr* ">" expr expr "</mover>" -> over
      | "<munder" _attr* ">" expr expr "</munder>" -> under
-     | "<munderover" _attr* ">" expr expr expr "</munderover>" -> underover
+     | summation
+     | product_of_seq
+     | underover
      | table
 
 // for mtable
@@ -72,6 +76,10 @@ table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
 mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
 
+// underover priority is lower than summation and product of a sequence.
+underover.-1: "<munderover" _attr* ">" expr expr expr "</munderover>"
+summation: "<munderover" _attr* "><mo" _attr* ">" ("&#x2211;" | "∑") "</mo>" expr expr "</munderover>" expr
+product_of_seq: "<munderover" _attr* "><mo" _attr* ">" ("&#x220F;" | "∏") "</mo>" expr expr "</munderover>" expr
 
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"

@@ -502,7 +502,8 @@ def test_get_parsed_tree_paren_1():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
-            Token(ParserConst.token_type, '3'), Tree(ParserConst.paren_data, [
+            Token(ParserConst.token_type, '3'),
+            Tree(ParserConst.paren_data, [
                 Tree(ParserConst.sum_data, [
                     Token(ParserConst.token_type, '4'), Token(ParserConst.token_type, '5')
                 ])
@@ -734,19 +735,18 @@ def test_get_parsed_tree_summation_1():
                     </msub>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.product_data, [
-            Tree(ParserConst.underover_data, [
-                Tree('#0', [Token(ParserConst.token_type, html.unescape('&#x2211;'))]),
-                Tree('#1', [Tree(ParserConst.equal_data, [
-                    Token(ParserConst.token_type, 'i'),
-                    Token(ParserConst.token_type, '1')
-                ])]),
-                Tree('#2', [Token(ParserConst.token_type, 'n')])
+        Tree(ParserConst.summation_data, [
+            Tree('#0', [Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'i'),
+                Token(ParserConst.token_type, '1')
+            ])]),
+            Tree('#1', [Token(ParserConst.token_type, 'n')]),
+            Tree('#2', [
+                Tree(ParserConst.sub_data, [
+                    Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                    Tree('#1', [Token(ParserConst.token_type, 'i')])
+                ])
             ]),
-            Tree(ParserConst.sub_data, [
-                Tree('#0', [Token(ParserConst.token_type, 'x')]),
-                Tree('#1', [Token(ParserConst.token_type, 'i')])
-            ])
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
@@ -796,6 +796,200 @@ def test_get_parsed_tree_summation_3():
                 ])
             ]),
             Token(ParserConst.token_type, 'x')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_summation_4():
+    r"""Σの左に定数がある場合。
+    λ\sum_{i=a}^{b} x_{i}
+    """
+    mathml = """<math displaystyle="true">
+                    <mi>&#x03BB;<!-- λ --></mi>
+                    <munderover>
+                        <mo>&#x2211;<!-- ∑ --></mo>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                            <mo>=</mo>
+                            <mi>a</mi>
+                        </mrow>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>b</mi>
+                        </mrow>
+                    </munderover>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                        </mrow>
+                    </msub>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'λ'),
+            Tree(ParserConst.summation_data, [
+                Tree('#0', [Tree(ParserConst.equal_data, [
+                    Token(ParserConst.token_type, 'i'),
+                    Token(ParserConst.token_type, 'a')
+                ])]),
+                Tree('#1', [Token(ParserConst.token_type, 'b')]),
+                Tree('#2', [
+                    Tree(ParserConst.sub_data, [
+                        Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                        Tree('#1', [Token(ParserConst.token_type, 'i')])
+                    ])
+                ]),
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_summation_5():
+    r"""Σの要素が複数の変数の積の場合。
+    \sum_{i=a}^{b} λx_{i}
+    """
+    mathml = """<math displaystyle="true">
+                    <munderover>
+                        <mo>&#x2211;<!-- ∑ --></mo>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                            <mo>=</mo>
+                            <mi>a</mi>
+                        </mrow>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>b</mi>
+                        </mrow>
+                    </munderover>
+                    <mi>&#x03BB;<!-- λ --></mi>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                        </mrow>
+                    </msub>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.summation_data, [
+            Tree('#0', [Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'i'),
+                Token(ParserConst.token_type, 'a')
+            ])]),
+            Tree('#1', [Token(ParserConst.token_type, 'b')]),
+            Tree('#2', [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, 'λ'),
+                    Tree(ParserConst.sub_data, [
+                        Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                        Tree('#1', [Token(ParserConst.token_type, 'i')])
+                    ])
+                ])
+            ]),
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_summation_6():
+    r"""総和を含む式。
+    g(b) + \sum_{i=a}^{b-1} g(i)
+    """
+    mathml = """<math displaystyle="true">
+                    <mi>g</mi>
+                    <mo stretchy="false">(</mo>
+                    <mi>b</mi>
+                    <mo stretchy="false">)</mo>
+                    <mo>+</mo>
+                    <munderover>
+                        <mo>&#x2211;<!-- ∑ --></mo>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>i</mi>
+                            <mo>=</mo>
+                            <mi>a</mi>
+                        </mrow>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>b</mi>
+                            <mo>&#x2212;<!-- − --></mo>
+                            <mn>1</mn>
+                        </mrow>
+                    </munderover>
+                    <mi>g</mi>
+                    <mo stretchy="false">(</mo>
+                    <mi>i</mi>
+                    <mo stretchy="false">)</mo>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sum_data, [
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'g'),
+                Tree(ParserConst.paren_data, [
+                    Token(ParserConst.token_type, 'b')
+                ])
+            ]),
+            Tree(ParserConst.summation_data, [
+                Tree('#0', [Tree(ParserConst.equal_data, [
+                    Token(ParserConst.token_type, 'i'),
+                    Token(ParserConst.token_type, 'a')
+                ])]),
+                Tree('#1', [
+                    Tree(ParserConst.sum_data, [
+                        Token(ParserConst.token_type, 'b'),
+                        Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '1')])
+                    ])
+                ]),
+                Tree('#2', [
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, 'g'),
+                        Tree(ParserConst.paren_data, [
+                            Token(ParserConst.token_type, 'i')
+                        ])
+                    ])
+                ]),
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_prod_of_a_seq_1():
+    r"""parse product of a sequence.
+    \prod _{i=1}^{6}i^{2}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \textstyle \prod _{i=1}^{6}i^{2}}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <munderover>
+                            <mo>&#x220F;<!-- ∏ --></mo>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>i</mi>
+                                <mo>=</mo>
+                                <mn>1</mn>
+                            </mrow>
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mn>6</mn>
+                            </mrow>
+                        </munderover>
+                        <msup>
+                            <mi>i</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mn>2</mn>
+                            </mrow>
+                        </msup>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_of_seq_data, [
+            Tree('#0', [Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'i'),
+                Token(ParserConst.token_type, '1')
+            ])]),
+            Tree('#1', [Token(ParserConst.token_type, '6')]),
+            Tree('#2', [
+                Tree(ParserConst.sup_data, [
+                    Tree('#0', [Token(ParserConst.token_type, 'i')]),
+                    Tree('#1', [Token(ParserConst.token_type, '2')])
+                ])
+            ]),
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))

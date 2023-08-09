@@ -39,6 +39,12 @@ class MathMLTree(Transformer):
     def slash(self, nodes: list):
         return Token(ParserConst.token_type, ParserConst.slash_data)
 
+    def summation(self, nodes: list):
+        return Tree('summation', _insert_pseudo_num(nodes))
+
+    def product_of_seq(self, nodes: list):
+        return Tree('product_of_seq', _insert_pseudo_num(nodes))
+
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""
