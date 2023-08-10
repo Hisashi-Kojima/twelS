@@ -32,23 +32,23 @@ _more_atom: (_mul | div) atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
      | "<mi" _attr* ">" "/" "</mi>" -> slash
-     | "<mi" _attr* ">" TOKEN "</mi>"
-     | "<mrow" _attr* ">" product "</mrow>"
+     | _mi
+     | _mi_empty
+     | _mo
+     | _mrow_tag product "</mrow>"
      | _left_paren sum _right_paren -> paren
      | func
      | cdots
-     | _mo
-     | _mi_empty
      | mtext
 
 // this priority is higher than _mo.
 cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
 
-// this priority is lower than atom.
-_mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
+_mi: "<mi" _attr* ">" TOKEN "</mi>"
+_mi_empty: "<mi" _attr* "></mi>"
 
-// this priority is lower than atom.
-_mi_empty.-1: "<mi" _attr* "></mi>"
+// this priority is lower than atom and cdots.
+_mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
 
 ?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
 
@@ -60,14 +60,16 @@ _mspace: "<mspace" _attr* "/>"
 ?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
      | "<mfrac" _attr* ">" expr expr "</mfrac>" -> frac
      | "<msup" _attr* ">" expr expr "</msup>" -> sup
-     | "<msub" _attr* ">" expr expr "</msub>" -> sub
+     | _sub_tag expr expr "</msub>" -> sub
+     | _subsup_tag expr expr expr "</msubsup>" -> subsup
      | "<mroot" _attr* ">" expr expr "</mroot>" -> root
      // use expr for dealing with relational operators
      | "<mover" _attr* ">" expr expr "</mover>" -> over
-     | "<munder" _attr* ">" expr expr "</munder>" -> under
+     | under
      | summation
      | product_of_seq
      | integral
+     | lim
      | underover
      | table
 
@@ -76,9 +78,13 @@ table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
 mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
 
-// underover priority is lower than summation, product of a sequence, and so on.
-underover.-1: _underover_tag expr expr expr "</munderover>"
-            | _subsup_tag expr expr expr "</msubsup>"
+// underとsub、underoverとsubsupは意味が異なると思い正規化をしない。
+// limやsummation、product_of_seqの中ではこれらを正規化する。
+under: _under_tag expr expr "</munder>"
+lim: _under_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></munder>" expr
+   | _sub_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></msub>" expr
+
+underover: _underover_tag expr expr expr "</munderover>"
 summation: _underover_tag _summation_op expr expr "</munderover>" expr
          | _subsup_tag _summation_op expr expr "</msubsup>" expr
 product_of_seq: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
@@ -100,9 +106,14 @@ in: _open "∈" _close
 _left_paren: _open "(" _close
 _right_paren: _open ")" _close
 
+_mrow_tag: "<mrow" _attr* ">"
+_under_tag: "<munder" _attr* ">"
 _underover_tag: "<munderover" _attr* ">"
+_sub_tag: "<msub" _attr* ">"
 _subsup_tag: "<msubsup" _attr* ">"
 
+_lim_op_1: "<mo" _attr* ">lim</mo>"
+_lim_op_2: "<mo" _attr* ">" ("&#x2192;" | "→") "</mo>"
 _summation_op: "<mo" _attr* ">" ("&#x2211;" | "∑") "</mo>"
 _product_of_seq_op:  "<mo" _attr* ">" ("&#x220F;" | "∏") "</mo>"
 _integral_op_1: "<mo" _attr* ">" ("&#x222B;" | "∫") "</mo>"
@@ -143,9 +154,6 @@ _ELEMENTS: "math"
          | "mstack"
          | "mstyle"
          | "ms"  // msはmstyleなどよりも後に記述しなければ，mstyleなどが無視されてしまう．
-         | "mtable"
-         | "mtd"
-         | "mtr"
          | "semantics"
          | "annotation"
          | "annotation-xml"

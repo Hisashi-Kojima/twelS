@@ -562,7 +562,6 @@ def test_get_parsed_tree_sub_1():
 def test_get_parsed_tree_subsup_1():
     """下付き上付き文字のparse。
     x_{i}^{2}
-    Notes: subsupはunderoverに正規化する。
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
                     <mrow>
@@ -578,7 +577,7 @@ def test_get_parsed_tree_subsup_1():
                     </mrow>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.underover_data, [
+        Tree(ParserConst.subsup_data, [
             Tree('#0', [Token(ParserConst.token_type, 'x')]),
             Tree('#1', [Token(ParserConst.token_type, 'i')]),
             Tree('#2', [Token(ParserConst.token_type, '2')])
@@ -1035,6 +1034,43 @@ def test_get_parsed_tree_integral_1():
                 ])
             ]),
             Tree('#3', [Token(ParserConst.token_type, 'x')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_lim_1():
+    r"""parse limit.
+    \lim _{n\to \infty }x_{n}
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <munder>
+                            <mo movablelimits="true" form="prefix">lim</mo>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>n</mi>
+                                <mo stretchy="false">&#x2192;<!-- → --></mo>
+                                <mi mathvariant="normal">&#x221E;<!-- ∞ --></mi>
+                            </mrow>
+                        </munder>
+                        <msub>
+                            <mi>x</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>n</mi>
+                            </mrow>
+                        </msub>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.lim_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'n')]),
+            Tree('#1', [Token(ParserConst.token_type, '∞')]),
+            Tree('#2', [
+                Tree(ParserConst.sub_data, [
+                    Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                    Tree('#1', [Token(ParserConst.token_type, 'n')])
+                ])
+            ]),
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
@@ -1735,7 +1771,7 @@ def test_parse_sum_1():
     """総和のparse。
     \sum_{i=1}^{n} x_{i}
     """
-    mathml = latex2mathml.converter.convert('\sum_{i=1}^{n} x_{i}')
+    mathml = latex2mathml.converter.convert(r'\sum_{i=1}^{n} x_{i}')
     actual = Parser.parse(Expression(mathml))
     equal = ParserConst.equal_data
     sub = ParserConst.sub_data
@@ -1754,7 +1790,7 @@ def test_parse_integral_1():
     """積分のparse。
     \int^{b}_{a} f(x) dx
     """
-    mathml = latex2mathml.converter.convert('\int^{b}_{a} f(x) dx')
+    mathml = latex2mathml.converter.convert(r'\int^{b}_{a} f(x) dx')
     actual = Parser.parse(Expression(mathml))
     integral = ParserConst.integral_data
     prod = ParserConst.product_data
@@ -1767,6 +1803,37 @@ def test_parse_integral_1():
         f'x/#3/{integral}'  # x of dx
     }
     assert actual == expected
+
+
+def test_parse_lim_1():
+    """parse limit.
+    \lim _{n\to \infty }x_{n}
+    """
+    mathml = latex2mathml.converter.convert(r'\lim _{n\to \infty }x_{n}')
+    actual = Parser.parse(Expression(mathml))
+    lim = ParserConst.lim_data
+    sub = ParserConst.sub_data
+    expected = {
+        'n', f'n/#0/{lim}',
+        '∞', f'∞/#1/{lim}',
+        'x', f'x/#0/{sub}', f'x/#0/{sub}/#2/{lim}',
+        f'n/#1/{sub}', f'n/#1/{sub}/#2/{lim}',
+    }
+    assert actual == expected
+
+
+Tree(ParserConst.root_data, [
+        Tree(ParserConst.lim_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'n')]),
+            Tree('#1', [Token(ParserConst.token_type, '∞')]),
+            Tree('#2', [
+                Tree(ParserConst.sub_data, [
+                    Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                    Tree('#1', [Token(ParserConst.token_type, 'n')])
+                ])
+            ]),
+        ])
+    ])
 
 
 def test_parse_table_1():

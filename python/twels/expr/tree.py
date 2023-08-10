@@ -9,7 +9,7 @@ from twels.normalizer.normalizer import Normalizer
 
 
 class MathMLTree(Transformer):
-    """MathMLのいらないノードや葉を削除するためのクラス．"""
+    """MathMLのいらないノードや葉を削除するためのクラス。"""
 
     # functions
     def frac(self, nodes: list):
@@ -48,30 +48,33 @@ class MathMLTree(Transformer):
     def integral(self, nodes: list):
         return Tree('integral', _insert_pseudo_num(nodes))
 
+    def lim(self, nodes: list):
+        return Tree('lim', _insert_pseudo_num(nodes))
+
     # do more complicated tasks
     def start(self, nodes: list):
-        """root直下のchild nodeがexprだったときにexprのノードを削除する関数．"""
+        """root直下のchild nodeがexprだったときにexprのノードを削除する関数。"""
         if len(nodes) == 1 and type(nodes[0]) is Tree and nodes[0].data == ParserConst.expr_data:
             return Tree(ParserConst.root_data, nodes[0].children)
         return Tree(ParserConst.root_data, nodes)
 
     def sum(self, nodes: list):
-        """sumの子ノードを整理する関数．
-        subtractを見つけたら，次のノードの符号を逆にする．
+        """sumの子ノードを整理する関数。
+        subtractを見つけたら、次のノードの符号を逆にする。
         """
         return _get_tree_of(ParserConst.sum_data, nodes, 'subtract', _get_negative)
 
     def product(self, nodes: list):
-        """productの子ノードを整理する関数．
-        divを見つけたら，次のノードの数を逆数にする．
-        cdotsを見つけたら，正規化する．
+        """productの子ノードを整理する関数。
+        divを見つけたら、次のノードの数を逆数にする。
+        cdotsを見つけたら、正規化する。
         """
         return _get_tree_of(ParserConst.product_data, nodes, 'div', _get_reciprocal)
 
     def table(self, nodes: list[Tree]):
         """tableの要素に引数の順番の情報を付与してtr,tdを削除する関数。
         Args:
-        ex.
+        e.g.
         [
             Tree('tr', [
                 Tree('td', [Token('TOKEN', 'A')]),
@@ -88,7 +91,7 @@ class MathMLTree(Transformer):
         ]
 
         Returns:
-        ex.
+        e.g.
         [
             Tree('#0', [
                 Tree('#0', [Token('TOKEN', 'A')]),
@@ -152,7 +155,7 @@ class MathMLTree(Transformer):
 
 # ************** functions ******************
 def get_ro_index(children: list) -> list[int]:
-    """Treeのchildrenに含まれるrelational operatorのindexのリストを返す関数．
+    """Treeのchildrenに含まれるrelational operatorのindexのリストを返す関数。
     """
     result = []
     for i, child in enumerate(children):
@@ -167,12 +170,12 @@ def _insert_pseudo_num(nodes: list) -> list:
 
 
 def _get_tree_of(operator: str, nodes: list, sign: str, get_func) -> Tree:
-    """sum()やproduct()で使う関数．
+    """sum()やproduct()で使う関数。
     Args:
-        operator: sumやproductなど．
-        nodes: ノードのリスト．要素はTreeまたはToken.
-        sign: subtractやdivなど．
-        get_func: 途中で呼び出す関数．
+        operator: sumやproductなど。
+        nodes: ノードのリスト。要素はTreeまたはToken.
+        sign: subtractやdivなど。
+        get_func: 途中で呼び出す関数。
     """
     new_nodes = []
     i = iter(nodes)
@@ -201,7 +204,7 @@ def _get_tree_of(operator: str, nodes: list, sign: str, get_func) -> Tree:
 
 
 def _get_negative(node):
-    """符号を逆にして返す関数．
+    """符号を逆にして返す関数。
     Args:
         node:
             Tree('neg', [a Tree or a Token])
@@ -216,7 +219,7 @@ def _get_negative(node):
 
 
 def _get_reciprocal(node) -> Tree:
-    """逆数を返す関数．
+    """逆数を返す関数。
     Args:
         node: Tree or Token.
     """
@@ -232,12 +235,12 @@ def _get_reciprocal(node) -> Tree:
 
 
 def _get_pseudo_tree(pseudo_num: int, node: Tree | Token) -> Tree:
-    """引数の順番の情報を追加する関数．"""
+    """引数の順番の情報を追加する関数。"""
     return Tree(f'#{pseudo_num}', [node])
 
 
 def _get_pseudo_tree_wrapper(pseudo_num: int, arg) -> Tree:
-    """引数がintのときにはToken()でwrapして_get_pseudo_tree()を呼ぶ関数．"""
+    """引数がintのときにはToken()でwrapして_get_pseudo_tree()を呼ぶ関数。"""
     if type(arg) is int:
         return _get_pseudo_tree(pseudo_num, Token(ParserConst.token_type, str(arg)))
     elif type(arg) is Tree or type(arg) is Token:
@@ -247,7 +250,7 @@ def _get_pseudo_tree_wrapper(pseudo_num: int, arg) -> Tree:
 
 
 def _get_fraction(numerator, denominator) -> Tree:
-    """分数を作成して返す関数．
+    """分数を作成して返す関数。
     Args:
         numerator(int or Tree or Token): 分子．
         denominator(int or Tree or Token): 分母．
@@ -261,14 +264,14 @@ def _get_fraction(numerator, denominator) -> Tree:
 def _get_tr(tr: Tree, pseudo_num: int) -> Tree:
     """引数の順番の情報を追加したtrを返す関数。
     Args:
-        ex.
+        e.g.
         Tree('tr', [
             Tree('td', [Token('TOKEN', 'A')]),
             Tree('td', [Token('TOKEN', 'B')])
         ])
 
     Returns:
-        ex.
+        e.g.
         Tree('#0', [
             Tree('#0', [Token('TOKEN', 'A')]),
             Tree('#1', [Token('TOKEN', 'B')])
