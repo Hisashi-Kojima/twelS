@@ -51,6 +51,20 @@ class MathMLTree(Transformer):
     def lim(self, nodes: list):
         return Tree('lim', _insert_pseudo_num(nodes))
 
+    def log(self, nodes: list):
+        return Tree('log', _insert_pseudo_num(nodes))
+
+    def log_less(self, nodes: list):
+        # len(nodes) == 1
+        # '#0'ではなく'#1'にしたかったので_insert_pseudo_num()を使っていない。
+        return Tree('log', [Tree('#1', nodes)])
+
+    def ln(self, nodes: list):
+        return Tree('log', [
+            Tree('#0', [Token(ParserConst.token_type, 'e')]),
+            Tree('#1', nodes)
+        ])
+
     # do more complicated tasks
     def start(self, nodes: list):
         """root直下のchild nodeがexprだったときにexprのノードを削除する関数。"""

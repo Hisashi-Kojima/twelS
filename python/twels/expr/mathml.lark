@@ -70,6 +70,7 @@ _mspace: "<mspace" _attr* "/>"
      | product_of_seq
      | integral
      | lim
+     | log
      | underover
      | table
 
@@ -92,6 +93,10 @@ product_of_seq: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
 integral: _underover_tag _integral_op_1 expr expr "</munderover>" expr _integral_op_2 atom
         | _subsup_tag _integral_op_1 expr expr "</msubsup>" expr _integral_op_2 atom
 
+log: _sub_tag _log_op expr "</msub>" expr
+   | _log_op _mo_empty? expr -> log_less
+   | _ln_op _mo_empty? expr -> ln
+
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
 
@@ -111,13 +116,18 @@ _under_tag: "<munder" _attr* ">"
 _underover_tag: "<munderover" _attr* ">"
 _sub_tag: "<msub" _attr* ">"
 _subsup_tag: "<msubsup" _attr* ">"
+_mo_tag: "<mo" _attr* ">"
 
-_lim_op_1: "<mo" _attr* ">lim</mo>"
-_lim_op_2: "<mo" _attr* ">" ("&#x2192;" | "→") "</mo>"
-_summation_op: "<mo" _attr* ">" ("&#x2211;" | "∑") "</mo>"
-_product_of_seq_op:  "<mo" _attr* ">" ("&#x220F;" | "∏") "</mo>"
-_integral_op_1: "<mo" _attr* ">" ("&#x222B;" | "∫") "</mo>"
+_mo_empty: "<mo></mo>"
+
+_lim_op_1: _mo_tag "lim</mo>"
+_lim_op_2: _mo_tag ("&#x2192;" | "→") "</mo>"
+_summation_op: _mo_tag ("&#x2211;" | "∑") "</mo>"
+_product_of_seq_op:  _mo_tag ("&#x220F;" | "∏") "</mo>"
+_integral_op_1: _mo_tag ("&#x222B;" | "∫") "</mo>"
 _integral_op_2: ("<mi>d</mi>" | "<mrow><mi>d</mi></mrow>")
+_log_op: "<mi" _attr* ">log</mi>"
+_ln_op: "<mi" _attr* ">ln</mi>"
 
 ?relational_operator: equal
                     | less

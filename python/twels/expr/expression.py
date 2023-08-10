@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """module description
 """
+import html
 import re
 
 from bs4 import BeautifulSoup
@@ -56,7 +57,8 @@ class Expression:
 
         remove_comments(soup)
         __class__._remove_unnecessary_tags(soup)
-        tmp = remove_not_content(str(soup))
+        # '&#x2061;'はparseする際に活用できるかもしれない。
+        tmp = remove_not_content(str(soup)).replace(html.unescape('&#x2061;'), '')
         return tmp.replace(' ', '')
 
     @staticmethod

@@ -1076,6 +1076,78 @@ def test_get_parsed_tree_lim_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_log_1():
+    r"""logのparse。
+    \log_{y}{x}
+    """
+    mathml = """<math>
+                    <msub>
+                        <mi>log</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>y</mi>
+                        </mrow>
+                    </msub>
+                    <mi>x</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.log_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'y')]),
+            Tree('#1', [Token(ParserConst.token_type, 'x')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_log_2():
+    r"""logのparse。
+    \log x
+    """
+    mathml = """<math>
+                    <mi>log</mi>
+                    <mo></mo>
+                    <mi>x</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.log_data, [
+            Tree('#1', [Token(ParserConst.token_type, 'x')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_log_3():
+    r"""logのparse。
+    \ln(1+x)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                    <mstyle displaystyle="true" scriptlevel="0">
+                        <mi>ln</mi>
+                        <mo>&#x2061;<!-- ⁡ --></mo>
+                        <mo stretchy="false">(</mo>
+                        <mn>1</mn>
+                        <mo>+</mo>
+                        <mi>x</mi>
+                        <mo stretchy="false">)</mo>
+                    </mstyle>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.log_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'e')]),
+            Tree('#1', [
+                Tree(ParserConst.paren_data, [
+                    Tree(ParserConst.sum_data, [
+                        Token(ParserConst.token_type, '1'),
+                        Token(ParserConst.token_type, 'x')
+                    ])
+                ])
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_annotation_1():
     """annotationを含むMathMLのparse。
     出典: 方程式 - Wikipedia
@@ -1822,18 +1894,48 @@ def test_parse_lim_1():
     assert actual == expected
 
 
-Tree(ParserConst.root_data, [
-        Tree(ParserConst.lim_data, [
-            Tree('#0', [Token(ParserConst.token_type, 'n')]),
-            Tree('#1', [Token(ParserConst.token_type, '∞')]),
-            Tree('#2', [
-                Tree(ParserConst.sub_data, [
-                    Tree('#0', [Token(ParserConst.token_type, 'x')]),
-                    Tree('#1', [Token(ParserConst.token_type, 'n')])
-                ])
-            ]),
-        ])
-    ])
+def test_parse_log_1():
+    """parse logarithm.
+    \log_{y}{x}
+    """
+    mathml = latex2mathml.converter.convert(r'\log_{y}{x}')
+    actual = Parser.parse(Expression(mathml))
+    log = ParserConst.log_data
+    expected = {
+        'y', f'y/#0/{log}',
+        'x', f'x/#1/{log}'
+    }
+    assert actual == expected
+
+
+def test_parse_log_2():
+    """parse logarithm.
+    \log x
+    """
+    mathml = latex2mathml.converter.convert(r'\log x')
+    actual = Parser.parse(Expression(mathml))
+    log = ParserConst.log_data
+    expected = {
+        'x', f'x/#1/{log}'
+    }
+    assert actual == expected
+
+
+def test_parse_log_3():
+    """parse logarithm.
+    \ln(1+x)
+    """
+    mathml = latex2mathml.converter.convert(r'\ln(1+x)')
+    actual = Parser.parse(Expression(mathml))
+    log = ParserConst.log_data
+    sum = ParserConst.sum_data
+    paren = ParserConst.paren_data
+    expected = {
+        'e', f'e/#0/{log}',
+        '1', f'1/{sum}', f'1/{sum}/{paren}', f'1/{sum}/{paren}/#1/{log}',
+        'x', f'x/{sum}', f'x/{sum}/{paren}', f'x/{sum}/{paren}/#1/{log}'
+    }
+    assert actual == expected
 
 
 def test_parse_table_1():

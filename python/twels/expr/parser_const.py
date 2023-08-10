@@ -31,6 +31,7 @@ class ParserConst:
     table_data = 'table'
     integral_data = 'integral'
     lim_data = 'lim'
+    log_data = 'log'
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
     slash_data = '\\slash'

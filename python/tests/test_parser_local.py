@@ -69,25 +69,6 @@ def test_make_new_trees_02():
     assert actual == expected
 
 
-def test_get_parsed_tree_log_1():
-    """logのparse。
-    log_{y}{x}
-    """
-    mathml = """<math>
-                    <msub>
-                        <mi>log</mi>
-                        <mrow class="MJX-TeXAtom-ORD">
-                            <mi>y</mi>
-                        </mrow>
-                    </msub>
-                    <mi>x</mi>
-                </math>"""
-    # TODO: expectedの実装。
-    expected = Tree(ParserConst.root_data, [
-    ])
-    assert expected == Parser.get_parsed_tree(Expression(mathml))
-
-
 def test_get_parsed_tree_equiv_1():
     """congruenceのparse。
     a ≡ b (mod n)
