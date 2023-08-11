@@ -486,6 +486,26 @@ def test_get_parsed_tree_gt_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_neq_1():
+    """parse not equal.
+    x≠0
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                        <mi>x</mi>
+                        <mo>&#x02260;</mo>
+                        <mn>0</mn>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.neq_data, [
+            Token(ParserConst.token_type, 'x'),
+            Token(ParserConst.token_type, '0')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_equiv_1():
     """congruenceのparse。
     a ≡ b (mod n)
@@ -596,9 +616,31 @@ def test_get_parsed_tree_paren_1():
             Token(ParserConst.token_type, '3'),
             Tree(ParserConst.paren_data, [
                 Tree(ParserConst.sum_data, [
-                    Token(ParserConst.token_type, '4'), Token(ParserConst.token_type, '5')
+                    Token(ParserConst.token_type, '4'),
+                    Token(ParserConst.token_type, '5')
                 ])
             ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_abs_1():
+    """絶対値のparse。
+    |x|
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mo stretchy="false">|</mo>
+                    </mrow>
+                    <mi>x</mi>
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mo stretchy="false">|</mo>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.abs_data, [
+            Token(ParserConst.token_type, 'x')
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
@@ -1812,7 +1854,7 @@ def test_parse_add_1():
     expected = {
         '1', f'1/{sum_}',
         '2', f'2/{sum_}'
-        }
+    }
     assert actual == expected
 
 
@@ -1827,7 +1869,7 @@ def test_parse_subtract_1():
     expected = {
         '3', f'3/{sum_}',
         f'2/{neg}', f'2/{neg}/{sum_}'
-        }
+    }
     assert actual == expected
 
 
@@ -1841,7 +1883,7 @@ def test_parse_product_1():
     expected = {
         '4', f'4/{product}',
         '5', f'5/{product}'
-        }
+    }
     assert actual == expected
 
 
@@ -1872,7 +1914,21 @@ def test_parse_eq_1():
     expected = {
         'a', f'a/{equal}',
         'b', f'b/{equal}'
-        }
+    }
+    assert actual == expected
+
+
+def test_parse_neq_1():
+    """parse not equal.
+    x≠0
+    """
+    mathml = latex2mathml.converter.convert(r'x \neq 0')
+    actual = Parser.parse(Expression(mathml))
+    neq = ParserConst.neq_data
+    expected = {
+        'x', f'x/{neq}',
+        '0', f'0/{neq}'
+    }
     assert actual == expected
 
 
@@ -1912,7 +1968,7 @@ def test_parse_lt_1():
     expected = {
         'a', f'a/#0/{less}',
         'b', f'b/#1/{less}'
-        }
+    }
     assert actual == expected
 
 
@@ -1926,7 +1982,20 @@ def test_parse_gt_1():
     expected = {
         'a', f'a/#0/{greater}',
         'b', f'b/#1/{greater}'
-        }
+    }
+    assert actual == expected
+
+
+def test_parse_abs_1():
+    """絶対値のparse。
+    |x|
+    """
+    mathml = latex2mathml.converter.convert('|x|')
+    actual = Parser.parse(Expression(mathml))
+    abs = ParserConst.abs_data
+    expected = {
+        'x', f'x/{abs}'
+    }
     assert actual == expected
 
 

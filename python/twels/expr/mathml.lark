@@ -40,6 +40,7 @@ _more_atom: (_mul | div) atom
      | _mo
      | _mrow_tag product "</mrow>"
      | _left_paren sum _right_paren -> paren
+     | abs
      | func
      | cdots
      | mtext
@@ -48,7 +49,11 @@ _more_atom: (_mul | div) atom
                     | less
                     | greater
                     | in
+                    | neq
 
+
+abs: _mo_tag "|</mo>" sum _mo_tag "|</mo>"
+   | _mrow_tag _mo_tag "|</mo></mrow>" sum _mrow_tag _mo_tag "|</mo></mrow>"
 
 // this priority is higher than _mo.
 cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
@@ -123,6 +128,7 @@ equal: _mo_tag "=</mo>"
 less: _mo_tag ("<" | "&lt;") "</mo>"
 greater: _mo_tag (">" | "&gt;") "</mo>"
 in: _mo_tag "∈</mo>"
+neq: _mo_tag "≠</mo>"
 
 _left_paren: _mo_tag "(" "</mo>"
 _right_paren: _mo_tag ")" "</mo>"

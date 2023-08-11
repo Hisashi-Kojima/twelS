@@ -19,6 +19,7 @@ class ParserConst:
     atom_data = 'atom'
     neg_data = 'neg'
     paren_data = 'paren'
+    abs_data = 'abs'
     frac_data = 'frac'
     sup_data = 'sup'
     sub_data = 'sub'
@@ -41,11 +42,12 @@ class ParserConst:
     less_data = 'less'
     greater_data = 'greater'
     in_data = 'in'
+    neq_data = 'neq'
 
     # modを含むので他のrelational operatorと同様には扱えないと思い
     # 他と分けて記述している。
     equiv_data = 'equiv'
 
-    relational_operators = [equal_data, less_data, greater_data, in_data]
-    ro_commutative = [equal_data]
+    relational_operators = [equal_data, less_data, greater_data, in_data, neq_data]
+    ro_commutative = [equal_data, neq_data]
     ro_non_commutative = [less_data, greater_data, in_data]
