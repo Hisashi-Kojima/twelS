@@ -411,7 +411,8 @@ def test_get_parsed_tree_eq_1():
         Tree(ParserConst.equal_data, [
             Token(ParserConst.token_type, 'y'),
             Tree(ParserConst.product_data, [
-                Token(ParserConst.token_type, 'a'), Token(ParserConst.token_type, 'x')
+                Token(ParserConst.token_type, 'a'),
+                Token(ParserConst.token_type, 'x')
                 ])
             ])
         ])
@@ -480,6 +481,96 @@ def test_get_parsed_tree_gt_1():
         Tree(ParserConst.greater_data, [
             Tree('#0', [Token(ParserConst.token_type, '3')]),
             Tree('#1', [Token(ParserConst.token_type, '2')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_equiv_1():
+    """congruenceのparse。
+    a ≡ b (mod n)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle a\equiv b{\pmod {n}}}">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mi>a</mi>
+                            <mo>&#x2261;<!-- ≡ --></mo>
+                            <mi>b</mi>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mspace width="1em" />
+                                <mo stretchy="false">(</mo>
+                                <mi>mod</mi>
+                                <mspace width="0.333em" />
+                                <mi>n</mi>
+                                <mo stretchy="false">)</mo>
+                            </mrow>
+                        </mstyle>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.equiv_data, [
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'b'),
+            Tree(ParserConst.mod_data, [
+                Token(ParserConst.token_type, 'n')
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_equiv_2():
+    """congruenceのparse。modのところにmrowがない場合。
+    a ≡ b (mod p)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">
+                    <mrow>
+                        <mi>a</mi>
+                        <mo>&#x02261;</mo>
+                        <mi>b</mi>
+                        <mspace width="1em" />
+                        <mo>&#x00028;</mo>
+                        <mi>mod</mi>
+                        <mspace width="0.333em" />
+                        <mi>p</mi>
+                        <mo>&#x00029;</mo>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.equiv_data, [
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'b'),
+            Tree(ParserConst.mod_data, [
+                Token(ParserConst.token_type, 'p')
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_equiv_3():
+    """modが省略されているcongruenceのparse。
+    ac ≡ bc
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                        <mi>a</mi>
+                        <mi>c</mi>
+                        <mo>≡</mo>
+                        <mi>b</mi>
+                        <mi>c</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.equiv_data, [
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'a'),
+                Token(ParserConst.token_type, 'c')
+            ]),
+            Tree(ParserConst.product_data, [
+                Token(ParserConst.token_type, 'b'),
+                Token(ParserConst.token_type, 'c')
+            ])
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
@@ -1839,8 +1930,72 @@ def test_parse_gt_1():
     assert actual == expected
 
 
+def test_parse_equiv_1():
+    """合同式のparse。
+    a ≡ b (mod p)
+    """
+    mathml = latex2mathml.converter.convert('a \equiv b \pmod p')
+    actual = Parser.parse(Expression(mathml))
+    equiv = ParserConst.equiv_data
+    mod = ParserConst.mod_data
+    expected = {
+        'a', f'a/{equiv}',
+        'b', f'b/{equiv}',
+        'p', f'p/{mod}', f'p/{mod}/{equiv}'
+    }
+    assert actual == expected
+
+
+def test_parse_equiv_2():
+    """合同式のparse。
+    a ≡ b mod p
+    """
+    mathml = latex2mathml.converter.convert('a \equiv b \mod p')
+    actual = Parser.parse(Expression(mathml))
+    equiv = ParserConst.equiv_data
+    mod = ParserConst.mod_data
+    expected = {
+        'a', f'a/{equiv}',
+        'b', f'b/{equiv}',
+        'p', f'p/{mod}', f'p/{mod}/{equiv}'
+    }
+    assert actual == expected
+
+
+def test_parse_equiv_3():
+    """合同式のparse。
+    a ≡ b (p)
+    """
+    mathml = latex2mathml.converter.convert('a \equiv b \pod p')
+    actual = Parser.parse(Expression(mathml))
+    equiv = ParserConst.equiv_data
+    mod = ParserConst.mod_data
+    expected = {
+        'a', f'a/{equiv}',
+        'b', f'b/{equiv}',
+        'p', f'p/{mod}', f'p/{mod}/{equiv}'
+    }
+    assert actual == expected
+
+
+def test_parse_equiv_4():
+    """modが省略されているcongruenceのparse。
+    ac ≡ bc
+    """
+    mathml = latex2mathml.converter.convert('ac \equiv bc')
+    actual = Parser.parse(Expression(mathml))
+    equiv = ParserConst.equiv_data
+    prod = ParserConst.product_data
+    expected = {
+        'a', f'a/{prod}', f'a/{prod}/{equiv}',
+        'b', f'b/{prod}', f'b/{prod}/{equiv}',
+        'c', f'c/{prod}', f'c/{prod}/{equiv}'
+    }
+    assert actual == expected
+
+
 def test_parse_sum_1():
-    """総和のparse。
+    r"""総和のparse。
     \sum_{i=1}^{n} x_{i}
     """
     mathml = latex2mathml.converter.convert(r'\sum_{i=1}^{n} x_{i}')
@@ -1859,7 +2014,7 @@ def test_parse_sum_1():
 
 
 def test_parse_integral_1():
-    """積分のparse。
+    r"""積分のparse。
     \int^{b}_{a} f(x) dx
     """
     mathml = latex2mathml.converter.convert(r'\int^{b}_{a} f(x) dx')
@@ -1878,7 +2033,7 @@ def test_parse_integral_1():
 
 
 def test_parse_lim_1():
-    """parse limit.
+    r"""parse limit.
     \lim _{n\to \infty }x_{n}
     """
     mathml = latex2mathml.converter.convert(r'\lim _{n\to \infty }x_{n}')
@@ -1895,7 +2050,7 @@ def test_parse_lim_1():
 
 
 def test_parse_log_1():
-    """parse logarithm.
+    r"""parse logarithm.
     \log_{y}{x}
     """
     mathml = latex2mathml.converter.convert(r'\log_{y}{x}')
@@ -1909,7 +2064,7 @@ def test_parse_log_1():
 
 
 def test_parse_log_2():
-    """parse logarithm.
+    r"""parse logarithm.
     \log x
     """
     mathml = latex2mathml.converter.convert(r'\log x')
@@ -1922,7 +2077,7 @@ def test_parse_log_2():
 
 
 def test_parse_log_3():
-    """parse logarithm.
+    r"""parse logarithm.
     \ln(1+x)
     """
     mathml = latex2mathml.converter.convert(r'\ln(1+x)')

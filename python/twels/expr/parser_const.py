@@ -35,11 +35,16 @@ class ParserConst:
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
     slash_data = '\\slash'
+    mod_data = 'mod'
 
     equal_data = 'equal'
     less_data = 'less'
     greater_data = 'greater'
     in_data = 'in'
+
+    # modを含むので他のrelational operatorと同様には扱えないと思い
+    # 他と分けて記述している。
+    equiv_data = 'equiv'
 
     relational_operators = [equal_data, less_data, greater_data, in_data]
     ro_commutative = [equal_data]

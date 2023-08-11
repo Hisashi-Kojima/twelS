@@ -7,6 +7,9 @@
 
 // default value of priority is 0.
 
+// Notes:
+// このルールのparserを使う前に"&#x220F;"などは"∏"などに変換しておくこと。
+
 start: _open mathml _close
 
 ?mathml: _open mathml _close _annotation?  // mathやsemantics, mrowなど
@@ -15,7 +18,7 @@ start: _open mathml _close
 _annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
 
 // deal with relational operators
-?expr: _open _mspace* expr _mspace* _close  // for mrow
+?expr: _open expr _close  // for mrow
      | sum _more_sum*
 
 _more_sum: relational_operator sum
@@ -31,7 +34,7 @@ _more_product: (_add | subtract) product
 _more_atom: (_mul | div) atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
-     | "<mi" _attr* ">" "/" "</mi>" -> slash
+     | _mi_tag "/" "</mi>" -> slash
      | _mi
      | _mi_empty
      | _mo
@@ -41,20 +44,22 @@ _more_atom: (_mul | div) atom
      | cdots
      | mtext
 
+?relational_operator: equal
+                    | less
+                    | greater
+                    | in
+
+
 // this priority is higher than _mo.
 cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
 
-_mi: "<mi" _attr* ">" TOKEN "</mi>"
-_mi_empty: "<mi" _attr* "></mi>"
+_mi: _mi_tag TOKEN "</mi>"
+_mi_empty: _mi_tag "</mi>"
 
 // this priority is lower than atom and cdots.
-_mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
+_mo.-2: _mo_tag TOKEN "</mo>"
 
 ?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
-
-// some mspace tags are used for a math expression delimiter.
-// some other mspace tags are used for just spaces. <- not a delimiter.
-_mspace: "<mspace" _attr* "/>"
 
 // tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
 ?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
@@ -63,7 +68,6 @@ _mspace: "<mspace" _attr* "/>"
      | _sub_tag expr expr "</msub>" -> sub
      | _subsup_tag expr expr expr "</msubsup>" -> subsup
      | "<mroot" _attr* ">" expr expr "</mroot>" -> root
-     // use expr for dealing with relational operators
      | "<mover" _attr* ">" expr expr "</mover>" -> over
      | under
      | summation
@@ -73,11 +77,21 @@ _mspace: "<mspace" _attr* "/>"
      | log
      | underover
      | table
+     | equiv
 
 // for mtable
 table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
 mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
+
+// modを含むので他のrelational operatorと同様には扱えないと思い
+// 他と分けて記述している。
+equiv: sum _equiv_op sum mod?
+     | sum _equiv_op sum _mrow_tag mod "</mrow>"
+
+mod: _mod_op product
+    | _mi_tag "\pod</mi>" product
+    | _left_paren _mod_op product _right_paren
 
 // underとsub、underoverとsubsupは意味が異なると思い正規化をしない。
 // limやsummation、product_of_seqの中ではこれらを正規化する。
@@ -100,46 +114,47 @@ log: _sub_tag _log_op expr "</msub>" expr
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
 
-_add: _open "+" _close
-subtract: _open ("−" | "-") _close
-_mul: _open ("*" | "×" | "⋅") _close
-div: _open ("/" | "÷") _close
-equal: _open "=" _close
-less: _open ("<" | "&lt;") _close
-greater: _open (">" | "&gt;") _close
-in: _open "∈" _close
-_left_paren: _open "(" _close
-_right_paren: _open ")" _close
+_add: _mo_tag "+</mo>"
+subtract: _mo_tag ("−" | "-") "</mo>"
+_mul: _mo_tag ("*" | "×" | "⋅") "</mo>"
+div: _mo_tag ("/" | "÷") "</mo>"
+
+equal: _mo_tag "=</mo>"
+less: _mo_tag ("<" | "&lt;") "</mo>"
+greater: _mo_tag (">" | "&gt;") "</mo>"
+in: _mo_tag "∈</mo>"
+
+_left_paren: _mo_tag "(" "</mo>"
+_right_paren: _mo_tag ")" "</mo>"
 
 _mrow_tag: "<mrow" _attr* ">"
 _under_tag: "<munder" _attr* ">"
 _underover_tag: "<munderover" _attr* ">"
 _sub_tag: "<msub" _attr* ">"
 _subsup_tag: "<msubsup" _attr* ">"
+_mi_tag: "<mi" _attr* ">"
 _mo_tag: "<mo" _attr* ">"
 
 _mo_empty: "<mo></mo>"
 
 _lim_op_1: _mo_tag "lim</mo>"
-_lim_op_2: _mo_tag ("&#x2192;" | "→") "</mo>"
-_summation_op: _mo_tag ("&#x2211;" | "∑") "</mo>"
-_product_of_seq_op:  _mo_tag ("&#x220F;" | "∏") "</mo>"
-_integral_op_1: _mo_tag ("&#x222B;" | "∫") "</mo>"
+_lim_op_2: _mo_tag "→" "</mo>"
+_summation_op: _mo_tag "∑" "</mo>"
+_product_of_seq_op:  _mo_tag "∏" "</mo>"
+_integral_op_1: _mo_tag "∫" "</mo>"
 _integral_op_2: ("<mi>d</mi>" | "<mrow><mi>d</mi></mrow>")
-_log_op: "<mi" _attr* ">log</mi>"
-_ln_op: "<mi" _attr* ">ln</mi>"
+_log_op: _mi_tag "log</mi>"
+_ln_op: _mi_tag "ln</mi>"
+_equiv_op: _mo_tag "≡" "</mo>"
+_mod_op: _mi_tag "mod</mi>"
 
-?relational_operator: equal
-                    | less
-                    | greater
-                    | in
-
-_attr: " "* _ATTRIBUTE
+_attr: " "+ _ATTRIBUTE
 
 TOKEN: /[^<> ]+/
 _CONTENT: /[^<>]+/
 _ATTRIBUTE: /[^<>= ]+=("[^"]*"|'[^']*')/  // シングルクォーテーションとダブルクォーテーションに対応．
 COMMENT: /<!--[^(-->)]*-->/
+MSPACE: "<mspace" (" "+ _ATTRIBUTE)* "/>"
 
 _ELEMENTS: "math"
          | "maction"
@@ -171,3 +186,8 @@ _ELEMENTS: "math"
 %import common.WS -> _WS  // white space
 %ignore _WS
 %ignore COMMENT
+
+// some mspace tags are used for a math expression delimiter.
+// some other mspace tags are used for just spaces. <- not a delimiter.
+// ignoreするなら事前に削除（正規化）した方がよいだろう。
+%ignore MSPACE
