@@ -483,7 +483,7 @@ def test_parse_subset_1():
 
 
 def test_parse_supset_1():
-    """parse subset.
+    """parse supset.
     A ⊃ B
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -501,7 +501,7 @@ def test_parse_supset_1():
 
 
 def test_parse_subseteq_1():
-    """parse subset.
+    """parse subseteq.
     A ⊆ B
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -519,7 +519,7 @@ def test_parse_subseteq_1():
 
 
 def test_parse_supseteq_1():
-    """parse subset.
+    """parse supseteq.
     A ⊇ B
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -531,6 +531,42 @@ def test_parse_supseteq_1():
         Tree(ParserConst.supseteq_data, [
             Tree('#0', [Token(ParserConst.token_type, 'A')]),
             Tree('#1', [Token(ParserConst.token_type, 'B')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_parse_in_1():
+    """parse in.
+    a ∈ A
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>a</mi>
+                    <mo>∈</mo>
+                    <mi>A</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.in_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'a')]),
+            Tree('#1', [Token(ParserConst.token_type, 'A')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_parse_ni_1():
+    """parse ni.
+    A ∋ a
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>A</mi>
+                    <mo>∋</mo>
+                    <mi>a</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.ni_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'A')]),
+            Tree('#1', [Token(ParserConst.token_type, 'a')])
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))

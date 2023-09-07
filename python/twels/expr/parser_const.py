@@ -44,6 +44,7 @@ class ParserConst:
     less_data = 'less'
     greater_data = 'greater'
     in_data = 'in'
+    ni_data = 'ni'
     neq_data = 'neq'
     subset_data = 'subset'
     supset_data = 'supset'
@@ -58,7 +59,7 @@ class ParserConst:
         equal_data, neq_data
     ]
     ro_non_commutative = [
-        less_data, greater_data, in_data, subset_data, supset_data,
+        less_data, greater_data, in_data, ni_data, subset_data, supset_data,
         subseteq_data, supseteq_data
     ]
     relational_operators = ro_commutative + ro_non_commutative

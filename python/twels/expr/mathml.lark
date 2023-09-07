@@ -58,6 +58,7 @@ _more_atom: (_mul | div) atom
                     | less
                     | greater
                     | in
+                    | ni
                     | neq
                     | subset
                     | supset
@@ -141,6 +142,7 @@ equal: _mo_tag "=</mo>"
 less: _mo_tag ("<" | "&lt;") "</mo>"
 greater: _mo_tag (">" | "&gt;") "</mo>"
 in: _mo_tag "∈</mo>"
+ni: _mo_tag "∋</mo>"
 neq: _mo_tag "≠</mo>"
 subset: _mo_tag "⊂</mo>"
 supset: _mo_tag "⊃</mo>"
