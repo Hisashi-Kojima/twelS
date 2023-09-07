@@ -35,6 +35,8 @@ class ParserConst:
     log_data = 'log'
     cdots_data = 'cdots'
     omit_data = 'omit'  # 0.333...や0.9999...などの省略があったことを示す．
+    abbr_add_data = 'abbr_add'
+    abbr_mul_data = 'abbr_mul'
     slash_data = '\\slash'
     mod_data = 'mod'
 

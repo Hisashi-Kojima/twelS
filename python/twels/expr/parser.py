@@ -8,8 +8,9 @@ import os
 from lark import Lark, exceptions, Tree
 
 from twels.expr.expression import Expression
+from twels.expr.parser_const import ParserConst
 from twels.expr.pathset import PathSet
-from twels.expr.tree import MathMLTree, get_ro_index
+from twels.expr.tree import MathMLTree, find_index
 from twels.utils.utils import print_in_red
 
 logger = logging.getLogger('django')
@@ -87,7 +88,7 @@ class Parser:
             root以外のノードに関係演算子が複数含まれる場合は分割の対象外としている。
             Transformerでの実装が難しそうなので、これを対象にすることは難しそう。
         """
-        ro_index_list = get_ro_index(tree.children)
+        ro_index_list = find_index(tree.children, ParserConst.relational_operators)
         ro_num = len(ro_index_list)
         if ro_num < 2:
             # remove ParserConst.root_data

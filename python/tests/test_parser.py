@@ -1564,6 +1564,7 @@ def test_get_parsed_tree_cdots_1():
 
 def test_get_parsed_tree_cdots_2():
     """0.999...のparse。
+    0.999... = 0.9 + 0.09 + ... + 9*10^{-n}
     https://ja.wikipedia.org/wiki/%E7%B4%9A%E6%95%B0
     """
     mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle 0.999\cdots =0.9+0.09+\cdots +9\cdot 10^{-n}+\cdots }">
@@ -1758,6 +1759,117 @@ def test_get_parsed_tree_cdots_3():
                             Token(ParserConst.token_type, '1')
                         ])
                     ])
+                ])
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_abbreviation_1():
+    """parse abbreviation.
+    frac{x_1 + x_2 + ... + x_n}{n}
+    """
+    mathml = """<math>
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mfrac>
+                                <mrow>
+                                    <msub>
+                                    <mi>x</mi>
+                                    <mrow class="MJX-TeXAtom-ORD">
+                                        <mn>1</mn>
+                                    </mrow>
+                                    </msub>
+                                    <mo>+</mo>
+                                    <msub>
+                                    <mi>x</mi>
+                                    <mrow class="MJX-TeXAtom-ORD">
+                                        <mn>2</mn>
+                                    </mrow>
+                                    </msub>
+                                    <mo>+</mo>
+                                    <mo>&#x22EF;<!-- ⋯ --></mo>
+                                    <mo>+</mo>
+                                    <msub>
+                                    <mi>x</mi>
+                                    <mrow class="MJX-TeXAtom-ORD">
+                                        <mi>n</mi>
+                                    </mrow>
+                                    </msub>
+                                </mrow>
+                                <mi>n</mi>
+                            </mfrac>
+                        </mstyle>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.frac_data, [
+                Tree('#0', [
+                    Tree(ParserConst.abbr_add_data, [
+                        Tree('#0', [
+                            Tree(ParserConst.sub_data, [
+                                Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                                Tree('#1', [Token(ParserConst.token_type, '1')])
+                            ])
+                        ]),
+                        Tree('#1', [
+                            Tree(ParserConst.sub_data, [
+                                Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                                Tree('#1', [Token(ParserConst.token_type, 'n')])
+                            ])
+                        ]),
+                        Tree('#2', [
+                            Token(ParserConst.token_type, '1')
+                        ])
+                    ])
+                ]),
+                Tree('#1', [Token(ParserConst.token_type, 'n')])
+            ])
+        ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_abbreviation_2():
+    """parse abbreviation.
+    x_1 x_2 ... x_n
+    """
+    mathml = """<math>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>1</mn>
+                        </mrow>
+                    </msub>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mn>2</mn>
+                        </mrow>
+                    </msub>
+                    <mo>&#x22EF;<!-- ⋯ --></mo>
+                    <msub>
+                        <mi>x</mi>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>n</mi>
+                        </mrow>
+                    </msub>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+            Tree(ParserConst.abbr_mul_data, [
+                Tree('#0', [
+                    Tree(ParserConst.sub_data, [
+                        Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                        Tree('#1', [Token(ParserConst.token_type, '1')])
+                    ]),
+                ]),
+                Tree('#1', [
+                    Tree(ParserConst.sub_data, [
+                        Tree('#0', [Token(ParserConst.token_type, 'x')]),
+                        Tree('#1', [Token(ParserConst.token_type, 'n')])
+                    ])
+                ]),
+                Tree('#2', [
+                    Token(ParserConst.token_type, '1')
                 ])
             ])
         ])

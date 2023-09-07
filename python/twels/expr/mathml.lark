@@ -25,11 +25,20 @@ _more_sum: relational_operator sum
 
 ?sum: (_add | subtract)? product _more_product*
     | _open (_add | subtract)? product _more_product* _close  // for mrow
+    | abbr_add
+
+// this priority is higher than other sum rules.
+abbr_add.1: (atom _add)+ cdots _add atom
 
 _more_product: (_add | subtract) product
 
 ?product: atom _more_atom*  // a*bのパターン
         | atom+  // abのパターン
+        | abbr_mul
+
+// this priority is higher than other product rules.
+abbr_mul.1: (atom _mul)+ cdots _mul atom
+          | atom+ cdots atom
 
 _more_atom: (_mul | div) atom
 
