@@ -48,7 +48,7 @@ _more_atom: (_mul | div) atom
      | _mi_empty
      | _mo
      | _mrow_tag product "</mrow>"
-     | _left_paren sum _right_paren -> paren
+     | paren
      | abs
      | func
      | cdots
@@ -96,6 +96,7 @@ _mo.-2: _mo_tag TOKEN "</mo>"
      | log
      | underover
      | table
+     | matrix
      | equiv
 
 // for mtable
@@ -103,14 +104,23 @@ table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
 mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
 
+// this priority is higher than table.
+matrix.1: _mo_tag "[</mo>" table _mo_tag "]</mo>"
+        | _mo_tag "(</mo>" table _mo_tag ")</mo>"
+
 // modを含むので他のrelational operatorと同様には扱えないと思い
 // 他と分けて記述している。
 equiv: sum _equiv_op sum mod?
      | sum _equiv_op sum _mrow_tag mod "</mrow>"
 
 mod: _mod_op product
-    | _mi_tag "\pod</mi>" product
-    | _left_paren _mod_op product _right_paren
+   | _mi_tag "\pod</mi>" product
+   | _left_paren _mod_op product _right_paren
+
+// 対応が取れている括弧は正規化する。
+paren: _left_paren sum _right_paren
+     | _mo_tag "{" "</mo>" sum _mo_tag "}" "</mo>"
+     | _mo_tag "[" "</mo>" sum _mo_tag "]" "</mo>"
 
 // underとsub、underoverとsubsupは意味が異なると思い正規化をしない。
 // limやsummation、product_of_seqの中ではこれらを正規化する。

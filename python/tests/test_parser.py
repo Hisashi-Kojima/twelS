@@ -733,6 +733,112 @@ def test_get_parsed_tree_paren_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_paren_2():
+    """parse () and [].
+    [(1+2)-3]-(4-5)=1
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mo stretchy="false">[</mo>
+                            <mo stretchy="false">(</mo>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                            <mo stretchy="false">)</mo>
+                            <mo>−</mo>
+                            <mn>3</mn>
+                            <mo stretchy="false">]</mo>
+                            <mo>−</mo>
+                            <mo stretchy="false">(</mo>
+                            <mn>4</mn>
+                            <mo>−</mo>
+                            <mn>5</mn>
+                            <mo stretchy="false">)</mo>
+                            <mo>=</mo>
+                            <mn>1</mn>
+                        </mstyle>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.equal_data, [
+            Tree(ParserConst.sum_data, [
+                Tree(ParserConst.paren_data, [
+                    Tree(ParserConst.sum_data, [
+                        Tree(ParserConst.paren_data, [
+                            Tree(ParserConst.sum_data, [
+                                Token('TOKEN', '1'),
+                                Token('TOKEN', '2')
+                            ])
+                        ]),
+                        Tree('neg', [Token('TOKEN', '3')])
+                    ])
+                ]),
+                Tree('neg', [
+                    Tree('paren', [
+                        Tree('sum', [
+                            Token('TOKEN', '4'),
+                            Tree('neg', [Token('TOKEN', '5')])
+                        ])
+                    ])
+                ])
+            ]),
+            Token('TOKEN', '1')])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_paren_3():
+    """parse () and {}.
+    {(1+2)-3}-(4-5)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mo stretchy="false">{</mo>
+                            <mo stretchy="false">(</mo>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mn>2</mn>
+                            <mo stretchy="false">)</mo>
+                            <mo>−</mo>
+                            <mn>3</mn>
+                            <mo stretchy="false">}</mo>
+                            <mo>−</mo>
+                            <mo stretchy="false">(</mo>
+                            <mn>4</mn>
+                            <mo>−</mo>
+                            <mn>5</mn>
+                            <mo stretchy="false">)</mo>
+                        </mstyle>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.sum_data, [
+            Tree(ParserConst.paren_data, [
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.paren_data, [
+                        Tree(ParserConst.sum_data, [
+                            Token('TOKEN', '1'),
+                            Token('TOKEN', '2')
+                        ])
+                    ]),
+                    Tree('neg', [Token('TOKEN', '3')])
+                ])
+            ]),
+            Tree('neg', [
+                Tree('paren', [
+                    Tree('sum', [
+                        Token('TOKEN', '4'),
+                        Tree('neg', [Token('TOKEN', '5')])
+                    ])
+                ])
+            ])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_abs_1():
     """絶対値のparse。
     |x|
@@ -1548,35 +1654,102 @@ def test_get_parsed_tree_table_2():
                     </semantics>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.product_data, [
-            Token(ParserConst.token_type, '['),
-            Tree(ParserConst.table_data, [
-                Tree('#0', [
-                    Tree('#0', [Token(ParserConst.token_type, '1')]),
-                    Tree('#1', [Token(ParserConst.token_type, '9')]),
-                    Tree('#2', [
-                        Tree(ParserConst.neg_data, [
-                            Token(ParserConst.token_type, '13')
-                        ])
-                    ])
-                ]),
-                Tree('#1', [
-                    Tree('#0', [Token(ParserConst.token_type, '20')]),
-                    Tree('#1', [Token(ParserConst.token_type, '5')]),
-                    Tree('#2', [
-                        Tree(ParserConst.neg_data, [
-                            Token(ParserConst.token_type, '6')
-                        ])
+        Tree(ParserConst.matrix_data, [
+            Tree('#0', [
+                Tree('#0', [Token(ParserConst.token_type, '1')]),
+                Tree('#1', [Token(ParserConst.token_type, '9')]),
+                Tree('#2', [
+                    Tree(ParserConst.neg_data, [
+                        Token(ParserConst.token_type, '13')
                     ])
                 ])
             ]),
-            Token(ParserConst.token_type, ']')
-        ])
+            Tree('#1', [
+                Tree('#0', [Token(ParserConst.token_type, '20')]),
+                Tree('#1', [Token(ParserConst.token_type, '5')]),
+                Tree('#2', [
+                    Tree(ParserConst.neg_data, [
+                        Token(ParserConst.token_type, '6')
+                    ])
+                ])
+            ])
+        ]),
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_table_3():
+    """parse parentheses matrix.
+    (  1 9 -13)
+    ( 20 5  -6)
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mstyle displaystyle="true" scriptlevel="0">
+                                <mrow class="MJX-TeXAtom-ORD">
+                                <mrow>
+                                    <mo>(</mo>
+                                    <mtable rowspacing="4pt" columnspacing="1em">
+                                        <mtr>
+                                            <mtd>
+                                            <mn>1</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>9</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>13</mn>
+                                            </mtd>
+                                        </mtr>
+                                        <mtr>
+                                            <mtd>
+                                            <mn>20</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mn>5</mn>
+                                            </mtd>
+                                            <mtd>
+                                            <mo>&#x2212;<!-- − --></mo>
+                                            <mn>6</mn>
+                                            </mtd>
+                                        </mtr>
+                                    </mtable>
+                                    <mo>)</mo>
+                                </mrow>
+                                </mrow>
+                            </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle {\begin{bmatrix}1&amp;9&amp;-13\\20&amp;5&amp;-6\end{bmatrix}}}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.matrix_data, [
+            Tree('#0', [
+                Tree('#0', [Token(ParserConst.token_type, '1')]),
+                Tree('#1', [Token(ParserConst.token_type, '9')]),
+                Tree('#2', [
+                    Tree(ParserConst.neg_data, [
+                        Token(ParserConst.token_type, '13')
+                    ])
+                ])
+            ]),
+            Tree('#1', [
+                Tree('#0', [Token(ParserConst.token_type, '20')]),
+                Tree('#1', [Token(ParserConst.token_type, '5')]),
+                Tree('#2', [
+                    Tree(ParserConst.neg_data, [
+                        Token(ParserConst.token_type, '6')
+                    ])
+                ])
+            ])
+        ]),
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_table_4():
     """mtableのparse。<mi>タグの中が空。
     https://ja.wikipedia.org/wiki/0.999...
     """
@@ -2429,18 +2602,15 @@ def test_parse_table_1():
                     </semantics>
                 </math>"""
     actual = Parser.parse(Expression(mathml))
-    table = ParserConst.table_data
-    product = ParserConst.product_data
+    matrix = ParserConst.matrix_data
     neg = ParserConst.neg_data
     expected = {
-        '[', f'[/{product}',
-        '1', f'1/#0/#0/{table}', f'1/#0/#0/{table}/{product}',
-        '9', f'9/#1/#0/{table}', f'9/#1/#0/{table}/{product}',
-        f'13/{neg}', f'13/{neg}/#2/#0/{table}', f'13/{neg}/#2/#0/{table}/{product}',
-        '20', f'20/#0/#1/{table}', f'20/#0/#1/{table}/{product}',
-        '5', f'5/#1/#1/{table}', f'5/#1/#1/{table}/{product}',
-        f'6/{neg}', f'6/{neg}/#2/#1/{table}', f'6/{neg}/#2/#1/{table}/{product}',
-        ']', f']/{product}',
+        '1', f'1/#0/#0/{matrix}',
+        '9', f'9/#1/#0/{matrix}',
+        f'13/{neg}', f'13/{neg}/#2/#0/{matrix}',
+        '20', f'20/#0/#1/{matrix}',
+        '5', f'5/#1/#1/{matrix}',
+        f'6/{neg}', f'6/{neg}/#2/#1/{matrix}'
     }
     assert actual == expected
 

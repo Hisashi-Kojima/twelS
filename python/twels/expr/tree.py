@@ -65,6 +65,19 @@ class MathMLTree(Transformer):
             Tree('#1', children)
         ])
 
+    def matrix(self, children: list[Tree | Token]):
+        """
+        Args:
+        e.g.
+        Tree('matrix', [Tree('table', table_children)])
+
+        Returns:
+        e.g.
+        Tree('matrix', table_children)
+        """
+        table_children = children[0].children
+        return Tree(ParserConst.matrix_data, table_children)
+
     def abbr_add(self, children: list[Tree | Token]):
         return _parse_abbr(ParserConst.abbr_add_data, children)
 
