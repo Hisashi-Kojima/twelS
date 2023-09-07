@@ -59,6 +59,10 @@ _more_atom: (_mul | div) atom
                     | greater
                     | in
                     | neq
+                    | subset
+                    | supset
+                    | subseteq
+                    | supseteq
 
 
 abs: _mo_tag "|</mo>" sum _mo_tag "|</mo>"
@@ -138,6 +142,10 @@ less: _mo_tag ("<" | "&lt;") "</mo>"
 greater: _mo_tag (">" | "&gt;") "</mo>"
 in: _mo_tag "∈</mo>"
 neq: _mo_tag "≠</mo>"
+subset: _mo_tag "⊂</mo>"
+supset: _mo_tag "⊃</mo>"
+subseteq: _mo_tag "⊆</mo>"
+supseteq: _mo_tag "⊇</mo>"
 
 _left_paren: _mo_tag "(" "</mo>"
 _right_paren: _mo_tag ")" "</mo>"

@@ -45,11 +45,20 @@ class ParserConst:
     greater_data = 'greater'
     in_data = 'in'
     neq_data = 'neq'
+    subset_data = 'subset'
+    supset_data = 'supset'
+    subseteq_data = 'subseteq'
+    supseteq_data = 'supseteq'
 
     # modを含むので他のrelational operatorと同様には扱えないと思い
     # 他と分けて記述している。
     equiv_data = 'equiv'
 
-    relational_operators = [equal_data, less_data, greater_data, in_data, neq_data]
-    ro_commutative = [equal_data, neq_data]
-    ro_non_commutative = [less_data, greater_data, in_data]
+    ro_commutative = [
+        equal_data, neq_data
+    ]
+    ro_non_commutative = [
+        less_data, greater_data, in_data, subset_data, supset_data,
+        subseteq_data, supseteq_data
+    ]
+    relational_operators = ro_commutative + ro_non_commutative

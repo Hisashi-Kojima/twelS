@@ -464,6 +464,78 @@ def test_get_parsed_tree_lt_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_parse_subset_1():
+    """parse subset.
+    A ⊂ B
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>A</mi>
+                    <mo>⊂</mo>
+                    <mi>B</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.subset_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'A')]),
+            Tree('#1', [Token(ParserConst.token_type, 'B')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_parse_supset_1():
+    """parse subset.
+    A ⊃ B
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>A</mi>
+                    <mo>⊃</mo>
+                    <mi>B</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.supset_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'A')]),
+            Tree('#1', [Token(ParserConst.token_type, 'B')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_parse_subseteq_1():
+    """parse subset.
+    A ⊆ B
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>A</mi>
+                    <mo>&#x2286;<!-- ⊆ --></mo>
+                    <mi>B</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.subseteq_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'A')]),
+            Tree('#1', [Token(ParserConst.token_type, 'B')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_parse_supseteq_1():
+    """parse subset.
+    A ⊇ B
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mi>A</mi>
+                    <mo>⊇</mo>
+                    <mi>B</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.supseteq_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'A')]),
+            Tree('#1', [Token(ParserConst.token_type, 'B')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_gt_1():
     """不等号（&gt; >）を含む式のparse。
     3>2
