@@ -964,7 +964,7 @@ def test_get_parsed_tree_lsup_2():
     r"""parse {}^{t}AA.
     転置行列{}^{t}Aと行列Aの積。
     """
-    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {}^{\ast }\mathbb {R} }">
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow class="MJX-TeXAtom-ORD">
                         <msup>
                             <mrow class="MJX-TeXAtom-ORD">
@@ -1839,7 +1839,6 @@ def test_get_parsed_tree_table_4():
                     Tree('#0', [Token(ParserConst.token_type, 'c')]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                         ])
                     ])
@@ -2038,7 +2037,6 @@ def test_get_parsed_tree_cdots_3():
                     Tree('#0', [Token(ParserConst.token_type, 'c')]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                         ])
                     ])
@@ -2050,7 +2048,6 @@ def test_get_parsed_tree_cdots_3():
                     ])]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')])
                         ])
                     ])
@@ -2065,7 +2062,6 @@ def test_get_parsed_tree_cdots_3():
                     ])]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Tree(ParserConst.sum_data, [
                                 Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')]),
                                 Tree(ParserConst.neg_data, [
@@ -2083,7 +2079,6 @@ def test_get_parsed_tree_cdots_3():
                         ])]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Token(ParserConst.token_type, '9')
                         ])
                     ])
@@ -2092,7 +2087,6 @@ def test_get_parsed_tree_cdots_3():
                     Tree('#0', [Token(ParserConst.token_type, 'c')]),
                     Tree('#1', [
                         Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.atom_data, []),
                             Token(ParserConst.token_type, '1')
                         ])
                     ])
@@ -2278,6 +2272,56 @@ def test_get_parsed_tree_mspace_1():
                     ])
                 ])
             ]),
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_empty_mo_1():
+    """parse empty mo.
+    <mo>&#x2061;<!-- ⁡ --></mo>を含む場合。
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle z-{\overline {z}}=2i\,\operatorname {Im} z}">
+                    <semantics>
+                        <mrow class="MJX-TeXAtom-ORD">
+                        <mstyle displaystyle="true" scriptlevel="0">
+                            <mi>z</mi>
+                            <mo>&#x2212;<!-- − --></mo>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mover>
+                                    <mi>z</mi>
+                                    <mo accent="false">&#x00AF;<!-- ¯ --></mo>
+                                </mover>
+                            </mrow>
+                            <mo>=</mo>
+                            <mn>2</mn>
+                            <mi>i</mi>
+                            <mspace width="thinmathspace" />
+                            <mi>Im</mi>
+                            <mo>&#x2061;<!-- ⁡ --></mo>
+                            <mi>z</mi>
+                        </mstyle>
+                        </mrow>
+                        <annotation encoding="application/x-tex">{\displaystyle z-{\overline {z}}=2i\,\operatorname {Im} z}</annotation>
+                    </semantics>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree('equal', [
+            Tree('sum', [
+                Token('TOKEN', 'z'),
+                Tree('neg', [
+                    Tree('over', [
+                        Tree('#0', [Token('TOKEN', 'z')]),
+                        Tree('#1', [Token('TOKEN', '¯')])
+                    ])
+                ])
+            ]),
+            Tree('product', [
+                Token('TOKEN', '2'),
+                Token('TOKEN', 'i'),
+                Token('TOKEN', 'Im'),
+                Token('TOKEN', 'z')
+            ])
         ])
     ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))

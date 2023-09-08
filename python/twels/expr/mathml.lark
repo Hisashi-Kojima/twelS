@@ -47,6 +47,7 @@ _more_atom: (_mul | div) atom
      | _mi
      | _mi_empty
      | _mo
+     | _mo_empty  // <mo>&#x2061;<!-- ⁡ --></mo>などに対応するため
      | _mrow_tag product "</mrow>"
      | paren
      | abs

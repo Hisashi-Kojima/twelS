@@ -2,7 +2,7 @@
 """module description
 """
 
-from lark import Transformer, Tree, Token
+from lark import Transformer, Tree, Token, Discard
 
 from twels.expr.parser_const import ParserConst
 from twels.normalizer.normalizer import Normalizer
@@ -64,6 +64,13 @@ class MathMLTree(Transformer):
             Tree('#0', [Token(ParserConst.token_type, 'e')]),
             Tree('#1', children)
         ])
+
+    def atom(self, children: list[Tree | Token]):
+        # len(children) is 0 or more than 1.
+        if len(children) == 0:
+            raise Discard
+        else:
+            return Tree(ParserConst.atom_data, children)
 
     def matrix(self, children: list[Tree | Token]):
         """
@@ -168,7 +175,7 @@ class MathMLTree(Transformer):
         if len(ro_index_list) == 1 and ro_index_list[0] == 1 and len(children) == 3:
             # ROが1つのとき，ROのchildrenに左辺と右辺を入れる．
             # remove ParserConst.root_data
-            ro_tree = children[ro_index_list[0]]
+            ro_tree = children[1]
             if ro_tree.data in ParserConst.ro_commutative:
                 return Tree(ro_tree.data, [
                     children[0],
@@ -181,6 +188,10 @@ class MathMLTree(Transformer):
                 ])
             else:
                 return Tree(ParserConst.expr_data, children)
+        elif len(ro_index_list) == 1 and ro_index_list[0] == 0 and len(children) == 2:
+            # equalの要素が1つしかないときなど
+            ro_tree = children[0]
+            return Tree(ro_tree.data, [children[1]])
         else:
             return Tree(ParserConst.expr_data, children)
 
