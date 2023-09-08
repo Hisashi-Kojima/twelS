@@ -23,6 +23,7 @@ class ParserConst:
     frac_data = 'frac'
     sup_data = 'sup'
     sub_data = 'sub'
+    lsup_data = 'lsup'
     subsup_data = 'subsup'
     sqrt_data = 'sqrt'
     func_root_data = 'root'

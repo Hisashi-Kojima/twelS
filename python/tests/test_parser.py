@@ -933,6 +933,62 @@ def test_get_parsed_tree_subsup_1():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_lsup_1():
+    r"""parse *R.
+    超実数体*Rのように、文字の左上にアスタリスク等を表示したい場合があるようだ。
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <msup>
+                            <mrow class="MJX-TeXAtom-ORD">
+                            </mrow>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mo>&#x2217;<!-- ∗ --></mo>
+                            </mrow>
+                        </msup>
+                        <mrow class="MJX-TeXAtom-ORD">
+                            <mi>R</mi>
+                        </mrow>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.lsup_data, [
+            Tree('#0', [Token(ParserConst.token_type, 'R')]),
+            Tree('#1', [Token(ParserConst.token_type, '∗')]),
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_lsup_2():
+    r"""parse {}^{t}AA.
+    転置行列{}^{t}Aと行列Aの積。
+    """
+    mathml = """<math xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {}^{\ast }\mathbb {R} }">
+                    <mrow class="MJX-TeXAtom-ORD">
+                        <msup>
+                            <mrow class="MJX-TeXAtom-ORD">
+                            </mrow>
+                            <mrow class="MJX-TeXAtom-ORD">
+                                <mi>t</mi>
+                            </mrow>
+                        </msup>
+                        <mi>A</mi>
+                        <mi>A</mi>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Tree(ParserConst.lsup_data, [
+                Tree('#0', [Token(ParserConst.token_type, 'A')]),
+                Tree('#1', [Token(ParserConst.token_type, 't')]),
+            ]),
+            Token(ParserConst.token_type, 'A')
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_sqrt_1():
     """平方根のparse。
     sqrt{3}

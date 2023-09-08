@@ -83,8 +83,9 @@ _mo.-2: _mo_tag TOKEN "</mo>"
 // tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
 ?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
      | "<mfrac" _attr* ">" expr expr "</mfrac>" -> frac
-     | "<msup" _attr* ">" expr expr "</msup>" -> sup
+     | _sup_tag expr expr "</msup>" -> sup
      | _sub_tag expr expr "</msub>" -> sub
+     | lsup
      | _subsup_tag expr expr expr "</msubsup>" -> subsup
      | "<mroot" _attr* ">" expr expr "</mroot>" -> root
      | "<mover" _attr* ">" expr expr "</mover>" -> over
@@ -98,6 +99,8 @@ _mo.-2: _mo_tag TOKEN "</mo>"
      | table
      | matrix
      | equiv
+
+lsup: _sup_tag _mrow_tag "</mrow>" expr "</msup>" atom
 
 // for mtable
 table: "<mtable" _attr* ">" mtr+ "</mtable>"
@@ -145,7 +148,7 @@ _close: "</" _ELEMENTS ">"
 
 _add: _mo_tag "+</mo>"
 subtract: _mo_tag ("−" | "-") "</mo>"
-_mul: _mo_tag ("*" | "×" | "⋅") "</mo>"
+_mul: _mo_tag ("*" | "×" | "⋅" | "∗") "</mo>"
 div: _mo_tag ("/" | "÷") "</mo>"
 
 equal: _mo_tag "=</mo>"
@@ -165,6 +168,7 @@ _right_paren: _mo_tag ")" "</mo>"
 _mrow_tag: "<mrow" _attr* ">"
 _under_tag: "<munder" _attr* ">"
 _underover_tag: "<munderover" _attr* ">"
+_sup_tag: "<msup" _attr* ">"
 _sub_tag: "<msub" _attr* ">"
 _subsup_tag: "<msubsup" _attr* ">"
 _mi_tag: "<mi" _attr* ">"

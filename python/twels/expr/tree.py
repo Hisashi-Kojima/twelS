@@ -78,6 +78,9 @@ class MathMLTree(Transformer):
         table_children = children[0].children
         return Tree(ParserConst.matrix_data, table_children)
 
+    def lsup(self, children: list[Tree | Token]):
+        return Tree(ParserConst.lsup_data, _insert_pseudo_num([children[1], children[0]]))
+
     def abbr_add(self, children: list[Tree | Token]):
         return _parse_abbr(ParserConst.abbr_add_data, children)
 
