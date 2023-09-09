@@ -88,6 +88,9 @@ class MathMLTree(Transformer):
     def lsup(self, children: list[Tree | Token]):
         return Tree(ParserConst.lsup_data, _insert_pseudo_num([children[1], children[0]]))
 
+    def lsub(self, children: list[Tree | Token]):
+        return Tree(ParserConst.lsub_data, _insert_pseudo_num([children[1], children[0]]))
+
     def abbr_add(self, children: list[Tree | Token]):
         return _parse_abbr(ParserConst.abbr_add_data, children)
 
@@ -310,6 +313,9 @@ def _get_fraction(numerator, denominator) -> Tree:
 
 def _get_tr(tr: Tree, pseudo_num: int) -> Tree:
     """引数の順番の情報を追加したtrを返す関数。
+    Notes:
+        td may be empty.
+        e.g. Tree('td', [])
     Args:
         e.g.
         Tree('tr', [
@@ -328,6 +334,8 @@ def _get_tr(tr: Tree, pseudo_num: int) -> Tree:
     td_num = len(tr.children)
     for i in range(td_num):
         td: Tree = tr.children[i]
+        if len(td.children) == 0:
+            continue
         token: Token = td.children[0]
         children.append(_get_pseudo_tree(i, token))
     return Tree(f'#{pseudo_num}', children)

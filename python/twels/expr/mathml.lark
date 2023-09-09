@@ -87,6 +87,7 @@ _mo.-2: _mo_tag TOKEN "</mo>"
      | _sup_tag expr expr "</msup>" -> sup
      | _sub_tag expr expr "</msub>" -> sub
      | lsup
+     | lsub
      | _subsup_tag expr expr expr "</msubsup>" -> subsup
      | "<mroot" _attr* ">" expr expr "</mroot>" -> root
      | "<mover" _attr* ">" expr expr "</mover>" -> over
@@ -102,11 +103,12 @@ _mo.-2: _mo_tag TOKEN "</mo>"
      | equiv
 
 lsup: _sup_tag _mrow_tag "</mrow>" expr "</msup>" atom
+lsub: _sub_tag _mrow_tag "</mrow>" expr "</msub>" atom
 
 // for mtable
 table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
-mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
+mtd: "<mtd" _attr* ">" mathml? "</mtd>" -> td
 
 // this priority is higher than table.
 matrix.1: _mo_tag "[</mo>" table _mo_tag "]</mo>"

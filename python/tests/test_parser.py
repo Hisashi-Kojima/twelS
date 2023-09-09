@@ -989,6 +989,36 @@ def test_get_parsed_tree_lsup_2():
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
+def test_get_parsed_tree_lsub_1():
+    """parse combination.
+    nCr
+    """
+    mathml = """<math>
+                    <mrow>
+                        <msub>
+                            <mrow></mrow>
+                            <mi>n</mi>
+                        </msub>
+                        <msub>
+                            <mi>C</mi>
+                            <mi>r</mi>
+                        </msub>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.lsub_data, [
+            Tree('#0', [
+                Tree(ParserConst.sub_data, [
+                    Tree('#0', [Token(ParserConst.token_type, 'C')]),
+                    Tree('#1', [Token(ParserConst.token_type, 'r')]),
+                ])
+            ]),
+            Tree('#1', [Token(ParserConst.token_type, 'n')])
+        ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
 def test_get_parsed_tree_sqrt_1():
     """平方根のparse。
     sqrt{3}
@@ -1845,6 +1875,39 @@ def test_get_parsed_tree_table_4():
                 ])
             ])
         ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_table_5():
+    """parse mtable.
+    mtd is empty.
+    """
+    mathml = """<math>
+                    <mrow>
+                        <mtable>
+                            <mtr>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mi>a</mi>
+                                    <mo>=</mo>
+                                    <mn>b</mn>
+                                </mtd>
+                            </mtr>
+                        </mtable>
+                    </mrow>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.table_data, [
+            Tree('#0', [
+                Tree('#1', [
+                    Tree(ParserConst.equal_data, [
+                        Token(ParserConst.token_type, 'a'),
+                        Token(ParserConst.token_type, 'b')
+                    ])
+                ])
+            ])
+        ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
