@@ -70,11 +70,19 @@ class Parser:
             print_in_red(e)
             print_in_red('grammarファイルを正しく読み込めていない，もしくはgrammarに間違いがあります．')
             return Tree('error', [])
-        except exceptions.LarkError as e:
-            logger.error('expression: ')
-            logger.error(expr.mathml)
-            logger.exception('LarkError')
-            return Tree('error', [])
+        except exceptions.LarkError:
+            try:
+                # 条件を変えて再度parseする
+                # mtableが複数の数式を含む場合、mtdが邪魔で正しくparseできないのでmtdを削除。
+                new_mathml = expr.mathml.replace('<mtd>', '').replace('</mtd>', '').replace('<mrow></mrow>', '').replace('<mi></mi>', '')
+                parsed_tree = __class__._lark.parse(new_mathml)
+                cleaned_tree = MathMLTree().transform(parsed_tree)
+                return cleaned_tree
+            except exceptions.LarkError:
+                logger.error('expression: ')
+                logger.error(expr.mathml)
+                logger.exception('LarkError')
+                return Tree('error', [])
 
     @staticmethod
     def _make_new_trees(tree: Tree) -> list[Tree]:

@@ -32,6 +32,8 @@ class ParserConst:
     under_data = 'under'
     underover_data = 'underover'
     table_data = 'table'
+    exprs_data = 'exprs'
+    etr_data = 'etr'
     matrix_data = 'matrix'
     integral_data = 'integral'
     lim_data = 'lim'

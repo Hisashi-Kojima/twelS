@@ -18,7 +18,7 @@ def test_get_parsed_tree_atom_1():
     mathml = '<math><mi>a</mi></math>'
     expected = Tree(ParserConst.root_data, [
         Token(ParserConst.token_type, 'a')
-        ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -36,8 +36,8 @@ def test_get_parsed_tree_add_1():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.sum_data, [
             Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2')
-            ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -57,8 +57,8 @@ def test_get_parsed_tree_add_2():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.sum_data, [
             Token(ParserConst.token_type, '1'), Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, 'a')
-            ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -92,8 +92,8 @@ def test_get_parsed_tree_subtract_1():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.sum_data, [
             Token(ParserConst.token_type, '3'), Tree(ParserConst.neg_data, [Token(ParserConst.token_type, '2')])
-            ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -127,8 +127,8 @@ def test_get_parsed_tree_mul_1():
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
             Token(ParserConst.token_type, '2'), Token(ParserConst.token_type, '5')
-            ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -145,9 +145,31 @@ def test_get_parsed_tree_mul_2():
                 </math>"""
     expected = Tree(ParserConst.root_data, [
         Tree(ParserConst.product_data, [
-            Token(ParserConst.token_type, 'a'), Token(ParserConst.token_type, 'b'), Token(ParserConst.token_type, 'c')
-            ])
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'b'),
+            Token(ParserConst.token_type, 'c')
         ])
+    ])
+    assert expected == Parser.get_parsed_tree(Expression(mathml))
+
+
+def test_get_parsed_tree_mul_3():
+    """乗算のparse。
+    2 ⋅ ab
+    """
+    mathml = """<math>
+                    <mn>2</mn>
+                    <mo>⋅</mo>
+                    <mi>a</mi>
+                    <mi>b</mi>
+                </math>"""
+    expected = Tree(ParserConst.root_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, '2'),
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'b')
+        ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
@@ -1864,46 +1886,425 @@ def test_get_parsed_tree_table_4():
                     </semantics>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-            Tree(ParserConst.table_data, [
-                Tree('#0', [
-                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
-                        ])
-                    ])
-                ])
+        Tree(ParserConst.exprs_data, [
+            Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'c'),
+                Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
             ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 
 def test_get_parsed_tree_table_5():
     """parse mtable.
-    mtd is empty.
+    <mtr>1つに数式が1つある場合。表示をきれいにするためにmtableが使われている。
     """
     mathml = """<math>
                     <mrow>
                         <mtable>
                             <mtr>
+                                <mtd>
+                                    <mi>ζ</mi>
+                                    <mo>(</mo>
+                                    <mi>s</mi>
+                                    <mo>)</mo>
+                                </mtd>
+                                <mtd>
+                                    <mi></mi>
+                                    <mrow></mrow>
+                                    <mo>=</mo>
+                                    <mrow></mrow>
+                                </mtd>
+                                <mtd>
+                                    <msup>
+                                        <mn>1</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>2</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
                                 <mtd></mtd>
                                 <mtd>
-                                    <mi>a</mi>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>3</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>4</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>5</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>6</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <mo>⋯</mo>
+                                </mtd>
+                                <mtd></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd>
+                                    <mn>2</mn>
+                                    <mo>⋅</mo>
+                                    <msup>
+                                        <mn>2</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mi>ζ</mi>
+                                    <mo>(</mo>
+                                    <mi>s</mi>
+                                    <mo>)</mo>
+                                </mtd>
+                                <mtd>
+                                    <mi></mi>
+                                    <mrow></mrow>
                                     <mo>=</mo>
-                                    <mn>b</mn>
+                                    <mrow></mrow>
+                                </mtd>
+                                <mtd>
+                                    <mn>2</mn>
+                                    <mo>⋅</mo>
+                                    <msup>
+                                        <mn>2</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <mn>2</mn>
+                                    <mo>⋅</mo>
+                                    <msup>
+                                        <mn>4</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <mn>2</mn>
+                                    <mo>⋅</mo>
+                                    <msup>
+                                        <mn>6</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <mo>⋯</mo>
+                                </mtd>
+                                <mtd></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mrow>
+                                            <mn>1</mn>
+                                            <mo>−</mo>
+                                            <msup>
+                                                <mn>2</mn>
+                                                <mrow>
+                                                    <mn>1</mn>
+                                                    <mo>−</mo>
+                                                    <mi>s</mi>
+                                                </mrow>
+                                            </msup>
+                                        </mrow>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mi>ζ</mi>
+                                    <mo>(</mo>
+                                    <mi>s</mi>
+                                    <mo>)</mo>
+                                </mtd>
+                                <mtd>
+                                    <mi></mi>
+                                    <mrow></mrow>
+                                    <mo>=</mo>
+                                    <mrow></mrow>
+                                </mtd>
+                                <mtd>
+                                    <msup>
+                                        <mn>1</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>−</mo>
+                                    <msup>
+                                        <mn>2</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>3</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>−</mo>
+                                    <msup>
+                                        <mn>4</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                </mtd>
+                                <mtd></mtd>
+                                <mtd>
+                                    <mrow></mrow>
+                                    <mo>+</mo>
+                                    <msup>
+                                        <mn>5</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>−</mo>
+                                    <msup>
+                                        <mn>6</mn>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>s</mi>
+                                        </mrow>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <mo>⋯</mo>
+                                </mtd>
+                                <mtd>
+                                    <mi></mi>
+                                    <mo>=</mo>
+                                    <mi>η</mi>
+                                    <mo>(</mo>
+                                    <mi>s</mi>
+                                    <mo>)</mo>
                                 </mtd>
                             </mtr>
                         </mtable>
                     </mrow>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-        Tree(ParserConst.table_data, [
-            Tree('#0', [
-                Tree('#1', [
-                    Tree(ParserConst.equal_data, [
-                        Token(ParserConst.token_type, 'a'),
-                        Token(ParserConst.token_type, 'b')
-                    ])
+        Tree(ParserConst.exprs_data, [
+            Tree(ParserConst.equal_data, [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, 'ζ'),
+                    Tree(ParserConst.paren_data, [Token(ParserConst.token_type, 's')])
+                ]),
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '1')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '2')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '3')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '4')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '5')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '6')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.cdots_data, [])
+                ])
+            ]),
+            Tree(ParserConst.equal_data, [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, '2'),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '2')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Token(ParserConst.token_type, 'ζ'),
+                    Tree(ParserConst.paren_data, [Token(ParserConst.token_type, 's')])
+                ]),
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, '2'),
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '2')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, '2'),
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '4')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.product_data, [
+                        Token(ParserConst.token_type, '2'),
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '6')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.cdots_data, [])
+                ])
+            ]),
+            Tree(ParserConst.expr_data, [
+                Tree(ParserConst.product_data, [
+                    Tree(ParserConst.paren_data, [
+                        Tree(ParserConst.sum_data, [
+                            Token(ParserConst.token_type, '1'),
+                            Tree(ParserConst.neg_data, [
+                                Tree(ParserConst.sup_data, [
+                                    Tree('#0', [Token(ParserConst.token_type, '2')]),
+                                    Tree('#1', [
+                                        Tree(ParserConst.sum_data, [
+                                            Token(ParserConst.token_type, '1'),
+                                            Tree(ParserConst.neg_data, [
+                                                Token(ParserConst.token_type, 's')
+                                            ])
+                                        ])
+                                    ])
+                                ])
+                            ])
+                        ])
+                    ]),
+                    Token(ParserConst.token_type, 'ζ'),
+                    Tree(ParserConst.paren_data, [Token(ParserConst.token_type, 's')])
+                ]),
+                Tree(ParserConst.equal_data, []),
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '1')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.neg_data, [
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '2')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '3')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.neg_data, [
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '4')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.sup_data, [
+                        Tree('#0', [Token(ParserConst.token_type, '5')]),
+                        Tree('#1', [Tree(ParserConst.neg_data, [
+                            Token(ParserConst.token_type, 's')
+                        ])])
+                    ]),
+                    Tree(ParserConst.neg_data, [
+                        Tree(ParserConst.sup_data, [
+                            Tree('#0', [Token(ParserConst.token_type, '6')]),
+                            Tree('#1', [Tree(ParserConst.neg_data, [
+                                Token(ParserConst.token_type, 's')
+                            ])])
+                        ])
+                    ]),
+                    Tree(ParserConst.cdots_data, [])
+                ]),
+                Tree(ParserConst.equal_data, []),
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, 'η'),
+                    Tree(ParserConst.paren_data, [Token(ParserConst.token_type, 's')])
                 ])
             ])
         ])
@@ -2095,67 +2496,46 @@ def test_get_parsed_tree_cdots_3():
                     </semantics>
                 </math>"""
     expected = Tree(ParserConst.root_data, [
-            Tree(ParserConst.table_data, [
-                Tree('#0', [
-                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
-                        ])
-                    ])
+        Tree(ParserConst.exprs_data, [
+            Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'c'),
+                Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
+            ]),
+            Tree(ParserConst.equal_data, [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, '10'),
+                    Token(ParserConst.token_type, 'c')
                 ]),
-                Tree('#1', [
-                    Tree('#0', [Tree(ParserConst.product_data, [
+                Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')])
+            ]),
+            Tree(ParserConst.equal_data, [
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.product_data, [
                         Token(ParserConst.token_type, '10'),
                         Token(ParserConst.token_type, 'c')
-                    ])]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')])
-                        ])
-                    ])
+                    ]),
+                    Tree(ParserConst.neg_data, [Token(ParserConst.token_type, 'c')])
                 ]),
-                Tree('#2', [
-                    Tree('#0', [Tree(ParserConst.sum_data, [
-                        Tree(ParserConst.product_data, [
-                            Token(ParserConst.token_type, '10'),
-                            Token(ParserConst.token_type, 'c')
-                        ]),
-                        Tree(ParserConst.neg_data, [Token(ParserConst.token_type, 'c')])
-                    ])]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Tree(ParserConst.sum_data, [
-                                Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')]),
-                                Tree(ParserConst.neg_data, [
-                                    Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
-                                ])
-                            ])
-                        ])
-                    ])
-                ]),
-                Tree('#3', [
-                    Tree('#0', [
-                        Tree(ParserConst.product_data, [
-                            Token(ParserConst.token_type, '9'),
-                            Token(ParserConst.token_type, 'c')
-                        ])]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Token(ParserConst.token_type, '9')
-                        ])
-                    ])
-                ]),
-                Tree('#4', [
-                    Tree('#0', [Token(ParserConst.token_type, 'c')]),
-                    Tree('#1', [
-                        Tree(ParserConst.equal_data, [
-                            Token(ParserConst.token_type, '1')
-                        ])
+                Tree(ParserConst.sum_data, [
+                    Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '9.9')]),
+                    Tree(ParserConst.neg_data, [
+                        Tree(ParserConst.omit_data, [Token(ParserConst.token_type, '0.9')])
                     ])
                 ])
+            ]),
+            Tree(ParserConst.equal_data, [
+                Tree(ParserConst.product_data, [
+                    Token(ParserConst.token_type, '9'),
+                    Token(ParserConst.token_type, 'c')
+                ]),
+                Token(ParserConst.token_type, '9')
+            ]),
+            Tree(ParserConst.equal_data, [
+                Token(ParserConst.token_type, 'c'),
+                Token(ParserConst.token_type, '1')
             ])
         ])
+    ])
     assert expected == Parser.get_parsed_tree(Expression(mathml))
 
 

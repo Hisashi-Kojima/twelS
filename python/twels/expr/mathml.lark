@@ -20,8 +20,14 @@ _annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
 // deal with relational operators
 ?expr: _open expr _close  // for mrow
      | sum _more_sum*
+     | equiv
 
 _more_sum: relational_operator sum
+
+// modを含むので他のrelational operatorと同様には扱えないと思い
+// 他と分けて記述している。
+equiv: sum _equiv_op sum mod?
+     | sum _equiv_op sum _mrow_tag mod "</mrow>"
 
 ?sum: (_add | subtract)? product _more_product*
     | _open (_add | subtract)? product _more_product* _close  // for mrow
@@ -32,20 +38,40 @@ abbr_add.1: (atom _add)+ cdots _add atom
 
 _more_product: (_add | subtract) product
 
-?product: atom _more_atom*  // a*bのパターン
-        | atom+  // abのパターン
+?product: atom _more_atom*
         | abbr_mul
+        | product? (summation | product_of_seq | log | lim | integral)
+
+_more_atom: (_mul | div)? atom
 
 // this priority is higher than other product rules.
 abbr_mul.1: (atom _mul)+ cdots _mul atom
           | atom+ cdots atom
 
-_more_atom: (_mul | div) atom
+// this priority is higher than other product rules.
+log.1: _sub_tag _log_op expr "</msub>" expr
+     | _log_op _mo_empty? expr -> log_less
+     | _ln_op _mo_empty? expr -> ln
+
+// this priority is higher than other product rules.
+summation.1: _underover_tag _summation_op expr expr "</munderover>" expr
+           | _subsup_tag _summation_op expr expr "</msubsup>" expr
+
+// this priority is higher than other product rules.
+product_of_seq.1: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
+                | _subsup_tag _product_of_seq_op expr expr "</msubsup>" expr
+
+// this priority is higher than other product rules.
+lim.1: _under_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></munder>" expr
+    | _sub_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></msub>" expr
+
+// this priority is higher than other product rules.
+integral.1: _underover_tag _integral_op_1 expr expr "</munderover>" expr _integral_op_2 atom
+         | _subsup_tag _integral_op_1 expr expr "</msubsup>" expr _integral_op_2 atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
      | _mi_tag "/" "</mi>" -> slash
      | _mi
-     | _mi_empty
      | _mo
      | _mo_empty  // <mo>&#x2061;<!-- ⁡ --></mo>などに対応するため
      | _mrow_tag product "</mrow>"
@@ -74,7 +100,6 @@ abs: _mo_tag "|</mo>" sum _mo_tag "|</mo>"
 cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
 
 _mi: _mi_tag TOKEN "</mi>"
-_mi_empty: _mi_tag "</mi>"
 
 // this priority is lower than atom and cdots.
 _mo.-2: _mo_tag TOKEN "</mo>"
@@ -92,32 +117,28 @@ _mo.-2: _mo_tag TOKEN "</mo>"
      | "<mroot" _attr* ">" expr expr "</mroot>" -> root
      | "<mover" _attr* ">" expr expr "</mover>" -> over
      | under
-     | summation
-     | product_of_seq
-     | integral
-     | lim
-     | log
      | underover
      | table
+     | exprs
      | matrix
-     | equiv
 
-lsup: _sup_tag _mrow_tag "</mrow>" expr "</msup>" atom
-lsub: _sub_tag _mrow_tag "</mrow>" expr "</msub>" atom
+lsup: _sup_tag _mrow_empty expr "</msup>" atom
+lsub: _sub_tag _mrow_empty expr "</msub>" atom
 
-// for mtable
 table: "<mtable" _attr* ">" mtr+ "</mtable>"
 mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
-mtd: "<mtd" _attr* ">" mathml? "</mtd>" -> td
+mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
+
+// mtableは行列に使われているが、
+// 複数の数式を並べて表示するときにも使われている。
+// このとき、1つのtrが1つの数式に対応しており、tdは無視したい。
+// this priority is lower than table.
+exprs.-1: "<mtable" _attr* ">" etr+ "</mtable>"
+?etr: "<mtr" _attr* ">" expr "</mtr>"
 
 // this priority is higher than table.
 matrix.1: _mo_tag "[</mo>" table _mo_tag "]</mo>"
         | _mo_tag "(</mo>" table _mo_tag ")</mo>"
-
-// modを含むので他のrelational operatorと同様には扱えないと思い
-// 他と分けて記述している。
-equiv: sum _equiv_op sum mod?
-     | sum _equiv_op sum _mrow_tag mod "</mrow>"
 
 mod: _mod_op product
    | _mi_tag "\pod</mi>" product
@@ -131,20 +152,8 @@ paren: _left_paren sum _right_paren
 // underとsub、underoverとsubsupは意味が異なると思い正規化をしない。
 // limやsummation、product_of_seqの中ではこれらを正規化する。
 under: _under_tag expr expr "</munder>"
-lim: _under_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></munder>" expr
-   | _sub_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></msub>" expr
-
 underover: _underover_tag expr expr expr "</munderover>"
-summation: _underover_tag _summation_op expr expr "</munderover>" expr
-         | _subsup_tag _summation_op expr expr "</msubsup>" expr
-product_of_seq: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
-              | _subsup_tag _product_of_seq_op expr expr "</msubsup>" expr
-integral: _underover_tag _integral_op_1 expr expr "</munderover>" expr _integral_op_2 atom
-        | _subsup_tag _integral_op_1 expr expr "</msubsup>" expr _integral_op_2 atom
 
-log: _sub_tag _log_op expr "</msub>" expr
-   | _log_op _mo_empty? expr -> log_less
-   | _ln_op _mo_empty? expr -> ln
 
 _open: "<" _ELEMENTS _attr* ">"
 _close: "</" _ELEMENTS ">"
@@ -177,7 +186,8 @@ _subsup_tag: "<msubsup" _attr* ">"
 _mi_tag: "<mi" _attr* ">"
 _mo_tag: "<mo" _attr* ">"
 
-_mo_empty: "<mo></mo>"
+_mo_empty: _mo_tag "</mo>"
+_mrow_empty: _mrow_tag "</mrow>"
 
 _lim_op_1: _mo_tag "lim</mo>"
 _lim_op_2: _mo_tag "→" "</mo>"
