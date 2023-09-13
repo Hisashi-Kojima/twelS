@@ -47,6 +47,7 @@ services:
       # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
       # host portは何でもよい．
       - 3306:3306
+    user: ${UID:?}:${GID:?}
     volumes:
       - ./db/mysql:/var/lib/mysql  # 永続化
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
