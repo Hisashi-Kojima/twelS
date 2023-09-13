@@ -130,8 +130,7 @@ class Searcher:
             }
         """
         mathml = latex2mathml.converter.convert(latex)
-        normalized = Normalizer.normalize_subsup(mathml)
-        path_set: set[str] = Parser.parse(Expression(normalized))
+        path_set: set[str] = Parser.parse(Expression(mathml))
         print('path_set:', str(path_set))
         with (Cursor.connect(test) as cnx, Cursor.cursor(cnx) as cursor):
             score_list = Cursor.search(cursor, path_set)

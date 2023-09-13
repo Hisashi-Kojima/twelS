@@ -8,8 +8,9 @@ import os
 from lark import Lark, exceptions, Tree
 
 from twels.expr.expression import Expression
+from twels.expr.parser_const import ParserConst
 from twels.expr.pathset import PathSet
-from twels.expr.tree import MathMLTree, get_ro_index
+from twels.expr.tree import MathMLTree, find_index
 from twels.utils.utils import print_in_red
 
 logger = logging.getLogger('django')
@@ -69,11 +70,19 @@ class Parser:
             print_in_red(e)
             print_in_red('grammarファイルを正しく読み込めていない，もしくはgrammarに間違いがあります．')
             return Tree('error', [])
-        except exceptions.LarkError as e:
-            logger.error('expression: ')
-            logger.error(expr.mathml)
-            logger.exception('LarkError')
-            return Tree('error', [])
+        except exceptions.LarkError:
+            try:
+                # 条件を変えて再度parseする
+                # mtableが複数の数式を含む場合、mtdが邪魔で正しくparseできないのでmtdを削除。
+                new_mathml = expr.mathml.replace('<mtd>', '').replace('</mtd>', '').replace('<mrow></mrow>', '').replace('<mi></mi>', '')
+                parsed_tree = __class__._lark.parse(new_mathml)
+                cleaned_tree = MathMLTree().transform(parsed_tree)
+                return cleaned_tree
+            except exceptions.LarkError:
+                logger.error('expression: ')
+                logger.error(expr.mathml)
+                logger.exception('LarkError')
+                return Tree('error', [])
 
     @staticmethod
     def _make_new_trees(tree: Tree) -> list[Tree]:
@@ -87,7 +96,7 @@ class Parser:
             root以外のノードに関係演算子が複数含まれる場合は分割の対象外としている。
             Transformerでの実装が難しそうなので、これを対象にすることは難しそう。
         """
-        ro_index_list = get_ro_index(tree.children)
+        ro_index_list = find_index(tree.children, ParserConst.relational_operators)
         ro_num = len(ro_index_list)
         if ro_num < 2:
             # remove ParserConst.root_data

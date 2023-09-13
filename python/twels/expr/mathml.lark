@@ -5,6 +5,11 @@
 //   '?'だったら，childが1つのとき，そのノードを作らない．
 // see here: https://github.com/lark-parser/lark/blob/master/docs/tree_construction.md
 
+// default value of priority is 0.
+
+// Notes:
+// このルールのparserを使う前に"&#x220F;"などは"∏"などに変換しておくこと。
+
 start: _open mathml _close
 
 ?mathml: _open mathml _close _annotation?  // mathやsemantics, mrowなど
@@ -13,91 +18,195 @@ start: _open mathml _close
 _annotation: "<annotation" _attr* ">" _CONTENT "</annotation>"
 
 // deal with relational operators
-?expr: _open _mspace* expr _mspace* _close  // for mrow
+?expr: _open expr _close  // for mrow
      | sum _more_sum*
+     | equiv
 
 _more_sum: relational_operator sum
 
+// modを含むので他のrelational operatorと同様には扱えないと思い
+// 他と分けて記述している。
+equiv: sum _equiv_op sum mod?
+     | sum _equiv_op sum _mrow_tag mod "</mrow>"
+
 ?sum: (_add | subtract)? product _more_product*
     | _open (_add | subtract)? product _more_product* _close  // for mrow
+    | abbr_add
+
+// this priority is higher than other sum rules.
+abbr_add.1: (atom _add)+ cdots _add atom
 
 _more_product: (_add | subtract) product
 
-?product: atom _more_atom*  // a*bのパターン
-        | atom+  // abのパターン
+?product: atom _more_atom*
+        | abbr_mul
+        | product? (summation | product_of_seq | log | lim | integral)
 
-_more_atom: (_mul | div) atom
+_more_atom: (_mul | div)? atom
+
+// this priority is higher than other product rules.
+abbr_mul.1: (atom _mul)+ cdots _mul atom
+          | atom+ cdots atom
+
+// this priority is higher than other product rules.
+log.1: _sub_tag _log_op expr "</msub>" expr
+     | _log_op _mo_empty? expr -> log_less
+     | _ln_op _mo_empty? expr -> ln
+
+// this priority is higher than other product rules.
+summation.1: _underover_tag _summation_op expr expr "</munderover>" expr
+           | _subsup_tag _summation_op expr expr "</msubsup>" expr
+
+// this priority is higher than other product rules.
+product_of_seq.1: _underover_tag _product_of_seq_op expr expr "</munderover>" expr
+                | _subsup_tag _product_of_seq_op expr expr "</msubsup>" expr
+
+// this priority is higher than other product rules.
+lim.1: _under_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></munder>" expr
+    | _sub_tag _lim_op_1 _mrow_tag atom _lim_op_2 atom "</mrow></msub>" expr
+
+// this priority is higher than other product rules.
+integral.1: _underover_tag _integral_op_1 expr expr "</munderover>" expr _integral_op_2 atom
+         | _subsup_tag _integral_op_1 expr expr "</msubsup>" expr _integral_op_2 atom
 
 ?atom: "<mn" _attr* ">" TOKEN "</mn>"
-     | "<mi" _attr* ">" "/" "</mi>" -> slash
-     | "<mi" _attr* ">" TOKEN "</mi>"
-     | "<mrow" _attr* ">" product "</mrow>"
-     | _left_paren sum _right_paren -> paren
+     | _mi_tag "/" "</mi>" -> slash
+     | _mi
+     | _mo
+     | _mo_empty  // <mo>&#x2061;<!-- ⁡ --></mo>などに対応するため
+     | _mrow_tag product "</mrow>"
+     | paren
+     | abs
      | func
      | cdots
-     | _mo
-     | _mi_empty
      | mtext
-
-// this priority is higher than _mo.
-cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
-
-// this priority is lower than atom.
-_mo.-2: "<mo" _attr* ">" TOKEN "</mo>"
-
-// this priority is lower than atom.
-_mi_empty.-1: "<mi" _attr* "></mi>"
-
-?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
-
-// some mspace tags are used for a math expression delimiter.
-// some other mspace tags are used for just spaces. <- not a delimiter.
-_mspace: "<mspace" _attr* "/>"
-
-// tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
-?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
-     | "<mfrac" _attr* ">" expr expr "</mfrac>" -> frac
-     | "<msup" _attr* ">" expr expr "</msup>" -> sup
-     | "<msub" _attr* ">" expr expr "</msub>" -> sub
-     | "<mroot" _attr* ">" expr expr "</mroot>" -> root
-     | "<msubsup" _attr* ">" expr expr expr "</msubsup>" -> subsup
-     // use expr for dealing with relational operators
-     | "<mover" _attr* ">" expr expr "</mover>" -> over
-     | "<munder" _attr* ">" expr expr "</munder>" -> under
-     | "<munderover" _attr* ">" expr expr expr "</munderover>" -> underover
-     | table
-
-// for mtable
-table: "<mtable" _attr* ">" mtr+ "</mtable>"
-mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
-mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
-
-
-_open: "<" _ELEMENTS _attr* ">"
-_close: "</" _ELEMENTS ">"
-
-_add: _open "+" _close
-subtract: _open ("−" | "-") _close
-_mul: _open ("*" | "×" | "⋅") _close
-div: _open ("/" | "÷") _close
-equal: _open "=" _close
-less: _open ("<" | "&lt;") _close
-greater: _open (">" | "&gt;") _close
-in: _open "∈" _close
-_left_paren: _open "(" _close
-_right_paren: _open ")" _close
 
 ?relational_operator: equal
                     | less
                     | greater
                     | in
+                    | ni
+                    | neq
+                    | subset
+                    | supset
+                    | subseteq
+                    | supseteq
 
-_attr: " "* _ATTRIBUTE
+
+abs: _mo_tag "|</mo>" sum _mo_tag "|</mo>"
+   | _mrow_tag _mo_tag "|</mo></mrow>" sum _mrow_tag _mo_tag "|</mo></mrow>"
+
+// this priority is higher than _mo.
+cdots.-1: "<mo" _attr* ">" "⋯" "</mo>"
+
+_mi: _mi_tag TOKEN "</mi>"
+
+// this priority is lower than atom and cdots.
+_mo.-2: _mo_tag TOKEN "</mo>"
+
+?mtext: "<mtext" _attr* ">" TOKEN "</mtext>"
+
+// tableのruleのときに，funcのノードを残したくなかったので，funcの先頭に'?'を付けた
+?func: "<msqrt" _attr* ">" expr "</msqrt>" -> sqrt
+     | "<mfrac" _attr* ">" expr expr "</mfrac>" -> frac
+     | _sup_tag expr expr "</msup>" -> sup
+     | _sub_tag expr expr "</msub>" -> sub
+     | lsup
+     | lsub
+     | _subsup_tag expr expr expr "</msubsup>" -> subsup
+     | "<mroot" _attr* ">" expr expr "</mroot>" -> root
+     | "<mover" _attr* ">" expr expr "</mover>" -> over
+     | under
+     | underover
+     | table
+     | exprs
+     | matrix
+
+lsup: _sup_tag _mrow_empty expr "</msup>" atom
+lsub: _sub_tag _mrow_empty expr "</msub>" atom
+
+table: "<mtable" _attr* ">" mtr+ "</mtable>"
+mtr: "<mtr" _attr* ">" mtd+ "</mtr>" -> tr
+mtd: "<mtd" _attr* ">" mathml "</mtd>" -> td
+
+// mtableは行列に使われているが、
+// 複数の数式を並べて表示するときにも使われている。
+// このとき、1つのtrが1つの数式に対応しており、tdは無視したい。
+// this priority is lower than table.
+exprs.-1: "<mtable" _attr* ">" etr+ "</mtable>"
+?etr: "<mtr" _attr* ">" expr "</mtr>"
+
+// this priority is higher than table.
+matrix.1: _mo_tag "[</mo>" table _mo_tag "]</mo>"
+        | _mo_tag "(</mo>" table _mo_tag ")</mo>"
+
+mod: _mod_op product
+   | _mi_tag "\pod</mi>" product
+   | _left_paren _mod_op product _right_paren
+
+// 対応が取れている括弧は正規化する。
+paren: _left_paren sum _right_paren
+     | _mo_tag "{" "</mo>" sum _mo_tag "}" "</mo>"
+     | _mo_tag "[" "</mo>" sum _mo_tag "]" "</mo>"
+
+// underとsub、underoverとsubsupは意味が異なると思い正規化をしない。
+// limやsummation、product_of_seqの中ではこれらを正規化する。
+under: _under_tag expr expr "</munder>"
+underover: _underover_tag expr expr expr "</munderover>"
+
+
+_open: "<" _ELEMENTS _attr* ">"
+_close: "</" _ELEMENTS ">"
+
+_add: _mo_tag "+</mo>"
+subtract: _mo_tag ("−" | "-") "</mo>"
+_mul: _mo_tag ("*" | "×" | "⋅" | "∗") "</mo>"
+div: _mo_tag ("/" | "÷") "</mo>"
+
+equal: _mo_tag "=</mo>"
+less: _mo_tag ("<" | "&lt;") "</mo>"
+greater: _mo_tag (">" | "&gt;") "</mo>"
+in: _mo_tag "∈</mo>"
+ni: _mo_tag "∋</mo>"
+neq: _mo_tag "≠</mo>"
+subset: _mo_tag "⊂</mo>"
+supset: _mo_tag "⊃</mo>"
+subseteq: _mo_tag "⊆</mo>"
+supseteq: _mo_tag "⊇</mo>"
+
+_left_paren: _mo_tag "(" "</mo>"
+_right_paren: _mo_tag ")" "</mo>"
+
+_mrow_tag: "<mrow" _attr* ">"
+_under_tag: "<munder" _attr* ">"
+_underover_tag: "<munderover" _attr* ">"
+_sup_tag: "<msup" _attr* ">"
+_sub_tag: "<msub" _attr* ">"
+_subsup_tag: "<msubsup" _attr* ">"
+_mi_tag: "<mi" _attr* ">"
+_mo_tag: "<mo" _attr* ">"
+
+_mo_empty: _mo_tag "</mo>"
+_mrow_empty: _mrow_tag "</mrow>"
+
+_lim_op_1: _mo_tag "lim</mo>"
+_lim_op_2: _mo_tag "→" "</mo>"
+_summation_op: _mo_tag "∑" "</mo>"
+_product_of_seq_op:  _mo_tag "∏" "</mo>"
+_integral_op_1: _mo_tag "∫" "</mo>"
+_integral_op_2: ("<mi>d</mi>" | "<mrow><mi>d</mi></mrow>")
+_log_op: _mi_tag "log</mi>"
+_ln_op: _mi_tag "ln</mi>"
+_equiv_op: _mo_tag "≡" "</mo>"
+_mod_op: _mi_tag "mod</mi>"
+
+_attr: " "+ _ATTRIBUTE
 
 TOKEN: /[^<> ]+/
 _CONTENT: /[^<>]+/
 _ATTRIBUTE: /[^<>= ]+=("[^"]*"|'[^']*')/  // シングルクォーテーションとダブルクォーテーションに対応．
 COMMENT: /<!--[^(-->)]*-->/
+MSPACE: "<mspace" (" "+ _ATTRIBUTE)* "/>"
 
 _ELEMENTS: "math"
          | "maction"
@@ -122,9 +231,6 @@ _ELEMENTS: "math"
          | "mstack"
          | "mstyle"
          | "ms"  // msはmstyleなどよりも後に記述しなければ，mstyleなどが無視されてしまう．
-         | "mtable"
-         | "mtd"
-         | "mtr"
          | "semantics"
          | "annotation"
          | "annotation-xml"
@@ -132,3 +238,8 @@ _ELEMENTS: "math"
 %import common.WS -> _WS  // white space
 %ignore _WS
 %ignore COMMENT
+
+// some mspace tags are used for a math expression delimiter.
+// some other mspace tags are used for just spaces. <- not a delimiter.
+// ignoreするなら事前に削除（正規化）した方がよいだろう。
+%ignore MSPACE

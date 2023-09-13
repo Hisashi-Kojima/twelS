@@ -1,7 +1,3 @@
-# for developing
-autopep8==2.0.2
-flake8==6.0.0
-
 # for build
 wheel==0.40.0
 

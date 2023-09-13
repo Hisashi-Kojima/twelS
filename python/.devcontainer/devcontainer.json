@@ -23,21 +23,13 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"dirk-thomas.vscode-lark",
+				"ms-python.flake8",
+				"ms-python.autopep8"
 			],
 
 			"settings": {
-				// for flake8 and autopep8
-				"python.linting.flake8Enabled": true,
-				"files.autoSave": "afterDelay",
-				"files.autoSaveDelay": 1000,
-				"python.linting.lintOnSave": true,
-				"python.linting.flake8Args": [
-					"--max-complexity=20"
-				],
-			
-				"python.formatting.provider": "autopep8",
-
 				"workbench.editor.enablePreview": false
 			}
 		}
