@@ -11,63 +11,64 @@ services:
         ./entrypoint.sh
         python front/manage.py runserver 0.0.0.0:8000
       '
-    volumes: 
-      - ./python/front:/code/front
-      - ./python/web_crawler:/code/web_crawler
-      - ./python/tests:/code/tests  # for test
+    environment:
+      - PYTHONPATH=/code:/code/front  # pytestのためにfrontのパスを追加する
     ports:
       # host port : container port
       - 8000:8000
-    environment:
-      - PYTHONPATH=/code:/code/front  # pytestのためにfrontのパスを追加する
+    volumes:
+      - ./python/front:/code/front
+      - ./python/web_crawler:/code/web_crawler
+      - ./python/tests:/code/tests  # for test
 
   db-test:
     container_name: $DB_TEST_CONTAINER_NAME
-    image: mysql:$MYSQL_VERSION
-    ports:
-      # host port : container port
-      # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
-      # host portは何でもよい．
-      - 3307:3306
     environment:
       MYSQL_ROOT_PASSWORD: $MY_ROOT_PASSWORD
       MYSQL_DATABASE: $MY_TEST_DB_NAME  # 本番環境と違う名前
       MYSQL_USER: hisashi
       MYSQL_PASSWORD: $MY_HISASHI_PASSWORD
+    image: mysql:$MYSQL_VERSION
+    networks:
+      - app_net
+    ports:
+      # host port : container port
+      # container_nameとコンテナ側のportを使ってmysqlコンテナと接続しているので，
+      # host portは何でもよい．
+      - 3307:3306
+    user: ${UID:?}:${GID:?}
     volumes:
       # 永続化したい場合は./db/mysql-testをvolumeする
       - ./db/conf:/etc/mysql/conf.d  # custom configのマウント
       - ./python/tests/db/logs:/var/log/mysql
       - ./sqls/initdb:/twels
       - ./sqls/initdb_test:/docker-entrypoint-initdb.d  # ここにマウントしたディレクトリにあるファイルは，mysqlディレクトリが空の場合，起動時に実行される
-    networks:
-      - app_net
 
   # use browser tests
   # hub
   selenium-hub:
     container_name: selenium-hub
-    image: selenium/hub:4.8.1-20230221
+    image: selenium/hub:4.12.1
+    networks:
+      - app_net
     ports:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
-    networks:
-      - app_net
 
   # node
   selenium-node:
     container_name: selenium-docker-node
-    image: selenium/node-docker:4.8.1-20230221
-    volumes:
-      - ./python/tests/selenium_node/assets:/opt/selenium/assets
-      - ./python/tests/selenium_node/config.toml:/opt/bin/config.toml
-      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - selenium-hub
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    image: selenium/node-docker:4.12.1
     networks:
       - app_net
+    volumes:
+      - ./python/tests/selenium_node/assets:/opt/selenium/assets
+      - ./python/tests/selenium_node/config.toml:/opt/bin/config.toml
+      - /var/run/docker.sock:/var/run/docker.sock
