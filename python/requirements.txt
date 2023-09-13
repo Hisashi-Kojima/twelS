@@ -1,7 +1,3 @@
-# for developing
-autopep8==2.0.2
-flake8==6.0.0
-
 # for build
 wheel==0.40.0
 
@@ -15,13 +11,13 @@ latex2mathml==3.76.0
 mysql-connector-python==8.0.30
 pysolr==3.9.0
 requests==2.31.0
-Scrapy==2.9.0
+Scrapy==2.10.1
 scrapy-splash==0.9.0
 uWSGI==2.0.21
 
 # for test
 pytest==7.4.0
 pytest-xdist==3.3.1
-selenium==4.10.0
+selenium==4.12.0
 pytest-django==4.5.2
 freezegun==1.2.2

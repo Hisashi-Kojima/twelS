@@ -25,7 +25,7 @@ def _visit_leaf(node: Tree | Token) -> tuple[list[str], list[str]]:
     """rootからleafまで探索してpath_listを作成する関数。
     Returns:
         fix: 新たなpathの作成に使わないpath_list。
-        tmp: 新たなpathの作成に使うかもしれないpath_list。いずれfix_listに移動する。
+        tmp: 新たなpathの作成に使うかもしれないpath_list。いずれfixに移動する。
     """
     if type(node) is Tree:
         fix = []

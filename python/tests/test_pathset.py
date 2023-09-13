@@ -83,7 +83,33 @@ def test_pathset_eq_1():
     expected = {
         'a', f'a/{equal}',
         'b', f'b/{equal}'
-        }
+    }
+    assert actual == expected
+
+
+def test_pathset_equiv_1():
+    """合同式
+    ac ≡ bc
+    """
+    tree = Tree(ParserConst.equiv_data, [
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'a'),
+            Token(ParserConst.token_type, 'c')
+        ]),
+        Tree(ParserConst.product_data, [
+            Token(ParserConst.token_type, 'b'),
+            Token(ParserConst.token_type, 'c')
+        ])
+    ])
+    actual = PathSet(tree)
+
+    equiv = ParserConst.equiv_data
+    prod = ParserConst.product_data
+    expected = {
+        'a', f'a/{prod}', f'a/{prod}/{equiv}',
+        'b', f'b/{prod}', f'b/{prod}/{equiv}',
+        'c', f'c/{prod}', f'c/{prod}/{equiv}'
+    }
     assert actual == expected
 
 

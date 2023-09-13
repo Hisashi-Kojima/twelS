@@ -94,23 +94,23 @@ class SeleniumEmailLoginTests(LiveServerTestCase):
 
     # 最新バージョン->
     def test_latest_chrome(self):
-        self.email_login("chrome", 110)
-
-    def test_latest_firefox(self):
-        self.email_login("firefox", 110)
+        self.email_login("chrome", 116)
 
     def test_latest_edge(self):
-        self.email_login("edge", 110)
+        self.email_login("edge", 116)
+
+    def test_latest_firefox(self):
+        self.email_login("firefox", 117)
 
     # 確認できた最も古いバージョン->
     def test_oldest_chrome(self):
-        self.email_login("chrome", 61)
-
-    def test_oldest_firefox(self):
-        self.email_login("firefox", 88)
+        self.email_login("chrome", 84)
 
     def test_oldest_edge(self):
         self.email_login("edge", 92)
+
+    def test_oldest_firefox(self):
+        self.email_login("firefox", 88)
     # -------------
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')  # メールのテストのために上書き

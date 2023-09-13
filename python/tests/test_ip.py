@@ -64,8 +64,8 @@ class IPTests(TestCase):
         user_date: datetime = datetime.strptime(user_date_str, '%Y/%m/%d %H:%M:%S')
 
         elapsed_time: datetime.timedelta = abs(now - user_date)
-        elapsed_time_seconds: int = int(elapsed_time.total_seconds())
-        self.assertLess(elapsed_time_seconds, 1)  # 最後のアクセスが現在から1秒未満であることを確認
+        elapsed_time_seconds = float(elapsed_time.total_seconds())
+        self.assertLess(elapsed_time_seconds, float(1))  # 最後のアクセスが現在から1秒未満であることを確認
 
     def test_new_ip(self):
         """登録されていないIPでログインしたときのテスト

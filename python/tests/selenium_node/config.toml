@@ -2,13 +2,13 @@
 # Configs have a mapping between the Docker image to use and the capabilities that need to be matched to
 # start a container with the given image.
 configs = [
-    "selenium/standalone-chrome:4.8.1-20230221", '{"browserName": "chrome", "platformName": "linux", "browserVersion": "110.0"}',
-    "selenium/standalone-edge:4.8.1-20230221", '{"browserName": "MicrosoftEdge", "platformName": "linux", "browserVersion": "110.0"}',
-    "selenium/standalone-firefox:4.8.1-20230221", '{"browserName": "firefox", "platformName": "linux", "browserVersion": "110.0"}',
-    "selenium/standalone-chrome:3.6.0-americium", '{"browserName": "chrome", "platformName": "linux", "browserVersion": "61.0"}',
-    "selenium/standalone-edge:4.0.0-rc-1-prerelease-20210713", '{"browserName": "MicrosoftEdge", "platformName": "linux", "browserVersion": "92.0"}',
-    "selenium/standalone-firefox:3.141.59-20210422", '{"browserName": "firefox", "platformName": "linux", "browserVersion": "88.0"}'
-    ]
+    "selenium/standalone-chrome:84.0", '{"browserName": "chrome", "browserVersion": "84.0"}',
+    "selenium/standalone-chrome:116.0", '{"browserName": "chrome", "browserVersion": "116.0"}',
+    "selenium/standalone-edge:92.0", '{"browserName": "MicrosoftEdge", "browserVersion": "92.0"}',
+    "selenium/standalone-edge:116.0", '{"browserName": "MicrosoftEdge", "browserVersion": "116.0"}',
+    "selenium/standalone-firefox:88.0", '{"browserName": "firefox", "browserVersion": "88.0"}',
+    "selenium/standalone-firefox:117.0", '{"browserName": "firefox", "browserVersion": "117.0"}'
+]
 
 # URL for connecting to the docker daemon
 # host.docker.internal works for macOS and Windows.
