@@ -37,8 +37,8 @@ if __name__ == '__main__':
                     'content': Snippet(html_content).text
                 }
                 docs.append(doc)
-            solr.add(docs)
             print('document number: ', i+1)
+        solr.add(docs)
 
         solr.commit()
         print('indexed!!')
